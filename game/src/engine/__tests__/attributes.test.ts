@@ -14,10 +14,10 @@ import { createGameState } from '../game-state';
 
 describe('Attribute System', () => {
   describe('createStartingAttributes', () => {
-    it('maps constitution to starting health correctly', () => {
-      expect(createStartingAttributes({ constitution: 0, schoolRanking: 3, geoLocation: 3 }).attributes.health).toBe(40);
-      expect(createStartingAttributes({ constitution: 3, schoolRanking: 3, geoLocation: 3 }).attributes.health).toBe(64);
-      expect(createStartingAttributes({ constitution: 5, schoolRanking: 3, geoLocation: 3 }).attributes.health).toBe(80);
+    it('starting health is 90 for all builds', () => {
+      expect(createStartingAttributes({ constitution: 0, schoolRanking: 3, geoLocation: 3 }).attributes.health).toBe(90);
+      expect(createStartingAttributes({ constitution: 3, schoolRanking: 3, geoLocation: 3 }).attributes.health).toBe(90);
+      expect(createStartingAttributes({ constitution: 5, schoolRanking: 3, geoLocation: 3 }).attributes.health).toBe(90);
     });
 
     it('maps school ranking to school modifier', () => {
@@ -95,11 +95,12 @@ describe('Attribute System', () => {
 
   describe('sickness probability', () => {
     it('health 80, age 25 ≈ 5%', () => {
-      const state = createGameState({ constitution: 5, schoolRanking: 3, geoLocation: 2 });
+      const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
       state.attributes.health = 80;
       state.turn = 12; // age 25
+      state.constitutionSicknessModifier = 0;
       const chance = computeSicknessChance(state);
-      expect(chance).toBeCloseTo(0.05, 1);
+      expect(chance).toBeCloseTo(0.08, 1); // (100-80)*0.004*1.0 = 0.08
     });
 
     it('health 50, age 45 ≈ 32%', () => {

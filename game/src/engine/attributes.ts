@@ -17,7 +17,7 @@ export function createStartingAttributes(creation: CreationAttributes): {
       performance: 0,
       skills: 20 + creation.schoolRanking * 4,
       academicImpact: creation.schoolRanking * 2,
-      health: 40 + creation.constitution * 8,
+      health: 90,
       mental: 70,
       netWorth: 0,
     },
@@ -83,10 +83,14 @@ export function computeNaturalDecay(state: GameState): Partial<CoreAttributes> {
     !state.immigration.hasGreenCard && !state.immigration.hasComboCard;
 
   // Performance decays only if no work AP was spent (handled by caller)
+  // Constitution reduces grind health cost: 0 = full penalty, 5 = 50% reduced
+  const grindReduction = state.creation.constitution * 0.1; // 0% to 50% reduction
+  const grindHealthPenalty = grindActive ? Math.round(-13 * (1 - grindReduction)) : 0;
+
   const healthDecay =
     -2 +
     (age > 40 ? -1 : 0) +
-    (grindActive ? -13 : 0);
+    grindHealthPenalty;
 
   const mentalDecay =
     -3 +

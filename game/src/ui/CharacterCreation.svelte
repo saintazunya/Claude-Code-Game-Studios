@@ -10,7 +10,7 @@
   const remaining = $derived(10 - total);
 
   // Derived preview values
-  const startingHealth = $derived(40 + constitution * 8);
+  const grindReduction = $derived(constitution * 10); // 0-50% reduction
   const schoolMod = $derived(((schoolRanking - 2.5) * 4).toFixed(0));
   const internBonus = $derived(((geoLocation - 2.5) * 6).toFixed(0));
 
@@ -78,7 +78,7 @@
       <div class="flex justify-between items-center mb-2">
         <div>
           <span class="text-sm font-semibold text-white">💪 体质</span>
-          <span class="text-xs text-gray-500 ml-2">初始血量 + 抗病能力</span>
+          <span class="text-xs text-gray-500 ml-2">卷王惩罚减免 + 抗病能力</span>
         </div>
         <span class="text-lg font-bold text-white">{constitution}</span>
       </div>
@@ -89,7 +89,7 @@
         </div>
         <button class="w-8 h-8 rounded-lg bg-[#1a2234] text-white font-bold active:bg-[#253050]" onclick={() => adjustAttr('c', 1)}>+</button>
       </div>
-      <p class="text-[10px] text-gray-600 mt-1">初始健康: {startingHealth}</p>
+      <p class="text-[10px] text-gray-600 mt-1">卷王健康惩罚减少: {grindReduction}%{constitution >= 4 ? ' 💪' : ''}</p>
     </div>
 
     <!-- School Ranking -->

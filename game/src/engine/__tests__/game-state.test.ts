@@ -7,7 +7,7 @@ describe('Game State', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 4, geoLocation: 3 });
       expect(state.turn).toBe(0);
       expect(state.phase).toBe('academic');
-      expect(state.attributes.health).toBe(64); // 40 + 3*8
+      expect(state.attributes.health).toBe(90); // all builds start at 90
       expect(state.attributes.mental).toBe(70);
       expect(state.attributes.skills).toBe(36); // 20 + 4*4
       expect(state.attributes.academicImpact).toBe(8); // 4*2

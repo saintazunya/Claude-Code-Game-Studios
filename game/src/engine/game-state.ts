@@ -123,18 +123,21 @@ export function getWorkModeCost(mode: WorkMode | AcademicStudyMode): number {
 export function getWorkModeEffects(mode: WorkMode | AcademicStudyMode, state: GameState): Partial<CoreAttributes> {
   const perfMult = getPerformanceGainMultiplier(state);
 
+  // Constitution reduces grind/intense health cost: 0 = full, 5 = 50% reduced
+  const grindReduction = state.creation.constitution * 0.1;
+
   if (state.phase === 'academic') {
     switch (mode as AcademicStudyMode) {
       case 'light': return { skills: 2, mental: 3 };
       case 'normal': return { skills: 5, mental: -2 };
-      case 'intense': return { skills: 8, mental: -8, health: -10 };
+      case 'intense': return { skills: 8, mental: -8, health: Math.round(-10 * (1 - grindReduction)) };
     }
   }
 
   switch (mode as WorkMode) {
     case 'coast': return { performance: Math.round(-5 * perfMult), mental: 3 };
     case 'normal': return { performance: Math.round(5 * perfMult), mental: -2 };
-    case 'grind': return { performance: Math.round(15 * perfMult), mental: -8, health: -15 };
+    case 'grind': return { performance: Math.round(15 * perfMult), mental: -8, health: Math.round(-15 * (1 - grindReduction)) };
   }
 }
 
