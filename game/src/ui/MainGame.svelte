@@ -98,6 +98,8 @@
       ]
     : []);
   const attCost = $derived($attitudeApCost);
+  // AP available for attitude switch = remaining AP + current attitude cost
+  const attBudget = $derived(ap + attCost);
 </script>
 
 {#if gs}
@@ -260,8 +262,10 @@
       </div>
       <div class="flex gap-1 bg-[#1a2234] rounded-xl p-1 border border-[#2a3050]">
         {#each attitudeConfig as item}
+          {@const canAfford = item.ap <= attBudget || att === item.level}
           <button
-            class="flex-1 py-2 rounded-lg text-center transition-all text-xs {att === item.level ? item.color + ' text-white font-bold shadow-lg' : 'text-gray-500'}"
+            class="flex-1 py-2 rounded-lg text-center transition-all text-xs {att === item.level ? item.color + ' text-white font-bold shadow-lg' : canAfford ? 'text-gray-500' : 'text-gray-700 opacity-40'}"
+            disabled={!canAfford}
             onclick={() => attitudeLevel.set(item.level)}
           >
             <div class="text-sm">{item.emoji}</div>
