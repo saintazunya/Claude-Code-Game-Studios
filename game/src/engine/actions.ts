@@ -146,9 +146,9 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
   searchIntern: {
     id: 'searchIntern', nameZh: '找实习', apCost: 3, phase: 'academic',
     effects: {}, description: 'Search for internship opportunities',
-    tipsZh: '✅ 搜索实习（立即判定成功/失败）| ✅ 有实习→找工作概率+25% | ⚠️ 没实习→找工作概率大幅下降 | 💡 Q3-Q4是实习季',
+    tipsZh: '✅ 搜索实习（立即判定成功/失败）| ✅ 有实习→找工作概率+25% | ✅ 已有实习可以再找更好的 | 💡 第二年开始可用',
     precondition: (s) => {
-      return s.turn >= 2 && s.turn <= 7 && !s.academic.hadIntern;
+      return s.turn >= 4 && !s.flags.internActiveThisQuarter;
     },
   },
   thesisResearch: {

@@ -253,9 +253,14 @@ export function processTurn(
       if (actionId === 'searchIntern') {
         const internRoll = roll('internSearch', s);
         if (internRoll.success) {
+          const newQuality = Math.random() < 0.3 ? 'top' : 'mid';
+          // Upgrade if found better, or first intern
+          if (!s.academic.hadIntern || (newQuality === 'top' && s.academic.internQuality !== 'top')) {
+            s.academic.internQuality = newQuality as 'mid' | 'top';
+          }
           s.academic.hadIntern = true;
-          s.academic.internQuality = Math.random() < 0.3 ? 'top' : 'mid';
-          s.flags.internActiveThisQuarter = true; // activates next turn's intern work
+          s.flags.internActiveThisQuarter = true;
+          s.academic.hasReturnOffer = false; // reset — new intern, new chance
           turnEvents.push({ id: 'intern_found', choiceId: s.academic.internQuality });
         } else {
           turnEvents.push({ id: 'intern_not_found', choiceId: '' });
