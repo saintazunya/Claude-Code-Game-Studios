@@ -46,8 +46,8 @@
 {#if $currentEvent}
   {@const event = $currentEvent}
   {@const ti = $turnInfo}
-<div class="min-h-dvh bg-[#0a0e17] flex items-center justify-center p-4">
-  <div class="bg-[#1a2234] rounded-2xl border border-[#2a3a5a] w-full max-w-[400px] shadow-2xl overflow-hidden" style="animation: slideUp 0.35s ease-out">
+<div class="min-h-dvh bg-[#0a0e17] overflow-y-auto p-4">
+  <div class="bg-[#1a2234] rounded-2xl border border-[#2a3a5a] w-full max-w-[400px] mx-auto shadow-2xl" style="animation: slideUp 0.35s ease-out">
     <!-- Header -->
     <div class="pt-6 px-5 text-center">
       <div class="w-16 h-16 rounded-2xl bg-gradient-to-br {iconBg(event.type)} flex items-center justify-center text-3xl mx-auto mb-3 shadow-lg">
@@ -91,7 +91,8 @@
         <button
           type="button"
           class="w-full text-left p-4 rounded-xl border-2 border-[#2a3a5a] bg-[#1e2a3a] hover:bg-[#253550] active:bg-[#2a3a5a] active:scale-[0.98] transition-all cursor-pointer select-none"
-          onpointerup={() => resolveCurrentEvent(choice.id)}
+          onclick={(e: MouseEvent) => { e.preventDefault(); resolveCurrentEvent(choice.id); }}
+          ontouchend={(e: TouchEvent) => { e.preventDefault(); resolveCurrentEvent(choice.id); }}
         >
           <div class="flex items-center gap-2 mb-1.5">
             <span class="text-[10px] font-bold px-2 py-0.5 rounded {tagStyle(choice.tag)}">
