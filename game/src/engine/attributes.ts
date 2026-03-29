@@ -93,9 +93,9 @@ export function computeNaturalDecay(state: GameState): Partial<CoreAttributes> {
     grindHealthPenalty;
 
   const mentalDecay =
-    -3 +
-    (visaInsecure ? -3 : 0) +
-    (grindActive ? -5 : 0) +
+    -5 +
+    (visaInsecure ? -4 : 0) +
+    (grindActive ? -6 : 0) +
     (state.attributes.health < 30 ? -5 : 0);
 
   // Boss effects

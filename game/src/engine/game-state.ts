@@ -106,6 +106,13 @@ export function getEffectiveAp(state: GameState, workMode?: WorkMode | AcademicS
     base -= 3;
   }
 
+  // Mental stress reduces AP: below 50 = -1, below 30 = -2
+  if (state.attributes.mental < 30) {
+    base -= 2;
+  } else if (state.attributes.mental < 50) {
+    base -= 1;
+  }
+
   // Sickness reduces AP but never below 4
   const sicknessPenalty = (state.flags.sicknessApPenalty as number) || 0;
   base -= sicknessPenalty;
