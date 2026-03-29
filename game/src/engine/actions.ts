@@ -148,7 +148,7 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
     effects: {}, description: 'Search for internship opportunities',
     tipsZh: '✅ 搜索实习（立即判定成功/失败）| ✅ 有实习→找工作概率+25% | ✅ 已有实习可以再找更好的 | 💡 第二年开始可用',
     precondition: (s) => {
-      return s.turn >= 4 && !s.flags.internActiveThisQuarter;
+      return s.turn >= 2 && !s.flags.internActiveThisQuarter;
     },
   },
   thesisResearch: {
