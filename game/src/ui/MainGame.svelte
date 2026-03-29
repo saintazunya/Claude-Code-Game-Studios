@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { gameState, selectedWorkMode, selectedActions, remainingAp, effectiveAp, availableActions, turnInfo, selectWorkModeAction, toggleAction, endTurn, portfolio, healthState, mentalState } from '../engine/store';
+  import { gameState, selectedWorkMode, selectedActions, remainingAp, effectiveAp, availableActions, turnInfo, selectWorkModeAction, toggleAction, endTurn, portfolio, healthState, mentalState, autoSelect, autoPlayReasoning } from '../engine/store';
   import { getWorkModeCost } from '../engine/game-state';
   import { canSelectAction, ACTIONS } from '../engine/actions';
   import { computeSicknessChance } from '../engine/attributes';
@@ -400,15 +400,35 @@
     {/if}
   </div>
 
+  <!-- Auto-play reasoning (shown after auto-select) -->
+  {#if $autoPlayReasoning.length > 0}
+    <div class="px-4 pb-2">
+      <div class="bg-amber-950/30 border border-amber-900/40 rounded-xl p-3">
+        <p class="text-[10px] text-amber-400 font-bold mb-1">🤖 自动决策理由：</p>
+        {#each $autoPlayReasoning as reason}
+          <p class="text-[10px] text-amber-400/70">• {reason}</p>
+        {/each}
+      </div>
+    </div>
+  {/if}
+
   <!-- Bottom Bar -->
   <div class="px-4 py-3 bg-[#0d1117] border-t border-[#2a3050]">
-    <button
-      class="w-full py-4 rounded-2xl text-white text-base font-bold transition-all duration-200 {canConfirm ? 'bg-gradient-to-r from-blue-600 to-blue-700 active:scale-[0.98] shadow-lg shadow-blue-600/20' : 'bg-gray-800 opacity-40'}"
-      disabled={!canConfirm}
-      onclick={endTurn}
-    >
-      结束本季度 ➜
-    </button>
+    <div class="flex gap-2">
+      <button
+        class="py-4 px-5 rounded-2xl bg-[#1a2234] text-amber-400 text-sm font-bold border border-amber-900/40 active:scale-[0.98] transition-all"
+        onclick={() => { autoSelect(); }}
+      >
+        🤖 自动
+      </button>
+      <button
+        class="flex-1 py-4 rounded-2xl text-white text-base font-bold transition-all duration-200 {canConfirm ? 'bg-gradient-to-r from-blue-600 to-blue-700 active:scale-[0.98] shadow-lg shadow-blue-600/20' : 'bg-gray-800 opacity-40'}"
+        disabled={!canConfirm}
+        onclick={endTurn}
+      >
+        结束本季度 ➜
+      </button>
+    </div>
   </div>
 </div>
 {/if}

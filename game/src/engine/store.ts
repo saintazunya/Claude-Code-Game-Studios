@@ -10,6 +10,7 @@ import { EVENT_POOL } from './events';
 import { startLog, logTurn, logEventChoice, endLog, downloadLog } from './logger';
 import { autoSave, loadGame, getSaveIndex, type SaveMeta } from './save';
 import { shareResult } from './share';
+import { autoSelectTurn } from './auto-play';
 
 export type Screen = 'title' | 'creation' | 'game' | 'event' | 'summary' | 'endgame';
 
@@ -136,6 +137,17 @@ export function toggleAction(actionId: ActionId) {
   }
 }
 
+export const autoPlayReasoning = writable<string[]>([]);
+
+export function autoSelect() {
+  const gs = get(gameState);
+  if (!gs) return;
+  const result = autoSelectTurn(gs);
+  selectedWorkMode.set(result.workMode);
+  selectedActions.set(result.actions);
+  autoPlayReasoning.set(result.reasoning);
+}
+
 export function endTurn() {
   const gs = get(gameState);
   const wm = get(selectedWorkMode);
@@ -153,6 +165,7 @@ export function endTurn() {
 
   selectedWorkMode.set(null);
   selectedActions.set([]);
+  autoPlayReasoning.set([]);
 
   // Check for pending random events
   const pendingIds = (newState.flags.pendingRandomEvents as string[]) || [];
