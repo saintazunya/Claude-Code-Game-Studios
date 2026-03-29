@@ -49,7 +49,7 @@
     visa_expired_deported: { icon: '✈️', text: '签证过期，被遣返', color: 'text-red-400' },
   };
 
-  // Detect milestones for celebration
+  // Detect milestones for celebration — show ALL events with Chinese text
   const milestones = $derived(() => {
     if (!lastRecord) return [];
     const ms: { icon: string; text: string; color: string; detail?: string }[] = [];
@@ -57,6 +57,9 @@
       const msg = EVENT_MESSAGES[e.id];
       if (msg) {
         ms.push(msg);
+      } else {
+        // Fallback: show event ID in Chinese-friendly format
+        ms.push({ icon: '📌', text: e.id.replace(/_/g, ' '), color: 'text-gray-400' });
       }
     }
     return ms;
@@ -235,19 +238,7 @@
       </div>
     </div>
 
-    <!-- Unrecognized events (show any events not covered by milestones) -->
-    {#if lastRecord.events.filter(ev => !EVENT_MESSAGES[ev.id]).length > 0}
-      <div class="bg-[#1a2234] rounded-xl p-4 border border-[#2a3050] mb-3">
-        <h2 class="text-[10px] text-gray-500 font-semibold mb-3 tracking-wider">其他</h2>
-        <div class="space-y-1">
-          {#each lastRecord.events.filter(ev => !EVENT_MESSAGES[ev.id]) as ev}
-            <div class="text-xs text-gray-400 py-0.5">
-              📌 {ev.id.replace(/_/g, ' ')}
-            </div>
-          {/each}
-        </div>
-      </div>
-    {/if}
+    <!-- All events are now shown through milestone cards above -->
 
     <!-- Next quarter AP warning if sick -->
     {#if gs.flags.sicknessApPenalty}
