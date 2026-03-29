@@ -1,20 +1,15 @@
 <script lang="ts">
-  import { currentEvent, gameState, resolveCurrentEvent, turnInfo } from '../engine/store';
-  import type { EventChoice } from '../engine/types';
+  import { currentEvent, resolveCurrentEvent, turnInfo } from '../engine/store';
 
-  const event = $derived($currentEvent);
-  const gs = $derived($gameState);
-  const ti = $derived($turnInfo);
-
-  function tagStyle(tag: string) {
-    switch (tag) {
-      case 'stable': return 'bg-blue-500/20 text-blue-400 border border-blue-500/30';
-      case 'risky': return 'bg-purple-500/20 text-purple-400 border border-purple-500/30';
-      case 'desperate': return 'bg-red-500/20 text-red-400 border border-red-500/30';
-      case 'costly': return 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
-      case 'neutral': return 'bg-gray-500/20 text-gray-400 border border-gray-500/30';
-      default: return 'bg-gray-500/20 text-gray-400';
-    }
+  function tagStyle(tag: string): string {
+    const styles: Record<string, string> = {
+      stable: 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
+      risky: 'bg-purple-500/20 text-purple-400 border border-purple-500/30',
+      desperate: 'bg-red-500/20 text-red-400 border border-red-500/30',
+      costly: 'bg-amber-500/20 text-amber-400 border border-amber-500/30',
+      neutral: 'bg-gray-500/20 text-gray-400 border border-gray-500/30',
+    };
+    return styles[tag] || styles.neutral;
   }
 
   function tagLabel(tag: string): string {
@@ -44,20 +39,15 @@
 
   function formatEffect(key: string, val: number): { name: string; text: string; color: string } {
     const names: Record<string, string> = { performance: '绩效', skills: '技能', academicImpact: '学术', health: '健康', mental: '精神', netWorth: '资产' };
-    const name = names[key] || key;
-    const prefix = val > 0 ? '+' : '';
-    const color = val > 0 ? 'text-green-400' : 'text-red-400';
-    return { name, text: `${prefix}${val}`, color };
-  }
-
-  function onChoose(choiceId: string) {
-    resolveCurrentEvent(choiceId);
+    return { name: names[key] || key, text: `${val > 0 ? '+' : ''}${val}`, color: val > 0 ? 'text-green-400' : 'text-red-400' };
   }
 </script>
 
-{#if event}
+{#if $currentEvent}
+  {@const event = $currentEvent}
+  {@const ti = $turnInfo}
 <div class="min-h-dvh bg-[#0a0e17] flex items-center justify-center p-4">
-  <div class="bg-[#1a2234] rounded-2xl border border-[#2a3a5a] w-full max-w-[400px] shadow-2xl overflow-hidden animate-slide-up">
+  <div class="bg-[#1a2234] rounded-2xl border border-[#2a3a5a] w-full max-w-[400px] shadow-2xl overflow-hidden" style="animation: slideUp 0.35s ease-out">
     <!-- Header -->
     <div class="pt-6 px-5 text-center">
       <div class="w-16 h-16 rounded-2xl bg-gradient-to-br {iconBg(event.type)} flex items-center justify-center text-3xl mx-auto mb-3 shadow-lg">
@@ -97,11 +87,11 @@
     <!-- Choices -->
     <div class="p-5 space-y-3">
       <p class="text-[10px] text-gray-500 font-semibold tracking-wider mb-1">选择你的应对方式</p>
-      {#each event.choices as choice}
+      {#each event.choices as choice (choice.id)}
         <button
           type="button"
-          class="w-full text-left p-4 rounded-xl border-2 border-[#2a3a5a] bg-[#1e2a3a] hover:bg-[#253550] active:bg-[#2a3a5a] active:scale-[0.98] transition-all cursor-pointer"
-          onclick={() => onChoose(choice.id)}
+          class="w-full text-left p-4 rounded-xl border-2 border-[#2a3a5a] bg-[#1e2a3a] hover:bg-[#253550] active:bg-[#2a3a5a] active:scale-[0.98] transition-all cursor-pointer select-none"
+          onpointerup={() => resolveCurrentEvent(choice.id)}
         >
           <div class="flex items-center gap-2 mb-1.5">
             <span class="text-[10px] font-bold px-2 py-0.5 rounded {tagStyle(choice.tag)}">
@@ -128,9 +118,6 @@
 {/if}
 
 <style>
-  .animate-slide-up {
-    animation: slideUp 0.35s ease-out;
-  }
   @keyframes slideUp {
     from { transform: translateY(30px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }

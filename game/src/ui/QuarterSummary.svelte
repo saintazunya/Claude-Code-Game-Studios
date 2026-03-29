@@ -233,20 +233,25 @@
       </div>
     </div>
 
-    <!-- Events this quarter -->
-    {#if lastRecord.events.length > 0}
+    <!-- Unrecognized events (show any events not covered by milestones) -->
+    {#if lastRecord.events.filter(ev => !EVENT_MESSAGES[ev.id]).length > 0}
       <div class="bg-[#1a2234] rounded-xl p-4 border border-[#2a3050] mb-3">
-        <h2 class="text-[10px] text-gray-500 font-semibold mb-3 tracking-wider">本季度事件</h2>
+        <h2 class="text-[10px] text-gray-500 font-semibold mb-3 tracking-wider">其他</h2>
         <div class="space-y-1">
-          {#each lastRecord.events as ev}
+          {#each lastRecord.events.filter(ev => !EVENT_MESSAGES[ev.id]) as ev}
             <div class="text-xs text-gray-400 py-0.5">
               📌 {ev.id.replace(/_/g, ' ')}
-              {#if ev.choiceId}
-                <span class="text-gray-600">→ {ev.choiceId}</span>
-              {/if}
             </div>
           {/each}
         </div>
+      </div>
+    {/if}
+
+    <!-- Next quarter AP warning if sick -->
+    {#if gs.flags.sicknessApPenalty}
+      <div class="mx-0 mb-3 p-3 rounded-xl bg-red-950/30 border border-red-900/40 text-xs">
+        <span class="text-red-400 font-bold">⚠️ 下季度影响：</span>
+        <span class="text-red-400/80">行动点 -{gs.flags.sicknessApPenalty}（生病后遗症）{gs.grindLockQuarters > 0 ? `，卷王锁定${gs.grindLockQuarters}季度` : ''}</span>
       </div>
     {/if}
   </div>

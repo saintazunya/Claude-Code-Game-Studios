@@ -351,6 +351,9 @@
         {/if}
         <span class="px-2.5 py-0.5 rounded-full bg-amber-500/90 text-black text-[10px] font-bold">
           AP: {ap} / {wm ? totalAp : '—'}
+          {#if totalAp !== 10 && wm}
+            <span class="text-black/60">({10}{gs.career.grindConsecutive > 0 && (wm === 'grind' || wm === 'intense') ? '+3' : ''}{gs.academic.hadIntern && isAcademic ? '-3实习' : ''}{(gs.flags.sicknessApPenalty as number) > 0 ? `-${gs.flags.sicknessApPenalty}病` : ''})</span>
+          {/if}
         </span>
       </div>
     </div>

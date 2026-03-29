@@ -158,9 +158,9 @@ export const EVENT_POOL: GameEvent[] = [
     cooldownQuarters: 6, oneTime: false,
     immediateEffects: { mental: -5 },
     choices: [
-      { id: 'reflect', textKey: '', nameZh: '反思并适应', descZh: '下次改变沟通方式。技能+1。', tag: 'stable', effects: { mental: 3, skills: 1 } },
-      { id: 'vent', textKey: '', nameZh: '和朋友吐槽', descZh: '情绪释放一下。', tag: 'neutral', effects: { mental: 3 } },
-      { id: 'withdraw', textKey: '', nameZh: '封闭自己', descZh: '减少社交，专注工作。', tag: 'risky', effects: { mental: -3, performance: 2 } },
+      { id: 'reflect', textKey: '', nameZh: '反思并适应', descZh: '花时间理解文化差异，调整沟通方式。', tag: 'stable', effects: { mental: 2, skills: 2 } },
+      { id: 'vent', textKey: '', nameZh: '和朋友吐槽+聚餐', descZh: '约上几个华人朋友大吃一顿。花$200，但心情好很多。', tag: 'neutral', effects: { mental: 8 } },
+      { id: 'withdraw', textKey: '', nameZh: '封闭自己', descZh: '减少社交，把精力投入工作。短期绩效提升但长期精神消耗。', tag: 'risky', effects: { mental: -5, performance: 3 } },
     ],
   },
   {
