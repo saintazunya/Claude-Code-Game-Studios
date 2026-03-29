@@ -100,8 +100,8 @@ export function getEffectiveAp(state: GameState, workMode?: WorkMode | AcademicS
   const isGrind = workMode === 'grind' || workMode === 'intense';
   if (isGrind && state.grindLockQuarters <= 0) base += 3;
 
-  // Intern work takes 3AP automatically
-  if (state.phase === 'academic' && state.academic.hadIntern) {
+  // Intern work takes 3AP for one quarter only
+  if (state.phase === 'academic' && state.flags.internActiveThisQuarter) {
     base -= 3;
   }
 
@@ -172,10 +172,11 @@ export function processTurn(
     s.economicPhaseQuarters = 0;
   }
 
-  // 2b. Intern work: if student has intern, auto-deduct 3AP and earn $15K
-  if (s.phase === 'academic' && s.academic.hadIntern) {
+  // 2b. Intern work: one quarter only, then intern ends (but hadIntern flag stays for job search bonus)
+  if (s.phase === 'academic' && s.flags.internActiveThisQuarter) {
     s.economy.cash += 15000;
-    s.attributes = applyDeltas(s.attributes, { skills: 5 }); // intern experience
+    s.attributes = applyDeltas(s.attributes, { skills: 5 });
+    s.flags.internActiveThisQuarter = false; // intern ends after 1 quarter
   }
 
   // 3. Apply work mode effects
@@ -212,6 +213,7 @@ export function processTurn(
         if (internRoll.success) {
           s.academic.hadIntern = true;
           s.academic.internQuality = Math.random() < 0.3 ? 'top' : 'mid';
+          s.flags.internActiveThisQuarter = true; // activates next turn's intern work
           turnEvents.push({ id: 'intern_found', choiceId: s.academic.internQuality });
         } else {
           turnEvents.push({ id: 'intern_not_found', choiceId: '' });
