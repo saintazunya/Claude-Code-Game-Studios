@@ -160,6 +160,7 @@ export type ActionId =
   | 'publishPaper'
   | 'consultLawyer'
   | 'rest'
+  | 'hospital'
   | 'travel'
   | 'exercise'
   | 'therapist'

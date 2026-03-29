@@ -24,7 +24,7 @@
     ? [
         { id: 'light' as AcademicStudyMode, label: '轻松', emoji: '☕', cost: 3, desc: 'GPA-0.10, 精神+3' },
         { id: 'normal' as AcademicStudyMode, label: '正常', emoji: '📚', cost: 4, desc: 'GPA+0.15, 精神-2' },
-        { id: 'intense' as AcademicStudyMode, label: '拼命', emoji: '🔥', cost: 4, desc: 'GPA+0.30, 健康-10, +3AP' },
+        { id: 'intense' as AcademicStudyMode, label: '拼命', emoji: '🔥', cost: 4, desc: 'GPA+0.15, 健康-, +3AP' },
       ]
     : [
         { id: 'coast' as WorkMode, label: '躺平', emoji: '🛋️', cost: 3, desc: '绩效-5, 精神+3' },
@@ -72,7 +72,7 @@
 
   function actionIcon(id: string): string {
     const icons: Record<string, string> = {
-      upskill: '📖', prepJobChange: '🔍', prepJobChangeIntensive: '🎯',
+      upskill: '📖', prepJobChange: '🔍', prepJobChangeIntensive: '🎯', hospital: '🏥',
       entrepreneurship: '🚀', prepH1b: '📋', researchNiw: '📝',
       publishPaper: '📄', consultLawyer: '⚖️', rest: '😴', travel: '✈️',
       exercise: '🏃', therapist: '🧠', studyGpa: '📚', searchIntern: '🔎',

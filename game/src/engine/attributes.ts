@@ -113,7 +113,7 @@ export function computeNaturalDecay(state: GameState): Partial<CoreAttributes> {
 export function computeSicknessChance(state: GameState): number {
   const age = 22 + Math.floor((state.turn - 1) / 4);
   const ageFactor = 1.0 + Math.max(0, (age - 30) * 0.03);
-  const baseChance = (100 - state.attributes.health) * 0.004 * ageFactor;
+  const baseChance = (100 - state.attributes.health) * 0.002 * ageFactor; // halved from 0.004
   return Math.min(0.8, Math.max(0, baseChance + state.constitutionSicknessModifier));
 }
 

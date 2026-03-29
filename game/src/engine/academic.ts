@@ -88,7 +88,7 @@ export function getGpaGain(studyMode: string): number {
   switch (studyMode) {
     case 'light': return -0.10;
     case 'normal': return 0.15;
-    case 'intense': return 0.30;
+    case 'intense': return 0.15; // same GPA as normal — grind benefit is +3 AP, not better grades
     default: return 0.10;
   }
 }

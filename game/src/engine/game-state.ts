@@ -53,7 +53,7 @@ export function createGameState(creation: CreationAttributes): GameState {
       graceQuartersRemaining: 0,
     },
     economy: {
-      cash: 0,
+      cash: 20000,
       portfolioShares: 0,
       portfolioCostBasis: 0,
       sharePrice: INITIAL_SHARE_PRICE,
@@ -100,14 +100,15 @@ export function getEffectiveAp(state: GameState, workMode?: WorkMode | AcademicS
   const isGrind = workMode === 'grind' || workMode === 'intense';
   if (isGrind && state.grindLockQuarters <= 0) base += 3;
 
-  // Sickness penalty (stored in flags from previous turn)
+  // Sickness reduces AP but never below 4 (enough for rest + hospital visit)
   const sicknessPenalty = (state.flags.sicknessApPenalty as number) || 0;
   base -= sicknessPenalty;
+  base = Math.max(base, 4);
 
-  // Burnout = 0 AP
-  if (state.flags.burnoutActive) return 0;
-  // Hospitalized = 0 AP
-  if (state.attributes.health <= 0) return 0;
+  // Burnout = minimum AP (can still rest)
+  if (state.flags.burnoutActive) return 4;
+  // Hospitalized = minimum AP
+  if (state.attributes.health <= 0) return 4;
 
   return Math.max(0, base);
 }
@@ -210,6 +211,11 @@ export function processTurn(
       }
       if (actionId === 'travel') {
         s.economy.cash -= 2000 + Math.random() * 3000;
+      }
+      if (actionId === 'hospital') {
+        s.economy.cash -= 3000;
+        // Hospital visit reduces next quarter's sickness AP penalty
+        s.flags.hospitalVisited = true;
       }
       if (actionId === 'therapist') {
         s.economy.cash -= 800;

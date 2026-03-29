@@ -68,6 +68,12 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
     effects: { health: 10, mental: 8 }, description: 'Rest and recover',
     tipsZh: '✅ 健康+10，精神+8 | ✅ 免费，性价比不错 | 💡 健康低于50%时建议休息',
   },
+  hospital: {
+    id: 'hospital', nameZh: '去医院看病', apCost: 3, phase: 'any',
+    effects: { health: 25, mental: 5 }, description: 'Visit hospital for treatment ($3,000)',
+    tipsZh: '✅ 健康+25（最强治疗）| ✅ 清除生病状态，减少下季度AP惩罚 | ⚠️ 花费$3,000',
+    precondition: (s) => (s.flags.gotSick as boolean) || s.attributes.health < 50,
+  },
   travel: {
     id: 'travel', nameZh: '旅游度假', apCost: 3, phase: 'any',
     effects: { health: 20, mental: 25 }, description: 'Travel for recovery ($2K-5K, visa risk on H1B)',

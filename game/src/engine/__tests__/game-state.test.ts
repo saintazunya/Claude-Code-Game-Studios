@@ -48,10 +48,10 @@ describe('Game State', () => {
       expect(getEffectiveAp(state, 'normal')).toBe(5);
     });
 
-    it('burnout = 0 AP', () => {
+    it('burnout = minimum 4 AP (can still rest/hospital)', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
       state.flags.burnoutActive = true;
-      expect(getEffectiveAp(state, 'normal')).toBe(0);
+      expect(getEffectiveAp(state, 'normal')).toBe(4);
     });
 
     it('grind locked does not add bonus', () => {

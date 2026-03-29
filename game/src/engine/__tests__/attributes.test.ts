@@ -94,21 +94,22 @@ describe('Attribute System', () => {
   });
 
   describe('sickness probability', () => {
-    it('health 80, age 25 ≈ 5%', () => {
+    it('health 80, age 25 ≈ 4%', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
       state.attributes.health = 80;
       state.turn = 12; // age 25
       state.constitutionSicknessModifier = 0;
       const chance = computeSicknessChance(state);
-      expect(chance).toBeCloseTo(0.08, 1); // (100-80)*0.004*1.0 = 0.08
+      expect(chance).toBeCloseTo(0.04, 1); // (100-80)*0.002*1.0 = 0.04
     });
 
-    it('health 50, age 45 ≈ 32%', () => {
+    it('health 50, age 45 ≈ 16%', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
       state.attributes.health = 50;
       state.turn = 92; // age 45
+      state.constitutionSicknessModifier = 0;
       const chance = computeSicknessChance(state);
-      expect(chance).toBeCloseTo(0.32, 1);
+      expect(chance).toBeCloseTo(0.16, 1); // (100-50)*0.002*1.45 = 0.145
     });
 
     it('capped at 80%', () => {
