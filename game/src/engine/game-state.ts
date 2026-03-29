@@ -97,9 +97,16 @@ export function getTurnInfo(turn: number) {
 }
 
 export function getEffectiveAp(state: GameState, workMode?: WorkMode | AcademicStudyMode): number {
-  let base = 10;
-  const isGrind = workMode === 'grind' || workMode === 'intense';
-  if (isGrind && state.grindLockQuarters <= 0) base += 3;
+  let base: number;
+  if (workMode === 'grind' || workMode === 'intense') {
+    base = state.grindLockQuarters <= 0 ? 10 : 6;
+  } else if (workMode === 'normal') {
+    base = 6;
+  } else if (workMode === 'coast' || workMode === 'light') {
+    base = 5;
+  } else {
+    base = 6; // default if no mode selected
+  }
 
   // Intern work takes 3AP for one quarter only
   if (state.phase === 'academic' && state.flags.internActiveThisQuarter) {

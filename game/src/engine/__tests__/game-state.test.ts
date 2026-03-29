@@ -32,20 +32,25 @@ describe('Game State', () => {
   });
 
   describe('getEffectiveAp', () => {
-    it('base AP is 10', () => {
+    it('normal = 6 AP', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
-      expect(getEffectiveAp(state, 'normal')).toBe(10);
+      expect(getEffectiveAp(state, 'normal')).toBe(6);
     });
 
-    it('grind mode adds 3 AP', () => {
+    it('grind = 10 AP', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
-      expect(getEffectiveAp(state, 'grind')).toBe(13);
+      expect(getEffectiveAp(state, 'grind')).toBe(10);
     });
 
-    it('sickness penalty reduces AP', () => {
+    it('coast = 5 AP', () => {
+      const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
+      expect(getEffectiveAp(state, 'coast')).toBe(5);
+    });
+
+    it('sickness penalty reduces AP but floors at 4', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
       state.flags.sicknessApPenalty = 5;
-      expect(getEffectiveAp(state, 'normal')).toBe(5);
+      expect(getEffectiveAp(state, 'normal')).toBe(4); // 6 - 5 = 1, but floor at 4
     });
 
     it('burnout = minimum 4 AP (rest/hospital are free when sick)', () => {
@@ -54,15 +59,15 @@ describe('Game State', () => {
       expect(getEffectiveAp(state, 'normal')).toBe(4);
     });
 
-    it('grind locked does not add bonus', () => {
+    it('grind locked falls back to 6 AP', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
       state.grindLockQuarters = 2;
-      expect(getEffectiveAp(state, 'grind')).toBe(10); // no bonus when locked
+      expect(getEffectiveAp(state, 'grind')).toBe(6); // locked = normal AP
     });
   });
 
   describe('getWorkModeCost', () => {
-    it('all work modes cost 0 AP (status effects only)', () => {
+    it('work mode cost is always 0 (AP budget set by getEffectiveAp)', () => {
       expect(getWorkModeCost('coast')).toBe(0);
       expect(getWorkModeCost('light')).toBe(0);
       expect(getWorkModeCost('normal')).toBe(0);

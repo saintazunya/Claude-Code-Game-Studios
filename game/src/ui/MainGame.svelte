@@ -22,14 +22,14 @@
 
   const workModes = $derived(isAcademic
     ? [
-        { id: 'light' as AcademicStudyMode, label: '轻松', emoji: '☕', cost: 0, desc: 'GPA-0.10 | 精神+3' },
-        { id: 'normal' as AcademicStudyMode, label: '正常', emoji: '📚', cost: 0, desc: 'GPA+0.15 | 精神-2' },
-        { id: 'intense' as AcademicStudyMode, label: '拼命', emoji: '🔥', cost: 0, desc: 'GPA+0.15 | 健康⬇ | AP+3' },
+        { id: 'light' as AcademicStudyMode, label: '轻松', emoji: '☕', cost: 0, desc: 'GPA-0.10 | 精神+3 | 5AP' },
+        { id: 'normal' as AcademicStudyMode, label: '正常', emoji: '📚', cost: 0, desc: 'GPA+0.15 | 精神-2 | 6AP' },
+        { id: 'intense' as AcademicStudyMode, label: '拼命', emoji: '🔥', cost: 0, desc: 'GPA+0.15 | 健康⬇ | 10AP' },
       ]
     : [
-        { id: 'coast' as WorkMode, label: '躺平', emoji: '🛋️', cost: 0, desc: '绩效-5 | 精神+3' },
-        { id: 'normal' as WorkMode, label: '正常', emoji: '💼', cost: 0, desc: '绩效+5 | 精神-2' },
-        { id: 'grind' as WorkMode, label: '卷王', emoji: '🔥', cost: 0, desc: '绩效+15 | 健康⬇ | AP+3' },
+        { id: 'coast' as WorkMode, label: '躺平', emoji: '🛋️', cost: 0, desc: '绩效-5 | 精神+3 | 5AP' },
+        { id: 'normal' as WorkMode, label: '正常', emoji: '💼', cost: 0, desc: '绩效+5 | 精神-2 | 6AP' },
+        { id: 'grind' as WorkMode, label: '卷王', emoji: '🔥', cost: 0, desc: '绩效+15 | 健康⬇ | 10AP' },
       ]
   );
 
