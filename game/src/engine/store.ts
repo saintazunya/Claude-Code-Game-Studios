@@ -1,11 +1,12 @@
 // Reactive game store — bridges engine to Svelte UI
 import { writable, derived, get } from 'svelte/store';
-import type { GameState, CreationAttributes, WorkMode, AcademicStudyMode, ActionId } from './types';
-import { createGameState, getTurnInfo, getEffectiveAp, getWorkModeCost, getWorkModeEffects, processTurn, calculateFinalScore } from './game-state';
+import type { GameState, CreationAttributes, WorkMode, AcademicStudyMode, ActionId, GameEvent } from './types';
+import { createGameState, getTurnInfo, getEffectiveAp, getWorkModeCost, getWorkModeEffects, processTurn, calculateFinalScore, resolveEvent } from './game-state';
 import { getAvailableActions, canSelectAction, ACTIONS } from './actions';
 import { preview } from './probability';
 import { getPortfolioStatus } from './economic-cycle';
 import { getHealthThreshold, getMentalThreshold } from './attributes';
+import { EVENT_POOL } from './events';
 
 export type Screen = 'title' | 'creation' | 'game' | 'event' | 'summary' | 'endgame';
 
@@ -16,8 +17,9 @@ export const gameState = writable<GameState | null>(null);
 export const selectedWorkMode = writable<WorkMode | AcademicStudyMode | null>(null);
 export const selectedActions = writable<ActionId[]>([]);
 
-// Pending events to show
-export const pendingEvents = writable<Array<{ event: import('./types').GameEvent; resolved: boolean }>>([]);
+// Current event being shown to player
+export const currentEvent = writable<GameEvent | null>(null);
+export const eventQueue = writable<GameEvent[]>([]);
 
 // Derived stores
 export const turnInfo = derived(gameState, ($gs) => {
@@ -71,7 +73,6 @@ export function startNewGame(creation: CreationAttributes) {
 
 export function selectWorkModeAction(mode: WorkMode | AcademicStudyMode) {
   selectedWorkMode.set(mode);
-  // Clear actions that no longer fit AP budget
   const gs = get(gameState);
   if (!gs) return;
   const totalAp = getEffectiveAp(gs, mode);
@@ -118,14 +119,52 @@ export function endTurn() {
   const newState = processTurn(gs, wm, actions);
   gameState.set(newState);
 
-  // Show summary
   selectedWorkMode.set(null);
   selectedActions.set([]);
 
-  if (newState.endingType) {
+  // Check for pending random events
+  const pendingIds = (newState.flags.pendingRandomEvents as string[]) || [];
+  const pendingGameEvents = pendingIds
+    .map(id => EVENT_POOL.find(e => e.id === id))
+    .filter((e): e is GameEvent => e !== undefined);
+
+  if (pendingGameEvents.length > 0) {
+    // Show events one by one
+    eventQueue.set(pendingGameEvents.slice(1));
+    currentEvent.set(pendingGameEvents[0]);
+    screen.set('event');
+  } else if (newState.endingType) {
     screen.set('endgame');
   } else {
     screen.set('summary');
+  }
+}
+
+export function resolveCurrentEvent(choiceId: string) {
+  const gs = get(gameState);
+  const event = get(currentEvent);
+  if (!gs || !event) return;
+
+  // Apply the player's choice
+  const newState = resolveEvent(gs, event, choiceId);
+  gameState.set(newState);
+
+  // Check for more events in queue
+  const queue = get(eventQueue);
+  if (queue.length > 0) {
+    currentEvent.set(queue[0]);
+    eventQueue.set(queue.slice(1));
+    // Stay on event screen
+  } else {
+    currentEvent.set(null);
+    eventQueue.set([]);
+
+    const latest = get(gameState);
+    if (latest?.endingType) {
+      screen.set('endgame');
+    } else {
+      screen.set('summary');
+    }
   }
 }
 
@@ -135,5 +174,7 @@ export function continueTurn() {
 
 export function returnToTitle() {
   gameState.set(null);
+  currentEvent.set(null);
+  eventQueue.set([]);
   screen.set('title');
 }

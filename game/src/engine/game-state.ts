@@ -428,21 +428,14 @@ export function processTurn(
   }
   s.flags.justLaidOff = false;
 
-  // 7e. Random events
+  // 7e. Random events — select but don't resolve (UI handles interactive choice)
   const randomEvents = selectEvents(s);
+  // Store pending events on the state for the UI to present
+  s.flags.pendingRandomEvents = randomEvents.map(e => e.id);
+  // Mark cooldowns and one-time flags now (selection is committed)
   for (const event of randomEvents) {
-    // Auto-select first choice for now (UI will handle interactive selection later)
-    const choice = event.choices[0];
-    if (choice) {
-      const result = applyEventChoice(s, event, choice.id);
-      s.attributes = applyDeltas(s.attributes, result.effects);
-      if (result.flags) {
-        Object.assign(s.flags, result.flags);
-      }
-    }
     s.eventCooldowns[event.id] = s.turn;
     if (event.oneTime) s.eventFired.add(event.id);
-    turnEvents.push({ id: event.id, choiceId: event.choices[0]?.id || '' });
   }
 
   // 8. Update net worth
@@ -470,6 +463,38 @@ export function processTurn(
   if (s.turn >= 148) {
     s.endingType = s.immigration.hasGreenCard ? 'age59WithGc' : 'age59WithoutGc';
   }
+
+  return s;
+}
+
+// Apply a player's event choice to the game state (called by UI after event popup)
+export function resolveEvent(state: GameState, event: import('./types').GameEvent, choiceId: string): GameState {
+  const s = structuredClone(state);
+  s.eventFired = new Set(state.eventFired);
+
+  const result = applyEventChoice(s, event, choiceId);
+  s.attributes = applyDeltas(s.attributes, result.effects);
+  if (result.flags) {
+    Object.assign(s.flags, result.flags);
+  }
+
+  // Update net worth after event effects
+  const portfolioValue = s.economy.portfolioShares * s.economy.sharePrice;
+  const homeEquity = s.economy.ownsHome
+    ? Math.max(0, s.economy.homeValue - s.economy.homeMortgageRemaining)
+    : 0;
+  s.attributes.netWorth = s.economy.cash + portfolioValue + homeEquity - s.economy.studentLoanRemaining;
+
+  // Add to timeline
+  const lastRecord = s.timeline[s.timeline.length - 1];
+  if (lastRecord) {
+    lastRecord.events.push({ id: eventId, choiceId });
+    lastRecord.attributesAfter = { ...s.attributes };
+  }
+
+  // Remove from pending
+  const pending = (s.flags.pendingRandomEvents as string[]) || [];
+  s.flags.pendingRandomEvents = pending.filter(id => id !== eventId);
 
   return s;
 }
