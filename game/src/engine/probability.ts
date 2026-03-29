@@ -43,7 +43,7 @@ const EVENT_TYPES: Record<string, EventTypeDef> = {
   eb1aApproval: { base: 0.05, attrKey: 'academicImpact', attrWeight: 0.009, floor: 0.01, cap: 0.75 },
   sickness: { base: 0, floor: 0, cap: 0.80 }, // custom formula
   burnout: { base: 0, floor: 0, cap: 0.30 }, // custom formula
-  internSearch: { base: 0.30, attrKey: 'skills', attrWeight: 0.003, floor: 0.05, cap: 0.90, usesSchoolMod: true, usesEconCycle: true },
+  internSearch: { base: 0.15, attrKey: 'skills', attrWeight: 0.003, floor: 0.05, cap: 0.90, usesSchoolMod: true, usesEconCycle: true },
   firstJob: { base: 0.40, attrKey: 'skills', attrWeight: 0.003, floor: 0.05, cap: 0.90, usesSchoolMod: true, usesEconCycle: true },
   jobOffer: { base: 0.20, attrKey: 'skills', attrWeight: 0.003, floor: 0.03, cap: 0.85, usesSchoolMod: true, usesEconCycle: true },
   layoff: { base: 0.05, attrKey: 'performance', attrWeight: 0.002, inverseAttr: true, floor: 0.01, cap: 0.40, usesEconCycle: true },
