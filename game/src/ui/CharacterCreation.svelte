@@ -12,7 +12,7 @@
   // Derived preview values
   const grindReduction = $derived(constitution * 10); // 0-50% reduction
   const schoolMod = $derived((-5 + schoolRanking * 4).toFixed(0));
-  const internBonus = $derived(((geoLocation - 2.5) * 8).toFixed(0));
+  const internBonus = $derived((-5 + geoLocation * 5).toFixed(0));
 
   const archetypes = [
     { name: '学霸', desc: '名校光环，永久加成', c: 2, s: 5, g: 3 },
