@@ -44,14 +44,28 @@ export const effectiveAp = derived(gameState, ($gs) => {
 
 const ATTITUDE_ACTION_IDS = ['workNone', 'workSlack', 'workHard', 'workSuperHard', 'studySlack', 'studyNormal', 'studyHard'];
 
+// Map attitude level to action ID for AP cost lookup
+function getAttitudeActionId(level: number, isAcademic: boolean): ActionId {
+  if (isAcademic) {
+    return (['studySlack', 'studyNormal', 'studyHard'] as ActionId[])[level] || 'studyNormal';
+  }
+  return (['workNone', 'workSlack', 'workHard', 'workSuperHard'] as ActionId[])[level] || 'workHard';
+}
+
+export const attitudeApCost = derived([attitudeLevel, gameState], ([$att, $gs]) => {
+  if (!$gs) return 0;
+  const actionId = getAttitudeActionId($att, $gs.phase === 'academic');
+  return ACTIONS[actionId]?.apCost || 0;
+});
+
 export const availableActions = derived(gameState, ($gs) => {
   if (!$gs) return [];
   // Filter out attitude actions — handled by toggle bar
   return getAvailableActions($gs).filter(a => !ATTITUDE_ACTION_IDS.includes(a.id));
 });
 
-export const remainingAp = derived([effectiveAp, selectedActions, availableActions], ([$eap, $sa, $avail]) => {
-  let remaining = $eap;
+export const remainingAp = derived([effectiveAp, selectedActions, availableActions, attitudeApCost], ([$eap, $sa, $avail, $attCost]) => {
+  let remaining = $eap - $attCost; // deduct attitude AP first
   for (const actionId of $sa) {
     const action = $avail.find(a => a.id === actionId) || ACTIONS[actionId];
     if (action) remaining -= action.apCost;
