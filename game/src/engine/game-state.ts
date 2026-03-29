@@ -55,6 +55,8 @@ export function createGameState(creation: CreationAttributes): GameState {
     },
     economy: {
       cash: 20000,
+      // No student loans in this game
+
       portfolioShares: 0,
       portfolioCostBasis: 0,
       sharePrice: INITIAL_SHARE_PRICE,

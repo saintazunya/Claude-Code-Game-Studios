@@ -57,6 +57,18 @@ export function processImmigrationQuarter(state: GameState): {
     }
   }
 
+  // --- Auto-file H1B: employer files for you if on OPT/STEM and employed ---
+  if (
+    !imm.h1bFiled && !imm.h1bPending &&
+    ['opt', 'optStem'].includes(imm.visaType) &&
+    state.career.employed === 'employed' &&
+    quarter === 1 // File in Q1 for Q2 lottery
+  ) {
+    updates.h1bFiled = true;
+    economyCost += 2000; // Filing fee (employer pays most, you pay some)
+    events.push('h1b_auto_filed');
+  }
+
   // --- H1B Lottery (Q2) ---
   if (quarter === 2 && imm.h1bFiled) {
     const eventType = state.hasUsMasters ? 'h1bLotteryMasters' : 'h1bLottery';

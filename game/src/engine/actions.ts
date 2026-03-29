@@ -65,18 +65,11 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
   },
 
   // Immigration actions
-  prepH1b: {
-    id: 'prepH1b', nameZh: '准备H-1B材料', apCost: 3, phase: 'career',
-    effects: {}, description: 'Prepare H1B filing for Q2 lottery',
-    tipsZh: '✅ 下个Q2参加H-1B抽签（硕士35%/本科27%）| ⚠️ 抽签是纯运气，准备只是入场券 | ⚠️ 需要在OPT期间提交',
-    precondition: (s) => ['opt', 'optStem'].includes(s.immigration.visaType) && !s.immigration.h1bFiled,
-    exclusive: ['researchNiw'],
-  },
+  // prepH1b removed — employer auto-files H1B each Q1 when on OPT/STEM
   researchNiw: {
     id: 'researchNiw', nameZh: '研究NIW/EB1A', apCost: 3, phase: 'career',
     effects: { academicImpact: 5 }, description: 'Work toward self-petition immigration route',
-    tipsZh: '✅ 学术+5，推进自主绿卡 | ✅ 不绑雇主，自由度高 | ⚠️ 需要学术影响力>50(NIW)或>75(EB1A) | ⚠️ 和H-1B准备互斥',
-    exclusive: ['prepH1b'],
+    tipsZh: '✅ 学术+5，推进自主绿卡 | ✅ 不绑雇主，自由度高 | ⚠️ 需要学术影响力>50(NIW)或>75(EB1A)',
   },
   publishPaper: {
     id: 'publishPaper', nameZh: '发论文（副业）', apCost: 4, phase: 'career',

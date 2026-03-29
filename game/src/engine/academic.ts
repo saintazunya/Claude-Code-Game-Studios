@@ -79,7 +79,7 @@ export function graduateMasters(state: GameState): {
 } {
   return {
     academicUpdates: {},
-    studentDebt: 50000,
+    studentDebt: 0,
   };
 }
 
@@ -89,7 +89,7 @@ export function graduatePhd(state: GameState): {
 } {
   return {
     academicUpdates: {},
-    studentDebt: 20000,
+    studentDebt: 0,
   };
 }
 

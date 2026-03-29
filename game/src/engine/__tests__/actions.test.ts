@@ -55,7 +55,7 @@ describe('Action Point System', () => {
       const ids = available.map(a => a.id);
       expect(ids).toContain('upskill');
       expect(ids).toContain('prepJobChange');
-      expect(ids).toContain('prepH1b');
+      // prepH1b removed — H1B auto-filed by employer
       expect(ids).not.toContain('studyGpa'); // academic only
     });
 
@@ -103,9 +103,6 @@ describe('Action Point System', () => {
       expect(result.allowed).toBe(true);
     });
 
-    it('enforces mutual exclusion: prepH1b and researchNiw', () => {
-      const result = canSelectAction(ACTIONS.prepH1b, ['researchNiw'], 10);
-      expect(result.allowed).toBe(false);
-    });
+    // prepH1b removed — H1B auto-filed by employer
   });
 });
