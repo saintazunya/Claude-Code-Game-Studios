@@ -176,6 +176,7 @@ export type ActionId =
   | 'urgentJobSearch'
   | 'internWork'
   | 'workNone'
+  | 'searchFullTimeJob'
   | 'workSlack'
   | 'workHard'
   | 'workSuperHard'

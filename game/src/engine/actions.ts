@@ -62,12 +62,8 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
     effects: { mental: -10 }, description: 'Desperate job search',
     tipsZh: '✅ +25%拿offer概率（紧急模式）| ⚠️ 精神-10 | 💡 失业或毕业前可用',
     precondition: (s) => {
-      // Available when unemployed in career phase
-      if (s.phase === 'career' && s.career.employed === 'unemployed') return true;
-      // Available in last quarter before graduation (no return offer)
-      const gradTurn = s.academic.isPhd ? 16 : 8;
-      if (s.phase === 'academic' && s.turn === gradTurn - 1 && !s.academic.hasReturnOffer) return true;
-      return false;
+      // Only available when unemployed in career phase
+      return s.phase === 'career' && s.career.employed === 'unemployed';
     },
   },
 
@@ -148,7 +144,18 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
     effects: {}, description: 'Search for internship opportunities',
     tipsZh: '✅ 搜索实习（立即判定成功/失败）| ✅ 有实习→找工作概率+25% | ✅ 已有实习可以再找更好的 | 💡 第二年开始可用',
     precondition: (s) => {
-      return s.turn >= 2 && !s.flags.internActiveThisQuarter;
+      const gradTurn = s.academic.isPhd ? 16 : 8;
+      // Available from turn 3 until second-to-last quarter (last quarter is for full-time job search)
+      return s.turn >= 2 && s.turn < gradTurn - 1 && !s.flags.internActiveThisQuarter;
+    },
+  },
+  searchFullTimeJob: {
+    id: 'searchFullTimeJob', nameZh: '找全职工作', apCost: 4, phase: 'academic',
+    effects: { mental: -5 }, description: 'Search for full-time job before graduation',
+    tipsZh: '✅ 毕业前找全职 | ✅ 概率受实习经历/学校/GPA影响 | ⚠️ 精神-5 | 💡 毕业前最后机会',
+    precondition: (s) => {
+      const gradTurn = s.academic.isPhd ? 16 : 8;
+      return s.turn === gradTurn - 1;
     },
   },
   thesisResearch: {
