@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { gameState, selectedActions, remainingAp, effectiveAp, availableActions, turnInfo, toggleAction, endTurn, portfolio, healthState, mentalState, autoSelect, autoPlayReasoning, inferredMode } from '../engine/store';
+  import { gameState, selectedActions, remainingAp, effectiveAp, availableActions, turnInfo, toggleAction, endTurn, portfolio, healthState, mentalState, autoSelect, autoPlayReasoning, inferredMode, attitudeLevel } from '../engine/store';
   import InfoPanel from './InfoPanel.svelte';
   import EventLog from './EventLog.svelte';
 
@@ -80,8 +80,23 @@
   }
 
   const modeInfo = $derived(modeLabel(mode));
-  const hasStudy = $derived(actions.some(id => ['studySlack', 'studyNormal', 'studyHard'].includes(id)));
-  const needsStudy = $derived(isAcademic && !hasStudy);
+  const att = $derived($attitudeLevel);
+  const needsStudy = false;
+
+  const attitudeConfig = $derived(isAcademic
+    ? [
+        { level: 0, emoji: '☕', label: '摸鱼', color: 'bg-green-600', desc: 'GPA+0.05, 技能+1' },
+        { level: 1, emoji: '📚', label: '正常', color: 'bg-blue-600', desc: 'GPA+0.15, 技能+3' },
+        { level: 2, emoji: '📖', label: '努力', color: 'bg-amber-600', desc: 'GPA+0.30, 技能+5, 精神-2' },
+      ]
+    : gs?.career.employed === 'employed'
+    ? [
+        { level: 0, emoji: '🏖️', label: '不干', color: 'bg-gray-600', desc: '绩效-5, 精神+5' },
+        { level: 1, emoji: '🫠', label: '摸鱼', color: 'bg-green-600', desc: '绩效-3, 精神+2' },
+        { level: 2, emoji: '💪', label: '努力', color: 'bg-blue-600', desc: '绩效+5, 精神-1' },
+        { level: 3, emoji: '🏋️', label: '超级', color: 'bg-red-600', desc: '绩效+12, 精神-3' },
+      ]
+    : []);
 </script>
 
 {#if gs}
@@ -235,12 +250,28 @@
     {/if}
   </div>
 
-  <!-- Status Warnings -->
-  {#if !isAcademic && gs.career.employed === 'employed'}
-    <div class="mx-4 mb-2 p-2 rounded-xl bg-[#1a2234] border border-[#2a3050] text-xs text-gray-500">
-      💼 基础工作占用 3AP
+  <!-- Attitude Toggle Bar -->
+  {#if attitudeConfig.length > 0}
+    <div class="px-4 mb-3">
+      <div class="flex justify-between items-center mb-1.5">
+        <span class="text-xs text-gray-500">{isAcademic ? '📚 学习态度' : '💼 工作态度'}</span>
+        <span class="text-[10px] text-gray-600">{attitudeConfig[att]?.desc || ''}</span>
+      </div>
+      <div class="flex gap-1 bg-[#1a2234] rounded-xl p-1 border border-[#2a3050]">
+        {#each attitudeConfig as item}
+          <button
+            class="flex-1 py-2 rounded-lg text-center transition-all text-xs {att === item.level ? item.color + ' text-white font-bold shadow-lg' : 'text-gray-500'}"
+            onclick={() => attitudeLevel.set(item.level)}
+          >
+            <div class="text-sm">{item.emoji}</div>
+            <div class="text-[9px]">{item.label}</div>
+          </button>
+        {/each}
+      </div>
     </div>
   {/if}
+
+  <!-- Status Warnings -->
   {#if isAcademic && gs.flags.internActiveThisQuarter}
     <div class="mx-4 mb-2 p-2.5 rounded-xl bg-green-950/30 border border-green-900/40 text-xs">
       <span class="text-green-400 font-bold">💼 实习中（本季度）</span>

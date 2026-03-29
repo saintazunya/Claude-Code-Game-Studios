@@ -20,6 +20,8 @@ export const gameState = writable<GameState | null>(null);
 // Current turn selections (not yet committed)
 export const selectedWorkMode = writable<WorkMode | AcademicStudyMode | null>(null);
 export const selectedActions = writable<ActionId[]>([]);
+// Attitude level: 0=not working/slack, 1=slack, 2=normal(default), 3=hard, 4=super hard
+export const attitudeLevel = writable<number>(1); // default: normal
 
 // Current event being shown to player
 export const currentEvent = writable<GameEvent | null>(null);
@@ -40,9 +42,12 @@ export const effectiveAp = derived(gameState, ($gs) => {
   return getEffectiveAp($gs);
 });
 
+const ATTITUDE_ACTION_IDS = ['workNone', 'workSlack', 'workHard', 'workSuperHard', 'studySlack', 'studyNormal', 'studyHard'];
+
 export const availableActions = derived(gameState, ($gs) => {
   if (!$gs) return [];
-  return getAvailableActions($gs);
+  // Filter out attitude actions — handled by toggle bar
+  return getAvailableActions($gs).filter(a => !ATTITUDE_ACTION_IDS.includes(a.id));
 });
 
 export const remainingAp = derived([effectiveAp, selectedActions, availableActions], ([$eap, $sa, $avail]) => {
@@ -143,9 +148,19 @@ export function endTurn() {
   const gs = get(gameState);
   if (!gs) return;
 
-  const actions = get(selectedActions);
+  const actions = [...get(selectedActions)];
+  // Inject attitude action based on toggle
+  const att = get(attitudeLevel);
+  const isAcad = gs.phase === 'academic';
+  const attitudeActions: Record<number, ActionId> = isAcad
+    ? { 0: 'studySlack', 1: 'studyNormal', 2: 'studyHard' }
+    : { 0: 'workNone', 1: 'workSlack', 2: 'workHard', 3: 'workSuperHard' };
+  const attAction = attitudeActions[att];
+  if (attAction && !actions.includes(attAction)) {
+    actions.push(attAction);
+  }
+
   const stateBefore = gs;
-  // Work mode is inferred from AP usage inside processTurn
   const newState = processTurn(gs, 'normal', actions);
   const mode = get(inferredMode);
   gameState.set(newState);
@@ -158,6 +173,7 @@ export function endTurn() {
   selectedWorkMode.set(null);
   selectedActions.set([]);
   autoPlayReasoning.set([]);
+  attitudeLevel.set(1); // reset to normal
 
   // Check for pending random events
   const pendingIds = (newState.flags.pendingRandomEvents as string[]) || [];
