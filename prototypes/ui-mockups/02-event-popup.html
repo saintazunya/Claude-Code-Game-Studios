@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>绿卡之路 - 随机事件</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
+    background: #0a0e17;
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .phone-frame {
+    width: 390px;
+    height: 844px;
+    background: #111827;
+    border-radius: 40px;
+    border: 3px solid #2a2a3a;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 60px rgba(0,0,0,0.5);
+  }
+  .game-bg {
+    position: absolute;
+    inset: 0;
+    background: #111827;
+    opacity: 0.3;
+    filter: blur(2px);
+  }
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .event-card {
+    background: #1a2234;
+    border-radius: 20px;
+    border: 1px solid #2a3a5a;
+    width: 100%;
+    max-height: 90%;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    animation: slideUp 0.3s ease-out;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .event-header {
+    padding: 20px 20px 0;
+    text-align: center;
+  }
+  .event-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #dc2626, #991b1b);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 12px;
+    box-shadow: 0 4px 20px rgba(220,38,38,0.3);
+  }
+  .event-type {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #ef4444;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .event-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .event-date {
+    font-size: 12px;
+    color: #666;
+  }
+  .event-body {
+    padding: 20px;
+  }
+  .event-narrative {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #bbb;
+    margin-bottom: 16px;
+    padding: 14px;
+    background: #111827;
+    border-radius: 12px;
+    border-left: 3px solid #ef4444;
+  }
+  .event-effects {
+    margin-bottom: 16px;
+  }
+  .effect-title {
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: #888;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .effect-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid #1e2a3a;
+    font-size: 13px;
+  }
+  .effect-item:last-child { border: none; }
+  .effect-neg { color: #ef4444; }
+  .effect-warn { color: #f59e0b; }
+  .effect-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .effect-dot.red { background: #ef4444; }
+  .effect-dot.yellow { background: #f59e0b; }
+  .choices {
+    padding: 0 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .choice-btn {
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px solid #2a3a5a;
+    background: #1e2a3a;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+  .choice-btn:hover {
+    background: #253550;
+    border-color: #3a5a8a;
+  }
+  .choice-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .choice-desc {
+    font-size: 12px;
+    color: #888;
+    line-height: 1.4;
+  }
+  .choice-btn.risky:hover {
+    border-color: #7c3aed;
+    background: #2a1e4a;
+  }
+  .choice-btn.safe:hover {
+    border-color: #2563eb;
+    background: #1a2a4a;
+  }
+  .choice-tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .choice-tag.risky { background: #7c3aed33; color: #a78bfa; }
+  .choice-tag.safe { background: #2563eb33; color: #60a5fa; }
+  .choice-tag.desperate { background: #dc262633; color: #f87171; }
+  .timer-strip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+    background: #111827;
+    border-top: 1px solid #1e2a3a;
+    font-size: 12px;
+    color: #f59e0b;
+  }
+</style>
+</head>
+<body>
+<div class="phone-frame">
+  <div class="game-bg"></div>
+  <div class="overlay">
+    <div class="event-card">
+      <div class="event-header">
+        <div class="event-icon">💥</div>
+        <div class="event-type">突发事件</div>
+        <div class="event-title">公司大裁员</div>
+        <div class="event-date">2030年11月 — 28岁</div>
+      </div>
+
+      <div class="event-body">
+        <div class="event-narrative">
+          你的公司刚刚宣布裁员15%。作为 H-1B 持有者，你只有
+          <strong style="color:#ef4444;">60天</strong>找到愿意接手你签证的新雇主
+          — 否则必须离开美国。你的经理说你所在的组"正在被评估"。
+        </div>
+
+        <div class="event-effects">
+          <div class="effect-title">即时影响</div>
+          <div class="effect-item">
+            <div class="effect-dot red"></div>
+            <span class="effect-neg">60天倒计时开始</span>
+          </div>
+          <div class="effect-item">
+            <div class="effect-dot red"></div>
+            <span class="effect-neg">精神状态 -25</span>
+          </div>
+          <div class="effect-item">
+            <div class="effect-dot yellow"></div>
+            <span class="effect-warn">大盘下跌 8%（经济衰退）</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="choices">
+        <div class="choice-btn safe">
+          <div class="choice-tag safe">稳妥</div>
+          <div class="choice-name">海投求职</div>
+          <div class="choice-desc">接下来2个月所有行动点投入找工作。大概率能找到，但可能降薪或去不理想的城市。</div>
+        </div>
+        <div class="choice-btn risky">
+          <div class="choice-tag risky">冒险</div>
+          <div class="choice-name">精准投递，目标大厂</div>
+          <div class="choice-desc">只投头部公司。成功的话薪资更高，但有40%概率来不及在60天内拿到offer。</div>
+        </div>
+        <div class="choice-btn" style="border-color: #dc262644;">
+          <div class="choice-tag desperate">孤注一掷</div>
+          <div class="choice-name">挂靠学校续身份 (Day-1 CPT)</div>
+          <div class="choice-desc">转回F-1学生签证争取时间。每年学费$15,000，但能保住留美身份，从长计议。</div>
+        </div>
+      </div>
+
+      <div class="timer-strip">
+        ⏰ 必须做出选择 — 此事件无法跳过
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

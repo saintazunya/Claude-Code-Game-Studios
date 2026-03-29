@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>绿卡之路 - 结算画面</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
+    background: #0a0e17;
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .phone-frame {
+    width: 390px;
+    height: 844px;
+    background: #111827;
+    border-radius: 40px;
+    border: 3px solid #2a2a3a;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 60px rgba(0,0,0,0.5);
+  }
+  .status-bar {
+    height: 50px;
+    background: #0d1117;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    font-size: 12px;
+    color: #888;
+  }
+  .notch {
+    width: 120px;
+    height: 5px;
+    background: #333;
+    border-radius: 3px;
+  }
+  .scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 20px 20px;
+  }
+  .victory-banner {
+    text-align: center;
+    padding: 30px 0 20px;
+  }
+  .victory-icon {
+    font-size: 64px;
+    margin-bottom: 12px;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+  }
+  .victory-title {
+    font-size: 28px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #34d399, #60a5fa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 4px;
+  }
+  .victory-sub {
+    font-size: 14px;
+    color: #888;
+  }
+  .score-section {
+    background: linear-gradient(135deg, #1a2a3a, #1a2234);
+    border: 1px solid #2a4060;
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+  .score-label {
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    color: #888;
+    margin-bottom: 6px;
+  }
+  .score-value {
+    font-size: 42px;
+    font-weight: 900;
+    color: #34d399;
+  }
+  .score-breakdown {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #888;
+  }
+  .score-part {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .score-part-val {
+    color: #bbb;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .timeline-section {
+    margin-bottom: 16px;
+  }
+  .section-header {
+    font-size: 13px;
+    font-weight: 700;
+    color: #9ca3af;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+  .milestone {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 4px;
+    position: relative;
+  }
+  .milestone-line {
+    width: 2px;
+    background: #2a3a5a;
+    position: absolute;
+    left: 15px;
+    top: 24px;
+    bottom: -4px;
+  }
+  .milestone:last-child .milestone-line { display: none; }
+  .milestone-dot-wrap {
+    width: 32px;
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    padding-top: 2px;
+    z-index: 1;
+  }
+  .milestone-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid;
+  }
+  .milestone-dot.green { border-color: #34d399; background: #34d39933; }
+  .milestone-dot.blue { border-color: #60a5fa; background: #60a5fa33; }
+  .milestone-dot.yellow { border-color: #f59e0b; background: #f59e0b33; }
+  .milestone-dot.red { border-color: #ef4444; background: #ef444433; }
+  .milestone-dot.purple { border-color: #a78bfa; background: #a78bfa33; }
+  .milestone-content {
+    flex: 1;
+    padding-bottom: 16px;
+  }
+  .milestone-age {
+    font-size: 11px;
+    color: #666;
+    font-weight: 600;
+  }
+  .milestone-text {
+    font-size: 13px;
+    color: #ddd;
+    line-height: 1.4;
+  }
+  .stats-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .summary-card {
+    background: #1a2234;
+    border-radius: 12px;
+    padding: 14px;
+    border: 1px solid #2a3050;
+    text-align: center;
+  }
+  .summary-label {
+    font-size: 10px;
+    letter-spacing: 0.8px;
+    color: #888;
+    margin-bottom: 4px;
+  }
+  .summary-value {
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .summary-value.green { color: #34d399; }
+  .summary-value.blue { color: #60a5fa; }
+  .summary-value.yellow { color: #f59e0b; }
+  .summary-value.purple { color: #a78bfa; }
+  .chart-placeholder {
+    background: #1a2234;
+    border: 1px solid #2a3050;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .chart-title {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+  .chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 80px;
+  }
+  .chart-bar {
+    flex: 1;
+    border-radius: 2px 2px 0 0;
+    min-height: 4px;
+  }
+  .chart-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #555;
+    margin-top: 6px;
+  }
+  .bottom-buttons {
+    padding: 16px 20px 30px;
+    display: flex;
+    gap: 10px;
+  }
+  .btn {
+    flex: 1;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+  }
+  .btn-secondary {
+    background: #1a2234;
+    color: #60a5fa;
+    border: 1px solid #2a3a5a;
+  }
+</style>
+</head>
+<body>
+<div class="phone-frame">
+  <div class="status-bar">
+    <span>9:41</span>
+    <div class="notch"></div>
+    <span>100%</span>
+  </div>
+
+  <div class="scroll-area">
+    <div class="victory-banner">
+      <div class="victory-icon">🏆</div>
+      <div class="victory-title">美国梦达成</div>
+      <div class="victory-sub">41岁拿到绿卡 — 比截止期限早了18年</div>
+    </div>
+
+    <div class="score-section">
+      <div class="score-label">最终得分</div>
+      <div class="score-value">2,847,500</div>
+      <div class="score-breakdown">
+        <div class="score-part">
+          <div class="score-part-val">$1.2M</div>
+          <div>净资产</div>
+        </div>
+        <div class="score-part">
+          <div class="score-part-val">x1.5</div>
+          <div>绿卡加成</div>
+        </div>
+        <div class="score-part">
+          <div class="score-part-val">+18年</div>
+          <div>提前奖励</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-summary">
+      <div class="summary-card">
+        <div class="summary-label">职业巅峰</div>
+        <div class="summary-value blue">Staff SDE (L6)</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">最终净资产</div>
+        <div class="summary-value green">$1,247,000</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">跳槽次数</div>
+        <div class="summary-value yellow">4</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">经历危机</div>
+        <div class="summary-value purple">7</div>
+      </div>
+    </div>
+
+    <div class="chart-placeholder">
+      <div class="chart-title">净资产变化曲线</div>
+      <div class="chart-bars">
+        <div class="chart-bar" style="height:2%; background:#1e3a5f;"></div>
+        <div class="chart-bar" style="height:3%; background:#1e3a5f;"></div>
+        <div class="chart-bar" style="height:2%; background:#1e3a5f;"></div>
+        <div class="chart-bar" style="height:5%; background:#1e3a5f;"></div>
+        <div class="chart-bar" style="height:4%; background:#1e3a5f;"></div>
+        <div class="chart-bar" style="height:8%; background:#1e4a5f;"></div>
+        <div class="chart-bar" style="height:12%; background:#1e4a5f;"></div>
+        <div class="chart-bar" style="height:10%; background:#ef4444;"></div>
+        <div class="chart-bar" style="height:15%; background:#1e4a5f;"></div>
+        <div class="chart-bar" style="height:20%; background:#1e5a5f;"></div>
+        <div class="chart-bar" style="height:18%; background:#1e5a5f;"></div>
+        <div class="chart-bar" style="height:25%; background:#1e5a5f;"></div>
+        <div class="chart-bar" style="height:30%; background:#1e6a5f;"></div>
+        <div class="chart-bar" style="height:28%; background:#ef4444;"></div>
+        <div class="chart-bar" style="height:35%; background:#1e6a5f;"></div>
+        <div class="chart-bar" style="height:42%; background:#1e7a5f;"></div>
+        <div class="chart-bar" style="height:50%; background:#1e7a5f;"></div>
+        <div class="chart-bar" style="height:55%; background:#1e8a5f;"></div>
+        <div class="chart-bar" style="height:60%; background:#34d399;"></div>
+        <div class="chart-bar" style="height:58%; background:#34d399;"></div>
+        <div class="chart-bar" style="height:65%; background:#34d399;"></div>
+        <div class="chart-bar" style="height:70%; background:#34d399;"></div>
+        <div class="chart-bar" style="height:75%; background:#34d399;"></div>
+        <div class="chart-bar" style="height:82%; background:#34d399;"></div>
+        <div class="chart-bar" style="height:88%; background:#34d399;"></div>
+        <div class="chart-bar" style="height:85%; background:#34d399;"></div>
+        <div class="chart-bar" style="height:90%; background:#34d399;"></div>
+        <div class="chart-bar" style="height:95%; background:#34d399;"></div>
+        <div class="chart-bar" style="height:100%; background:#34d399;"></div>
+      </div>
+      <div class="chart-labels">
+        <span>22岁</span>
+        <span>30岁</span>
+        <span>40岁</span>
+        <span>50岁</span>
+        <span>59岁</span>
+      </div>
+    </div>
+
+    <div class="timeline-section">
+      <div class="section-header">人生轨迹</div>
+
+      <div class="milestone">
+        <div class="milestone-dot-wrap"><div class="milestone-dot blue"></div></div>
+        <div class="milestone-line"></div>
+        <div class="milestone-content">
+          <div class="milestone-age">22岁</div>
+          <div class="milestone-text">清华大学CS本科毕业，赴美在CMU读硕士。</div>
+        </div>
+      </div>
+
+      <div class="milestone">
+        <div class="milestone-dot-wrap"><div class="milestone-dot blue"></div></div>
+        <div class="milestone-line"></div>
+        <div class="milestone-content">
+          <div class="milestone-age">24岁</div>
+          <div class="milestone-text">硕士毕业，入职Amazon担任SDE L4，坐标西雅图。OPT生效。</div>
+        </div>
+      </div>
+
+      <div class="milestone">
+        <div class="milestone-dot-wrap"><div class="milestone-dot red"></div></div>
+        <div class="milestone-line"></div>
+        <div class="milestone-content">
+          <div class="milestone-age">25岁</div>
+          <div class="milestone-text">H-1B抽签 — 没抽中。靠OPT STEM延期续命，明年再战。</div>
+        </div>
+      </div>
+
+      <div class="milestone">
+        <div class="milestone-dot-wrap"><div class="milestone-dot green"></div></div>
+        <div class="milestone-line"></div>
+        <div class="milestone-content">
+          <div class="milestone-age">26岁</div>
+          <div class="milestone-text">H-1B第二次抽中了！签证有效期3年，终于喘口气。</div>
+        </div>
+      </div>
+
+      <div class="milestone">
+        <div class="milestone-dot-wrap"><div class="milestone-dot yellow"></div></div>
+        <div class="milestone-line"></div>
+        <div class="milestone-content">
+          <div class="milestone-age">28岁</div>
+          <div class="milestone-text">公司大裁员，惊险存活。跳槽去Google，升到L5。TC：$280K。</div>
+        </div>
+      </div>
+
+      <div class="milestone">
+        <div class="milestone-dot-wrap"><div class="milestone-dot red"></div></div>
+        <div class="milestone-line"></div>
+        <div class="milestone-content">
+          <div class="milestone-age">30岁</div>
+          <div class="milestone-text">严重Burnout，被迫休息一个月。精神状态跌到谷底。</div>
+        </div>
+      </div>
+
+      <div class="milestone">
+        <div class="milestone-dot-wrap"><div class="milestone-dot purple"></div></div>
+        <div class="milestone-line"></div>
+        <div class="milestone-content">
+          <div class="milestone-age">32岁</div>
+          <div class="milestone-text">通过Google提交EB-2绿卡申请。优先日期：2035年3月。漫长的等待开始。</div>
+        </div>
+      </div>
+
+      <div class="milestone">
+        <div class="milestone-dot-wrap"><div class="milestone-dot blue"></div></div>
+        <div class="milestone-line"></div>
+        <div class="milestone-content">
+          <div class="milestone-age">35岁</div>
+          <div class="milestone-text">升到Staff (L6)。湾区买房 — $1.8M。跳槽去Meta。</div>
+        </div>
+      </div>
+
+      <div class="milestone">
+        <div class="milestone-dot-wrap"><div class="milestone-dot green"></div></div>
+        <div class="milestone-line"></div>
+        <div class="milestone-content">
+          <div class="milestone-age">41岁</div>
+          <div class="milestone-text">🎉 绿卡批准！等了整整9年。终于自由了。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-buttons">
+    <button class="btn btn-secondary">分享 📤</button>
+    <button class="btn btn-primary">再来一局</button>
+  </div>
+</div>
+</body>
+</html>

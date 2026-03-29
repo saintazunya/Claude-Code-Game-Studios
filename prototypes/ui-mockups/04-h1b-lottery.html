@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>绿卡之路 - H1B抽签</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
+    background: #0a0e17;
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .phone-frame {
+    width: 390px;
+    height: 844px;
+    background: #111827;
+    border-radius: 40px;
+    border: 3px solid #2a2a3a;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 60px rgba(0,0,0,0.5);
+    position: relative;
+  }
+  .lottery-container {
+    text-align: center;
+    padding: 30px;
+    width: 100%;
+  }
+  .lottery-year {
+    font-size: 13px;
+    letter-spacing: 2px;
+    color: #666;
+    margin-bottom: 8px;
+  }
+  .lottery-title {
+    font-size: 28px;
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+  .lottery-sub {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 40px;
+  }
+  .lottery-drum {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 3px solid #2a3a5a;
+    margin: 0 auto 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: radial-gradient(circle, #1a2a3a, #111827);
+  }
+  .lottery-drum::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 2px dashed #2a3a5a;
+    animation: spin 10s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .lottery-percent {
+    font-size: 48px;
+    font-weight: 900;
+    color: #f59e0b;
+  }
+  .lottery-percent-label {
+    font-size: 14px;
+    color: #888;
+    margin-top: -4px;
+  }
+  .lottery-stats {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 40px;
+  }
+  .lottery-stat { text-align: center; }
+  .lottery-stat-val {
+    font-size: 20px;
+    font-weight: 700;
+    color: #bbb;
+  }
+  .lottery-stat-label {
+    font-size: 11px;
+    color: #666;
+    margin-top: 2px;
+  }
+  .draw-btn {
+    width: 80%;
+    padding: 18px;
+    border-radius: 16px;
+    border: none;
+    font-size: 18px;
+    font-weight: 800;
+    cursor: pointer;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #000;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 30px rgba(245,158,11,0.3);
+    transition: all 0.2s;
+    margin-bottom: 16px;
+  }
+  .draw-btn:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 40px rgba(245,158,11,0.5);
+  }
+  .skip-note {
+    font-size: 12px;
+    color: #555;
+  }
+  .result-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s;
+  }
+  .result-overlay.fail { background: radial-gradient(circle, #1a0a0a, #0a0e17); }
+  .result-overlay.success { background: radial-gradient(circle, #0a1a0a, #0a0e17); }
+  .result-icon { font-size: 80px; margin-bottom: 20px; }
+  .result-title {
+    font-size: 32px;
+    font-weight: 900;
+    margin-bottom: 8px;
+  }
+  .result-title.fail { color: #ef4444; }
+  .result-title.success { color: #34d399; }
+  .result-desc {
+    font-size: 14px;
+    color: #888;
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    max-width: 280px;
+  }
+  .result-effects {
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 30px;
+  }
+  .result-effect {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #1e2a3a;
+    font-size: 13px;
+  }
+  .result-effect:last-child { border: none; }
+  .result-continue {
+    padding: 16px 40px;
+    border-radius: 14px;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    color: #fff;
+  }
+  .result-continue.fail { background: #7f1d1d; }
+  .result-continue.success { background: #14532d; }
+  .phone-frame.showing-fail .lottery-container { opacity: 0.1; }
+  .phone-frame.showing-fail .result-overlay.fail { opacity: 1; pointer-events: auto; }
+  .phone-frame.showing-success .lottery-container { opacity: 0.1; }
+  .phone-frame.showing-success .result-overlay.success { opacity: 1; pointer-events: auto; }
+</style>
+</head>
+<body>
+<div class="phone-frame" id="frame">
+  <div class="lottery-container">
+    <div class="lottery-year">2029年4月</div>
+    <div class="lottery-title">H-1B 抽签</div>
+    <div class="lottery-sub">命运交给了移民局...</div>
+
+    <div class="lottery-drum">
+      <div>
+        <div class="lottery-percent">27%</div>
+        <div class="lottery-percent-label">中签概率</div>
+      </div>
+    </div>
+
+    <div class="lottery-stats">
+      <div class="lottery-stat">
+        <div class="lottery-stat-val">780,884</div>
+        <div class="lottery-stat-label">申请人数</div>
+      </div>
+      <div class="lottery-stat">
+        <div class="lottery-stat-val">85,000</div>
+        <div class="lottery-stat-label">名额</div>
+      </div>
+      <div class="lottery-stat">
+        <div class="lottery-stat-val">第1次</div>
+        <div class="lottery-stat-label">你的第几抽</div>
+      </div>
+    </div>
+
+    <button class="draw-btn" onclick="drawLottery()">开始抽签</button>
+    <div class="skip-note">这是你的第一次抽签。OPT还剩8个月到期。</div>
+  </div>
+
+  <div class="result-overlay fail">
+    <div class="result-icon">😰</div>
+    <div class="result-title fail">没抽中</div>
+    <div class="result-desc">
+      你的H-1B申请没有在今年的抽签中被选中。
+      好在你还有OPT STEM延期 — 但时间不多了。
+      明年4月还能再抽一次。
+    </div>
+    <div class="result-effects">
+      <div class="result-effect">
+        <span>精神状态</span>
+        <span style="color:#ef4444;">-30</span>
+      </div>
+      <div class="result-effect">
+        <span>OPT剩余</span>
+        <span style="color:#f59e0b;">8个月</span>
+      </div>
+      <div class="result-effect">
+        <span>下次抽签</span>
+        <span style="color:#60a5fa;">2030年4月</span>
+      </div>
+      <div class="result-effect">
+        <span>备选方案</span>
+        <span style="color:#a78bfa;">3个可用</span>
+      </div>
+    </div>
+    <button class="result-continue fail" onclick="reset()">继续...</button>
+  </div>
+
+  <div class="result-overlay success">
+    <div class="result-icon">🎉</div>
+    <div class="result-title success">抽中了！</div>
+    <div class="result-desc">
+      恭喜！你的H-1B申请被选中了！
+      你的雇主将提交正式申请材料。
+      H-1B身份从10月1日生效。
+    </div>
+    <div class="result-effects">
+      <div class="result-effect">
+        <span>精神状态</span>
+        <span style="color:#34d399;">+40</span>
+      </div>
+      <div class="result-effect">
+        <span>新身份</span>
+        <span style="color:#34d399;">H-1B（审批中）</span>
+      </div>
+      <div class="result-effect">
+        <span>有效期至</span>
+        <span style="color:#60a5fa;">2032年10月（3年）</span>
+      </div>
+      <div class="result-effect">
+        <span>绿卡</span>
+        <span style="color:#a78bfa;">可以开始申请EB-2/EB-3</span>
+      </div>
+    </div>
+    <button class="result-continue success" onclick="reset()">继续...</button>
+  </div>
+</div>
+
+<script>
+function drawLottery() {
+  const frame = document.getElementById('frame');
+  const won = Math.random() < 0.27;
+  frame.className = 'phone-frame ' + (won ? 'showing-success' : 'showing-fail');
+}
+function reset() {
+  document.getElementById('frame').className = 'phone-frame';
+}
+</script>
+</body>
+</html>

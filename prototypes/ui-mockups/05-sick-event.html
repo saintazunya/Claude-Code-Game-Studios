@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>绿卡之路 - 生病事件</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
+    background: #0a0e17;
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .phone-frame {
+    width: 390px;
+    height: 844px;
+    background: #111827;
+    border-radius: 40px;
+    border: 3px solid #2a2a3a;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 0 60px rgba(0,0,0,0.5);
+  }
+  .game-bg {
+    position: absolute;
+    inset: 0;
+    background: #111827;
+    opacity: 0.3;
+    filter: blur(2px);
+  }
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .event-card {
+    background: #1a2234;
+    border-radius: 20px;
+    border: 1px solid #2a3a5a;
+    width: 100%;
+    max-height: 90%;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    animation: slideUp 0.3s ease-out;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(30px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+  .event-header {
+    padding: 20px 20px 0;
+    text-align: center;
+  }
+  .event-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 12px;
+    box-shadow: 0 4px 20px rgba(245,158,11,0.3);
+  }
+  .event-icon.health { background: linear-gradient(135deg, #b45309, #78350f); }
+  .event-type {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .event-type.health { color: #f59e0b; }
+  .event-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .event-date {
+    font-size: 12px;
+    color: #666;
+  }
+  .event-body { padding: 20px; }
+  .event-narrative {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #bbb;
+    margin-bottom: 16px;
+    padding: 14px;
+    background: #111827;
+    border-radius: 12px;
+    border-left: 3px solid #f59e0b;
+  }
+  .cause-tag {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    background: #5f1e1e44;
+    color: #f87171;
+    margin-bottom: 12px;
+  }
+  .effect-title {
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: #888;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+  .effect-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid #1e2a3a;
+    font-size: 13px;
+  }
+  .effect-item:last-child { border: none; }
+  .effect-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .effect-dot.red { background: #ef4444; }
+  .effect-dot.yellow { background: #f59e0b; }
+  .effect-dot.blue { background: #60a5fa; }
+
+  .severity-meter {
+    margin: 16px 0;
+    padding: 14px;
+    background: #111827;
+    border-radius: 12px;
+  }
+  .severity-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 6px;
+  }
+  .severity-bar {
+    height: 10px;
+    background: #1a2234;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+  }
+  .severity-fill {
+    height: 100%;
+    border-radius: 5px;
+  }
+  .severity-ticks {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 9px;
+    color: #555;
+  }
+
+  .choices {
+    padding: 0 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .choice-btn {
+    padding: 16px;
+    border-radius: 14px;
+    border: 1px solid #2a3a5a;
+    background: #1e2a3a;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+  .choice-btn:hover {
+    background: #253550;
+    border-color: #3a5a8a;
+  }
+  .choice-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .choice-desc {
+    font-size: 12px;
+    color: #888;
+    line-height: 1.4;
+  }
+  .choice-tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .choice-tag.rest { background: #14532d44; color: #34d399; }
+  .choice-tag.push { background: #7c3aed33; color: #a78bfa; }
+  .choice-tag.money { background: #f59e0b33; color: #fbbf24; }
+
+  .grind-callout {
+    margin: 0 20px 16px;
+    padding: 10px 12px;
+    background: #2a1515;
+    border: 1px dashed #5f2020;
+    border-radius: 8px;
+    font-size: 11px;
+    color: #f87171;
+    text-align: center;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+<div class="phone-frame">
+  <div class="game-bg"></div>
+  <div class="overlay">
+    <div class="event-card">
+      <div class="event-header">
+        <div class="event-icon health">🤒</div>
+        <div class="event-type health">健康事件</div>
+        <div class="event-title">身体撑不住了</div>
+        <div class="event-date">2029年6月 — 27岁</div>
+      </div>
+
+      <div class="event-body">
+        <div class="cause-tag">🔥 触发原因: 连续3个季度开启卷王模式</div>
+
+        <div class="event-narrative">
+          连续几个月的高强度工作终于把你击垮了。持续的睡眠不足、久坐不动和精神高压
+          导致你的免疫系统崩溃 — 严重感冒加上急性胃炎，医生说你必须休息。
+          没有保险的话，急诊费用是一笔不小的开支。
+        </div>
+
+        <div class="severity-meter">
+          <div class="severity-label">
+            <span>病情严重程度</span>
+            <span style="color:#f59e0b;">中度</span>
+          </div>
+          <div class="severity-bar">
+            <div class="severity-fill" style="width: 60%; background: linear-gradient(90deg, #34d399, #f59e0b, #ef4444);"></div>
+          </div>
+          <div class="severity-ticks">
+            <span>轻微</span>
+            <span>中度</span>
+            <span>重度</span>
+            <span>住院</span>
+          </div>
+        </div>
+
+        <div class="effect-title">即时影响</div>
+        <div class="effect-item">
+          <div class="effect-dot red"></div>
+          <span style="color:#ef4444;">下个季度行动点 -5（只剩5点可用）</span>
+        </div>
+        <div class="effect-item">
+          <div class="effect-dot red"></div>
+          <span style="color:#ef4444;">医疗费 -$3,200（有保险后自付部分）</span>
+        </div>
+        <div class="effect-item">
+          <div class="effect-dot yellow"></div>
+          <span style="color:#f59e0b;">绩效动量暂停（病假不算工作产出）</span>
+        </div>
+        <div class="effect-item">
+          <div class="effect-dot blue"></div>
+          <span style="color:#60a5fa;">卷王模式强制关闭 2 个季度</span>
+        </div>
+      </div>
+
+      <div class="grind-callout">
+        💡 提示：健康低于 30% 时，每月生病概率超过 50%。<br>
+        卷王模式是一把双刃剑 — 用得好抢时间，用多了毁身体。
+      </div>
+
+      <div class="choices">
+        <div class="choice-btn">
+          <div class="choice-tag rest">恢复优先</div>
+          <div class="choice-name">老老实实养病</div>
+          <div class="choice-desc">下个季度全部行动点用于休息。健康+25，精神+15。但绩效和签证进度完全停滞。</div>
+        </div>
+        <div class="choice-btn">
+          <div class="choice-tag push">硬扛</div>
+          <div class="choice-name">吃药顶着继续干</div>
+          <div class="choice-desc">只损失1个行动点。但健康只恢复+5，且下个月生病概率居高不下。恶性循环警告。</div>
+        </div>
+        <div class="choice-btn">
+          <div class="choice-tag money">花钱买健康</div>
+          <div class="choice-name">看专科 + 请私教调理</div>
+          <div class="choice-desc">额外花费$2,000，但健康+20且不损失行动点。有钱真的可以为所欲为。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
