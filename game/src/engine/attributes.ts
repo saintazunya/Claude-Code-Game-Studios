@@ -121,5 +121,5 @@ export function computeSicknessChance(state: GameState): number {
 
 export function computeBurnoutChance(mental: number): number {
   if (mental >= 30) return 0;
-  return (30 - mental) * 0.01;
+  return (30 - mental) * 0.005; // halved: was 0.01
 }

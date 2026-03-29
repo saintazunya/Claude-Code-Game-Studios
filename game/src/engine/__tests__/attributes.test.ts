@@ -137,9 +137,9 @@ describe('Attribute System', () => {
       expect(computeBurnoutChance(70)).toBe(0);
     });
 
-    it('scales below 30', () => {
-      expect(computeBurnoutChance(20)).toBeCloseTo(0.10, 2);
-      expect(computeBurnoutChance(0)).toBeCloseTo(0.30, 2);
+    it('scales below 30 (halved rate)', () => {
+      expect(computeBurnoutChance(20)).toBeCloseTo(0.05, 2);
+      expect(computeBurnoutChance(0)).toBeCloseTo(0.15, 2);
     });
   });
 

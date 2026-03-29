@@ -377,11 +377,11 @@ export function processTurn(
     if (severity < (isUpgraded ? 0.30 : 0.50)) {
       apPenalty = 2; medicalCost = 1000 + Math.random() * 2000; grindLock = 1; mentalHit = -5;
     } else if (severity < (isUpgraded ? 0.70 : 0.85)) {
-      apPenalty = 5; medicalCost = 3000 + Math.random() * 5000; grindLock = 2; mentalHit = -10;
+      apPenalty = 5; medicalCost = 3000 + Math.random() * 5000; grindLock = 1; mentalHit = -10;
     } else if (severity < (isUpgraded ? 0.90 : 0.97)) {
-      apPenalty = 8; medicalCost = 8000 + Math.random() * 12000; grindLock = 3; mentalHit = -15;
+      apPenalty = 8; medicalCost = 8000 + Math.random() * 12000; grindLock = 1; mentalHit = -15;
     } else {
-      apPenalty = 10; medicalCost = 15000 + Math.random() * 15000; grindLock = 4; mentalHit = -20;
+      apPenalty = 10; medicalCost = 15000 + Math.random() * 15000; grindLock = 1; mentalHit = -20;
       s.attributes.health = 40; // hospitalized reset
     }
 
@@ -400,7 +400,7 @@ export function processTurn(
       s.flags.burnoutActive = true;
       s.attributes.mental = 30;
       s.attributes = applyDeltas(s.attributes, { performance: -10 });
-      s.grindLockQuarters = Math.max(s.grindLockQuarters, 2);
+      s.grindLockQuarters = Math.max(s.grindLockQuarters, 1);
       turnEvents.push({ id: 'burnout', choiceId: '' });
     }
   } else {
