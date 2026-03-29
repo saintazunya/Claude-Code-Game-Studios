@@ -483,8 +483,9 @@ export function processTurn(
       }
     }
 
-    // Layoff check
-    if (!s.career.onPip) {
+    // Layoff: warning system (event sets flag, next quarter resolves)
+    if (s.flags.layoffWarningActive && !s.career.onPip) {
+      // Resolve layoff from last quarter's warning
       const layoffCheck = checkLayoff(s);
       if (layoffCheck.laidOff) {
         s.career.employed = 'unemployed';
@@ -492,6 +493,25 @@ export function processTurn(
         s.flags.justLaidOff = true;
         s.attributes = applyDeltas(s.attributes, { mental: -25 });
         turnEvents.push({ id: 'laid_off', choiceId: '' });
+      } else {
+        // Survived! Relief.
+        s.attributes = applyDeltas(s.attributes, { mental: 3 });
+        turnEvents.push({ id: 'layoff_survived', choiceId: '' });
+      }
+      s.flags.layoffWarningActive = false;
+      s.flags.layoffPrepared = false;
+    } else if (!s.flags.layoffWarningActive && !s.career.onPip) {
+      // Normal background layoff check (lower probability, no warning)
+      // Only during recession for surprise layoffs
+      if (s.economicPhase === 'recession') {
+        const layoffCheck = checkLayoff(s);
+        if (layoffCheck.laidOff) {
+          s.career.employed = 'unemployed';
+          s.economy.cash += layoffCheck.severance;
+          s.flags.justLaidOff = true;
+          s.attributes = applyDeltas(s.attributes, { mental: -25 });
+          turnEvents.push({ id: 'laid_off', choiceId: '' });
+        }
       }
     }
 

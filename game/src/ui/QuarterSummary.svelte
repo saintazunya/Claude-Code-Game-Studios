@@ -49,7 +49,8 @@
     i485_rfe: { icon: '📋', text: 'I-485被要求补件(RFE)', color: 'text-amber-400', detail: '需要额外材料，处理时间延长。' },
     visa_expired_deported: { icon: '✈️', text: '签证过期，被遣返', color: 'text-red-400' },
     // Random events from event pool
-    layoff_wave: { icon: '💥', text: '公司大裁员', color: 'text-red-400', detail: '你的公司宣布裁员，签证持有者面临双重危机。' },
+    layoff_wave: { icon: '⚠️', text: '裁员预警', color: 'text-amber-400', detail: '公司宣布下季度裁员15%。你的名字可能在名单上，提前做好准备。' },
+    layoff_survived: { icon: '😮‍💨', text: '裁员没裁到你！', color: 'text-green-400', detail: '虚惊一场，你的岗位保住了。精神+3。' },
     market_crash: { icon: '📉', text: '股市暴跌', color: 'text-red-400', detail: '市场突然暴跌，投资组合缩水。' },
     pip_warning: { icon: '⚠️', text: '收到PIP警告', color: 'text-red-400', detail: '被放入绩效改进计划，2个季度内需要证明自己。' },
     recruiter_call: { icon: '📞', text: '猎头来电', color: 'text-blue-400', detail: '有人看上了你的简历，想挖你跳槽。' },

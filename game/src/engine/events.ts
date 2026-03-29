@@ -18,17 +18,17 @@ function weightedPick<T>(options: { value: T; weight: number }[]): T {
 export const EVENT_POOL: GameEvent[] = [
   // CRISIS
   {
-    id: 'layoff_wave', type: 'crisis', nameZh: '公司大裁员', phase: 'career',
-    descZh: '你的公司宣布裁员15%。作为签证持有者，你面临着失去工作和身份的双重危机。',
+    id: 'layoff_wave', type: 'crisis', nameZh: '裁员预警', phase: 'career',
+    descZh: '公司宣布将在下个季度裁员15%。你的名字可能在名单上。利用这个季度做好准备。',
     weight: 1.0,
     weightModifiers: [{ condition: (s) => s.economicPhase === 'recession', multiplier: 3.0 }],
     cooldownQuarters: 6, oneTime: false,
-    precondition: (s) => s.career.employed === 'employed',
+    precondition: (s) => s.career.employed === 'employed' && !s.flags.layoffWarningActive,
     immediateEffects: { mental: -15 },
     choices: [
-      { id: 'panic', textKey: '', nameZh: '海投求职', descZh: '花2个季度全力找工作，可能降薪。', tag: 'stable', effects: { mental: -5 }, flags: { urgentJobSearch: true } },
-      { id: 'selective', textKey: '', nameZh: '精准投递大厂', descZh: '只投头部公司，薪资更高但40%概率来不及。', tag: 'risky', effects: {}, probabilityRoll: 'jobOffer' },
-      { id: 'cpt', textKey: '', nameZh: '挂靠学校 (Day-1 CPT)', descZh: '花$15,000/年学费，转F1保身份。', tag: 'desperate', effects: { mental: -10 }, flags: { cptFallback: true } },
+      { id: 'prepare', textKey: '', nameZh: '赶紧准备后路', descZh: '下个季度优先找工作。如果被裁，准备越充分越好。', tag: 'stable', effects: { mental: -3 }, flags: { layoffWarningActive: true, layoffPrepared: true } },
+      { id: 'grind', textKey: '', nameZh: '拼命表现争取留下', descZh: '用绩效证明自己。绩效越高被裁概率越低。', tag: 'risky', effects: { performance: 5, mental: -5 }, flags: { layoffWarningActive: true } },
+      { id: 'ignore', textKey: '', nameZh: '先不管了', descZh: '也许裁不到我头上。', tag: 'neutral', effects: {}, flags: { layoffWarningActive: true } },
     ],
   },
   {

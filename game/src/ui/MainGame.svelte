@@ -258,6 +258,12 @@
       <span class="text-red-400/70"> — 精神崩溃，本季度最多4AP</span>
     </div>
   {/if}
+  {#if gs.flags.layoffWarningActive}
+    <div class="mx-4 mb-2 p-2.5 rounded-xl bg-red-950/40 border border-red-900/50 text-xs animate-pulse">
+      <span class="text-red-400 font-bold">⚠️ 裁员预警</span>
+      <span class="text-red-400/70"> — 下季度揭晓结果。绩效越高被裁概率越低！</span>
+    </div>
+  {/if}
   {#if gs.grindLockQuarters > 0}
     <div class="mx-4 mb-2 p-2 rounded-xl bg-amber-950/30 border border-amber-900/40 text-xs">
       <span class="text-amber-400">🔒 卷王模式锁定 {gs.grindLockQuarters}季度（AP上限{totalAp}）</span>
