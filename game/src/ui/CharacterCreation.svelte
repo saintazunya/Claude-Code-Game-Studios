@@ -11,7 +11,7 @@
 
   // Derived preview values
   const grindReduction = $derived(constitution * 10); // 0-50% reduction
-  const schoolMod = $derived(((schoolRanking - 2.5) * 4).toFixed(0));
+  const schoolMod = $derived(((schoolRanking - 2.5) * 6).toFixed(0));
   const internBonus = $derived(((geoLocation - 2.5) * 6).toFixed(0));
 
   const archetypes = [

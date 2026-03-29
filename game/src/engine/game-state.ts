@@ -271,7 +271,7 @@ export function processTurn(
       }
       if (actionId === 'networking') {
         // bonus is applied through probability system via flags
-        s.flags.networkingBonus = ((s.flags.networkingBonus as number) || 0) + 0.05;
+        s.flags.networkingBonus = ((s.flags.networkingBonus as number) || 0) + 0.025; // halved
       }
     }
   }

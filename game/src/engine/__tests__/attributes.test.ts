@@ -23,8 +23,8 @@ describe('Attribute System', () => {
     it('maps school ranking to school modifier', () => {
       const { schoolModifier: low } = createStartingAttributes({ constitution: 3, schoolRanking: 0, geoLocation: 3 });
       const { schoolModifier: high } = createStartingAttributes({ constitution: 3, schoolRanking: 5, geoLocation: 3 });
-      expect(low).toBeCloseTo(-0.10, 2);
-      expect(high).toBeCloseTo(0.10, 2);
+      expect(low).toBeCloseTo(-0.15, 2);
+      expect(high).toBeCloseTo(0.15, 2);
     });
 
     it('maps geo location to intern bonus', () => {
