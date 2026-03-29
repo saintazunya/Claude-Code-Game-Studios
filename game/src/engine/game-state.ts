@@ -517,13 +517,13 @@ export function resolveEvent(state: GameState, event: import('./types').GameEven
   // Add to timeline
   const lastRecord = s.timeline[s.timeline.length - 1];
   if (lastRecord) {
-    lastRecord.events.push({ id: eventId, choiceId });
+    lastRecord.events.push({ id: event.id, choiceId });
     lastRecord.attributesAfter = { ...s.attributes };
   }
 
   // Remove from pending
   const pending = (s.flags.pendingRandomEvents as string[]) || [];
-  s.flags.pendingRandomEvents = pending.filter(id => id !== eventId);
+  s.flags.pendingRandomEvents = pending.filter(id => id !== event.id);
 
   return s;
 }
