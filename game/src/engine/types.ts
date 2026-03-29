@@ -178,6 +178,7 @@ export interface ActionDef {
   phase: 'academic' | 'career' | 'any';
   effects: Partial<CoreAttributes>;
   description: string;
+  tipsZh?: string; // Chinese pros/cons guidance
   precondition?: (state: GameState) => boolean;
   exclusive?: ActionId[]; // mutually exclusive with
 }

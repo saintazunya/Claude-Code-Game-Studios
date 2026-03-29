@@ -1,31 +1,53 @@
 <script lang="ts">
   import { gameState, continueTurn, turnInfo } from '../engine/store';
+  import { ACTIONS } from '../engine/actions';
 
   const gs = $derived($gameState);
   const ti = $derived($turnInfo);
   const lastRecord = $derived(gs?.timeline[gs.timeline.length - 1]);
 
+  // Event message map
+  const EVENT_MESSAGES: Record<string, { icon: string; text: string; color: string; detail?: string }> = {
+    promoted: { icon: '🎉', text: '升职了！', color: 'text-blue-400', detail: '职级提升，薪资增加。新的挑战开始了。' },
+    h1b_approved: { icon: '🎊', text: 'H-1B 抽中了！', color: 'text-purple-400', detail: 'H-1B签证获批，有效期3年。可以开始办绿卡了！' },
+    h1b_denied: { icon: '😰', text: 'H-1B 没抽中...', color: 'text-red-400', detail: '很遗憾，今年没中签。需要等明年再抽或寻找替代方案。' },
+    green_card_approved: { icon: '🏆', text: '绿卡批准！！！', color: 'text-green-400', detail: '漫长的等待终于结束了！你现在是美国永久居民。' },
+    i485_filed_combo_card: { icon: '🎫', text: 'Combo卡到手！', color: 'text-teal-400', detail: '拿到EAD/AP，不再绑定雇主，可以自由换工作和旅行！' },
+    i140_approved: { icon: '📋', text: 'I-140批准！', color: 'text-purple-400', detail: '排期已锁定。即使换工作也保留优先日期。关键里程碑！' },
+    perm_approved: { icon: '✅', text: 'PERM批准！', color: 'text-amber-400', detail: 'PERM劳工证批准，下一步提交I-140。' },
+    perm_filed: { icon: '📝', text: '公司开始办PERM', color: 'text-amber-400', detail: '雇主启动了绿卡流程，PERM申请已提交。' },
+    perm_audited: { icon: '⚠️', text: 'PERM被Audit', color: 'text-amber-400', detail: 'PERM申请被劳工部抽查，处理时间将延长2-6个季度。' },
+    perm_voided_layoff: { icon: '💀', text: 'PERM作废了！', color: 'text-red-400', detail: '因为离职/裁员，进行中的PERM申请全部作废。' },
+    masters_graduated: { icon: '🎓', text: '硕士毕业！', color: 'text-blue-400', detail: '恭喜毕业！OPT已激活，开始找工作吧。' },
+    phd_graduated: { icon: '🎓', text: '博士毕业！', color: 'text-blue-400', detail: '博士毕业！以L4级别进入职场，学术影响力大幅积累。' },
+    first_job_found: { icon: '💼', text: '拿到第一份工作！', color: 'text-green-400', detail: '成功入职！美国职业生涯正式开始。' },
+    first_job_search_failed: { icon: '😟', text: '暂时没找到工作', color: 'text-amber-400', detail: 'OPT正在倒计时，需要尽快找到工作。' },
+    laid_off: { icon: '💥', text: '被裁员了', color: 'text-red-400', detail: '收到了遣散费。如果是H-1B身份，60天内必须找到新工作。' },
+    pip_started: { icon: '⚠️', text: '收到PIP警告！', color: 'text-red-400', detail: '2个季度内必须把绩效提升到50以上，否则被开除。' },
+    pip_resolved: { icon: '😮‍💨', text: 'PIP考核通过', color: 'text-green-400', detail: '绩效达标，PIP解除。好险！' },
+    pip_terminated: { icon: '💔', text: 'PIP未通过，被开除', color: 'text-red-400', detail: '绩效未达标，被公司辞退。需要紧急找新工作。' },
+    priority_date_retrogression: { icon: '😤', text: '排期倒退了！', color: 'text-red-400', detail: '签证公告牌排期倒退，绿卡等待时间又变长了。' },
+    h1b_renewed: { icon: '📄', text: 'H-1B续签成功', color: 'text-purple-400' },
+    h1b_7th_year_extension: { icon: '📄', text: 'H-1B第7年延期', color: 'text-purple-400', detail: '因I-140已批准，获得H-1B延期。' },
+    i140_filed: { icon: '📝', text: 'I-140已提交', color: 'text-purple-400' },
+    i140_denied: { icon: '❌', text: 'I-140被拒', color: 'text-red-400', detail: '需要重新提交。' },
+    boss_changed: { icon: '👔', text: '换了新老板', color: 'text-gray-400' },
+    h1b_grace_period_started: { icon: '⏰', text: '60天宽限期开始', color: 'text-red-400', detail: 'H-1B身份下被裁，必须在1个季度内找到新的雇主。' },
+    gc_frozen_by_employer: { icon: '🥶', text: '公司冻结绿卡办理', color: 'text-red-400', detail: '经济不好，公司暂停了所有绿卡申请。' },
+    noid_received: { icon: '⚠️', text: '收到NOID（拒绝意向通知）', color: 'text-red-400', detail: '失业太久，I-485面临被拒风险。必须尽快找到工作！' },
+    rfe_resolved: { icon: '📋', text: 'RFE补件完成', color: 'text-amber-400' },
+    i485_rfe: { icon: '📋', text: 'I-485被要求补件(RFE)', color: 'text-amber-400', detail: '需要额外材料，处理时间延长。' },
+    visa_expired_deported: { icon: '✈️', text: '签证过期，被遣返', color: 'text-red-400' },
+  };
+
   // Detect milestones for celebration
   const milestones = $derived(() => {
     if (!lastRecord) return [];
-    const ms: { icon: string; text: string; color: string }[] = [];
+    const ms: { icon: string; text: string; color: string; detail?: string }[] = [];
     for (const e of lastRecord.events) {
-      switch (e.id) {
-        case 'promoted': ms.push({ icon: '🎉', text: '升职了！', color: 'text-blue-400' }); break;
-        case 'h1b_approved': ms.push({ icon: '🎊', text: 'H-1B 抽中了！', color: 'text-purple-400' }); break;
-        case 'green_card_approved': ms.push({ icon: '🏆', text: '绿卡批准！！！', color: 'text-green-400' }); break;
-        case 'i485_filed_combo_card': ms.push({ icon: '🎫', text: 'Combo卡到手！', color: 'text-teal-400' }); break;
-        case 'i140_approved': ms.push({ icon: '📋', text: 'I-140批准，排期锁定！', color: 'text-purple-400' }); break;
-        case 'perm_approved': ms.push({ icon: '✅', text: 'PERM批准！', color: 'text-amber-400' }); break;
-        case 'masters_graduated': ms.push({ icon: '🎓', text: '硕士毕业！', color: 'text-blue-400' }); break;
-        case 'phd_graduated': ms.push({ icon: '🎓', text: '博士毕业！', color: 'text-blue-400' }); break;
-        case 'first_job_found': ms.push({ icon: '💼', text: '找到第一份工作！', color: 'text-green-400' }); break;
-        case 'laid_off': ms.push({ icon: '💥', text: '被裁员了...', color: 'text-red-400' }); break;
-        case 'pip_started': ms.push({ icon: '⚠️', text: '收到PIP警告', color: 'text-red-400' }); break;
-        case 'pip_terminated': ms.push({ icon: '💔', text: 'PIP未通过，被开除', color: 'text-red-400' }); break;
-        case 'h1b_denied': ms.push({ icon: '😰', text: 'H-1B没抽中...', color: 'text-red-400' }); break;
-        case 'perm_voided_layoff': ms.push({ icon: '💀', text: 'PERM作废了！', color: 'text-red-400' }); break;
-        case 'priority_date_retrogression': ms.push({ icon: '😤', text: '排期倒退了！', color: 'text-red-400' }); break;
+      const msg = EVENT_MESSAGES[e.id];
+      if (msg) {
+        ms.push(msg);
       }
     }
     return ms;
@@ -66,15 +88,44 @@
       </div>
     </div>
 
-    <!-- Milestones (celebration) -->
+    <!-- What you did this quarter -->
+    {#if lastRecord.actions.length > 0}
+      <div class="mb-3">
+        <div class="flex flex-wrap gap-1.5">
+          <span class="text-[10px] text-gray-500">本季度：</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-900/30 text-blue-300">
+            {lastRecord.workMode === 'coast' || lastRecord.workMode === 'light' ? '躺平' : lastRecord.workMode === 'grind' || lastRecord.workMode === 'intense' ? '卷王🔥' : '正常'}模式
+          </span>
+          {#each lastRecord.actions as actionId}
+            <span class="text-[10px] px-1.5 py-0.5 rounded bg-[#1a2234] text-gray-400">
+              {ACTIONS[actionId]?.nameZh || actionId}
+            </span>
+          {/each}
+        </div>
+      </div>
+    {/if}
+
+    <!-- Milestones & Events (with details) -->
     {#if milestones().length > 0}
       <div class="mb-4 space-y-2">
         {#each milestones() as m}
-          <div class="flex items-center gap-2 p-3 rounded-xl border {m.color.includes('red') ? 'bg-red-950/30 border-red-900/50' : 'bg-[#1a2a3a] border-[#2a4060]'} {hasCelebration && !m.color.includes('red') ? 'animate-celebration' : ''}">
-            <span class="text-2xl">{m.icon}</span>
-            <span class="font-bold {m.color}">{m.text}</span>
+          <div class="p-3 rounded-xl border {m.color.includes('red') ? 'bg-red-950/30 border-red-900/50' : 'bg-[#1a2a3a] border-[#2a4060]'} {hasCelebration && !m.color.includes('red') ? 'animate-celebration' : ''}">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">{m.icon}</span>
+              <span class="font-bold {m.color}">{m.text}</span>
+            </div>
+            {#if m.detail}
+              <p class="text-xs text-gray-400 mt-1.5 ml-10 leading-relaxed">{m.detail}</p>
+            {/if}
           </div>
         {/each}
+      </div>
+    {:else}
+      <div class="mb-4 p-3 rounded-xl bg-[#1a2234] border border-[#2a3050]">
+        <div class="flex items-center gap-2">
+          <span class="text-lg">📅</span>
+          <span class="text-xs text-gray-400">平静的一个季度，没有特别事件发生。</span>
+        </div>
       </div>
     {/if}
 

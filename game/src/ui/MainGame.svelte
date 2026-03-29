@@ -223,10 +223,39 @@
         <span class="text-gray-300 font-semibold">{gs.academic.gpa.toFixed(2)}</span>
       </div>
       {#if gs.academic.hadIntern}
-        <div class="text-green-400 font-semibold">✅ 有实习</div>
+        <div class="text-green-400 font-semibold">✅ 实习 ({gs.academic.internQuality === 'top' ? '大厂' : '普通'})</div>
+      {:else}
+        <div class="text-gray-600">❌ 无实习</div>
       {/if}
     {/if}
   </div>
+
+  <!-- Academic Progress Bar -->
+  {#if isAcademic}
+    {@const gradTurn = gs.academic.isPhd ? 16 : 8}
+    {@const progress = Math.min(100, (gs.turn / gradTurn) * 100)}
+    {@const turnsLeft = gradTurn - gs.turn}
+    <div class="px-4 mb-3">
+      <div class="bg-[#1a2234] rounded-xl p-3 border border-[#2a3050]">
+        <div class="flex justify-between text-[10px] mb-1.5">
+          <span class="text-gray-500">🎓 {gs.academic.isPhd ? '博士' : '硕士'}进度</span>
+          <span class="text-blue-400 font-semibold">还剩 {turnsLeft} 个季度毕业</span>
+        </div>
+        <div class="h-2.5 bg-[#111827] rounded-full overflow-hidden">
+          <div class="h-full rounded-full bg-gradient-to-r from-blue-600 to-purple-500 transition-all duration-500" style="width: {progress}%"></div>
+        </div>
+        <div class="flex justify-between text-[9px] text-gray-600 mt-1">
+          <span>入学</span>
+          {#if !gs.academic.isPhd && gs.turn < 8}
+            <span>第{gs.turn}学期 / 共8学期</span>
+          {:else if gs.academic.isPhd}
+            <span>第{gs.turn}学期 / 共16学期（博士需要5次论文研究: {gs.academic.thesisPoints}/5）</span>
+          {/if}
+          <span>毕业</span>
+        </div>
+      </div>
+    </div>
+  {/if}
 
   <!-- Work Mode Selection -->
   <div class="px-4 mb-3">
@@ -284,7 +313,11 @@
             <div class="text-lg w-8 text-center flex-shrink-0">{actionIcon(action.id)}</div>
             <div class="flex-1 min-w-0">
               <div class="text-sm font-semibold text-white">{action.nameZh}</div>
-              <div class="text-[10px] text-gray-500 truncate">{action.description}</div>
+              {#if action.tipsZh}
+                <div class="text-[10px] text-gray-500 leading-relaxed mt-0.5">{action.tipsZh}</div>
+              {:else}
+                <div class="text-[10px] text-gray-500 truncate">{action.description}</div>
+              {/if}
             </div>
             <div class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold {isSelected ? 'bg-blue-500 text-white' : disabled ? 'bg-[#111827] text-gray-600' : 'bg-amber-500/20 text-amber-400'}">
               {action.apCost}
