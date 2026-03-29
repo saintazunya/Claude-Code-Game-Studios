@@ -49,6 +49,7 @@ export function createGameState(creation: CreationAttributes): GameState {
       hasGreenCard: false,
       h1bAttempts: 0,
       h1bFiled: false,
+      h1bPending: false,
       unemploymentQuarters: 0,
       graceQuartersRemaining: 0,
     },
@@ -106,6 +107,11 @@ export function getEffectiveAp(state: GameState, workMode?: WorkMode | AcademicS
     base = 5;
   } else {
     base = 6; // default if no mode selected
+  }
+
+  // Base work occupies 3 AP when employed in career phase
+  if (state.phase === 'career' && state.career.employed === 'employed') {
+    base -= 3;
   }
 
   // Intern work takes 3AP for one quarter only

@@ -116,6 +116,7 @@ export interface ImmigrationState {
   hasGreenCard: boolean;
   h1bAttempts: number;
   h1bFiled: boolean;
+  h1bPending: boolean; // selected in lottery but not yet activated (Q2→Q4)
   unemploymentQuarters: number; // for NOID tracking
   graceQuartersRemaining: number; // 60-day H1B grace
 }
@@ -172,7 +173,9 @@ export type ActionId =
   | 'networking'
   | 'sideProject'
   | 'urgentJobSearch'
-  | 'internWork';
+  | 'internWork'
+  | 'workHard'
+  | 'workSuperHard';
 
 export interface ActionDef {
   id: ActionId;

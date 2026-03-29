@@ -72,7 +72,7 @@
 
   function actionIcon(id: string): string {
     const icons: Record<string, string> = {
-      upskill: '📖', prepJobChange: '🔍', prepJobChangeIntensive: '🎯', hospital: '🏥', internWork: '💪',
+      workHard: '💪', workSuperHard: '🏋️', upskill: '📖', prepJobChange: '🔍', prepJobChangeIntensive: '🎯', hospital: '🏥', internWork: '💪',
       entrepreneurship: '🚀', prepH1b: '📋', researchNiw: '📝',
       publishPaper: '📄', consultLawyer: '⚖️', rest: '😴', travel: '✈️',
       exercise: '🏃', therapist: '🧠', studyGpa: '📚', searchIntern: '🔎',
@@ -282,6 +282,14 @@
           <span>毕业</span>
         </div>
       </div>
+    </div>
+  {/if}
+
+  <!-- Base Work Notice -->
+  {#if !isAcademic && gs.career.employed === 'employed'}
+    <div class="mx-4 mb-2 p-2.5 rounded-xl bg-[#1a2234] border border-[#2a3050] text-xs">
+      <span class="text-gray-400">💼 基础工作占用 3AP</span>
+      <span class="text-gray-600"> — 可选"努力工作"或"超级努力"额外加绩效</span>
     </div>
   {/if}
 

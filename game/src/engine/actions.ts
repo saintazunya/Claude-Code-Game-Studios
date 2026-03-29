@@ -4,6 +4,20 @@ import type { ActionDef, ActionId, GameState } from './types';
 
 export const ACTIONS: Record<ActionId, ActionDef> = {
   // Career actions
+  workHard: {
+    id: 'workHard', nameZh: '努力工作', apCost: 1, phase: 'career',
+    effects: { performance: 3, mental: -1 }, description: 'Put in extra effort at work',
+    tipsZh: '✅ 绩效+3 | ⚠️ 精神-1 | 💡 基础工作之外的额外投入',
+    precondition: (s) => s.career.employed === 'employed',
+    exclusive: ['workSuperHard'],
+  },
+  workSuperHard: {
+    id: 'workSuperHard', nameZh: '超级努力工作', apCost: 2, phase: 'career',
+    effects: { performance: 7, mental: -3 }, description: 'Go above and beyond',
+    tipsZh: '✅ 绩效+7 | ⚠️ 精神-3 | 💡 冲绩效升职用',
+    precondition: (s) => s.career.employed === 'employed',
+    exclusive: ['workHard'],
+  },
   upskill: {
     id: 'upskill', nameZh: '技能进修', apCost: 2, phase: 'career',
     effects: { skills: 8 }, description: 'Study and improve technical skills',

@@ -64,6 +64,8 @@
     identity_crisis: { icon: '💭', text: '身份认同危机', color: 'text-amber-400', detail: '"来美国这些年，值得吗？"' },
     immigration_policy_change: { icon: '📜', text: '移民政策变动', color: 'text-purple-400', detail: '新的移民政策法案通过，可能影响签证和绿卡处理。' },
     opt_stem_activated: { icon: '📋', text: 'OPT STEM延期激活', color: 'text-blue-400', detail: 'STEM学位自动延长OPT 24个月，争取更多时间抽H-1B。' },
+    h1b_activated: { icon: '🎊', text: 'H-1B正式生效！', color: 'text-purple-400', detail: 'H-1B签证10月1日起生效，有效期3年。' },
+    h1b_pending_lost: { icon: '💔', text: 'H-1B抽中但未能激活', color: 'text-red-400', detail: '在H-1B生效前失去了工作，抽中的名额作废了。' },
     grace_period_ticking: { icon: '⏰', text: '宽限期倒计时中', color: 'text-red-400', detail: '必须尽快找到工作或获得新签证状态！' },
   };
 

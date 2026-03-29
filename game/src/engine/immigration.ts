@@ -65,13 +65,30 @@ export function processImmigrationQuarter(state: GameState): {
     updates.h1bAttempts = imm.h1bAttempts + 1;
 
     if (result.success) {
-      updates.visaType = 'h1b';
-      updates.visaExpiryTurn = state.turn + 12; // 3 years
+      // H1B selected but doesn't activate until Q4 (Oct 1)
+      // Store as pending — layoff before Q4 cancels it
+      updates.visaType = imm.visaType; // stay on current visa
       mentalDelta += 20;
       events.push('h1b_approved');
+      updates.h1bPending = true;
     } else {
       mentalDelta -= 20;
       events.push('h1b_denied');
+    }
+  }
+
+  // --- H1B Pending → Active (Q4) ---
+  if (quarter === 4 && imm.h1bPending) {
+    if (state.career.employed === 'employed') {
+      updates.visaType = 'h1b';
+      updates.visaExpiryTurn = state.turn + 12;
+      updates.h1bPending = false;
+      events.push('h1b_activated');
+      mentalDelta += 5;
+    } else {
+      updates.h1bPending = false;
+      mentalDelta -= 20;
+      events.push('h1b_pending_lost');
     }
   }
 
@@ -293,6 +310,12 @@ export function processImmigrationQuarter(state: GameState): {
 
   // --- Layoff impact on immigration ---
   if (state.flags.justLaidOff) {
+    // Cancel pending H1B if laid off before activation
+    if (imm.h1bPending) {
+      updates.h1bPending = false;
+      mentalDelta -= 20;
+      events.push('h1b_pending_lost');
+    }
     if (!imm.hasComboCard && !imm.hasGreenCard) {
       // H1B holder laid off: 60-day grace (1 quarter)
       updates.graceQuartersRemaining = 1;

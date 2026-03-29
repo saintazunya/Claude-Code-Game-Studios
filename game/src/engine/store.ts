@@ -40,11 +40,12 @@ export const effectiveAp = derived([gameState, selectedWorkMode], ([$gs, $wm]) =
   return getEffectiveAp($gs, $wm);
 });
 
-export const remainingAp = derived([effectiveAp, selectedWorkMode, selectedActions], ([$eap, $wm, $sa]) => {
+export const remainingAp = derived([effectiveAp, selectedWorkMode, selectedActions, availableActions], ([$eap, $wm, $sa, $avail]) => {
   if (!$wm) return $eap;
   let remaining = $eap - getWorkModeCost($wm);
   for (const actionId of $sa) {
-    const action = ACTIONS[actionId];
+    // Use available actions (which have modified AP costs when sick)
+    const action = $avail.find(a => a.id === actionId) || ACTIONS[actionId];
     if (action) remaining -= action.apCost;
   }
   return Math.max(0, remaining);
@@ -107,9 +108,10 @@ export function selectWorkModeAction(mode: WorkMode | AcademicStudyMode) {
   let remaining = totalAp - workCost;
 
   const current = get(selectedActions);
+  const avail = get(availableActions);
   const valid: ActionId[] = [];
   for (const id of current) {
-    const action = ACTIONS[id];
+    const action = avail.find(a => a.id === id) || ACTIONS[id];
     if (action && action.apCost <= remaining) {
       valid.push(id);
       remaining -= action.apCost;
@@ -126,7 +128,9 @@ export function toggleAction(actionId: ActionId) {
     const gs = get(gameState);
     const wm = get(selectedWorkMode);
     if (!gs || !wm) return;
-    const action = ACTIONS[actionId];
+    // Use available actions for correct AP cost (may be 0 when sick)
+    const avail = get(availableActions);
+    const action = avail.find(a => a.id === actionId) || ACTIONS[actionId];
     if (!action) return;
 
     const rem = get(remainingAp);
