@@ -35,6 +35,7 @@
     h1b_grace_period_started: { icon: '⏰', text: '60天宽限期开始', color: 'text-red-400', detail: 'H-1B身份下被裁，必须在1个季度内找到新的雇主。' },
     gc_frozen_by_employer: { icon: '🥶', text: '公司冻结绿卡办理', color: 'text-red-400', detail: '经济不好，公司暂停了所有绿卡申请。' },
     noid_received: { icon: '⚠️', text: '收到NOID（拒绝意向通知）', color: 'text-red-400', detail: '失业太久，I-485面临被拒风险。必须尽快找到工作！' },
+    graduated_unemployed: { icon: '🎓', text: '毕业了，但还没找到工作', color: 'text-amber-400', detail: '没有return offer，需要自己找工作。OPT已激活，抓紧时间！' },
     intern_found: { icon: '🎉', text: '找到实习了！', color: 'text-green-400', detail: '下个季度进行实习，赚$15K+技能提升。记得努力表现争取return offer！' },
     intern_not_found: { icon: '😔', text: '实习没找到', color: 'text-amber-400', detail: '继续投简历吧。可以多参加招聘会提高概率。' },
     return_offer_received: { icon: '🎊', text: '拿到Return Offer！', color: 'text-green-400', detail: '实习表现出色，公司发了全职offer！毕业直接入职，不用再找工作了！' },

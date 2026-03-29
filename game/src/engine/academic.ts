@@ -122,35 +122,36 @@ export function processGraduation(state: GameState): {
 
   events.push(isPhd ? 'phd_graduated' : 'masters_graduated');
 
-  // Auto-search for first job
-  const jobResult = processFirstJobSearch(state);
-
-  if (jobResult.found && jobResult.company) {
-    events.push('first_job_found');
-    return {
-      newPhase: 'career',
-      careerUpdates: {
-        path: 'sde',
-        level,
-        company: jobResult.company,
-        bossType: rollBossType(),
-        tenure: 0,
-        onPip: false,
-        pipQuartersRemaining: 0,
-        coastConsecutive: 0,
-        grindConsecutive: 0,
-        employed: 'employed',
-        salary: jobResult.salary,
-        rsu: jobResult.rsu,
-      },
-      studentDebt: debt,
-      mentalDelta: jobResult.mentalDelta,
-      events,
-    };
+  // Only return offer = auto employment. Otherwise enter unemployed.
+  if (state.academic.hasReturnOffer) {
+    const jobResult = processFirstJobSearch(state);
+    if (jobResult.found && jobResult.company) {
+      events.push('first_job_found');
+      return {
+        newPhase: 'career',
+        careerUpdates: {
+          path: 'sde',
+          level,
+          company: jobResult.company,
+          bossType: rollBossType(),
+          tenure: 0,
+          onPip: false,
+          pipQuartersRemaining: 0,
+          coastConsecutive: 0,
+          grindConsecutive: 0,
+          employed: 'employed',
+          salary: jobResult.salary,
+          rsu: jobResult.rsu,
+        },
+        studentDebt: debt,
+        mentalDelta: jobResult.mentalDelta,
+        events,
+      };
+    }
   }
 
-  // No job found — enter career phase unemployed (OPT ticking)
-  events.push('first_job_search_failed');
+  // No return offer or job search failed — enter career phase unemployed
+  events.push('graduated_unemployed');
   return {
     newPhase: 'career',
     careerUpdates: {

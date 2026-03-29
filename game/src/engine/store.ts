@@ -77,6 +77,10 @@ export const mentalState = derived(gameState, ($gs) => {
 });
 
 // Actions
+function scrollTop() {
+  setTimeout(() => window.scrollTo(0, 0), 50);
+}
+
 export function startNewGame(creation: CreationAttributes) {
   const state = createGameState(creation);
   gameState.set(state);
@@ -87,6 +91,7 @@ export function startNewGame(creation: CreationAttributes) {
   currentSessionId.set(id);
   refreshSaveList();
   screen.set('game');
+  scrollTop();
 }
 
 export function resumeGame(id: string) {
@@ -165,7 +170,6 @@ export function endTurn() {
   }
 
   if (pendingGameEvents.length > 0) {
-    // Show events one by one
     eventQueue.set(pendingGameEvents.slice(1));
     currentEvent.set(pendingGameEvents[0]);
     screen.set('event');
@@ -174,6 +178,7 @@ export function endTurn() {
   } else {
     screen.set('summary');
   }
+  scrollTop();
 }
 
 export function resolveCurrentEvent(choiceId: string) {
@@ -202,11 +207,14 @@ export function resolveCurrentEvent(choiceId: string) {
     } else {
       screen.set('summary');
     }
+    scrollTop();
   }
 }
 
 export function continueTurn() {
   screen.set('game');
+  // Scroll to top after screen change
+  setTimeout(() => window.scrollTo(0, 0), 50);
 }
 
 export function exportGameLog() {
