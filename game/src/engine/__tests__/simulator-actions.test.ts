@@ -45,9 +45,9 @@ function validateAvailableActions(state: GameState): ActionIssue[] {
     }
   }
 
-  // searchIntern should NOT be available if already has intern
-  if (state.academic.hadIntern && availableIds.includes('searchIntern')) {
-    issues.push({ turn: state.turn, age: ti.age, phase: state.phase, issue: 'searchIntern available but already has intern' });
+  // searchIntern: allowed even with existing intern (can upgrade), blocked during active intern quarter
+  if (state.flags.internActiveThisQuarter && availableIds.includes('searchIntern')) {
+    issues.push({ turn: state.turn, age: ti.age, phase: state.phase, issue: 'searchIntern available during active intern quarter' });
   }
 
   // internWork should ONLY be available during intern quarter
