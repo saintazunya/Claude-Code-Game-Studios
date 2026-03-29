@@ -130,10 +130,18 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
 };
 
 export function getAvailableActions(state: GameState): ActionDef[] {
+  const isSick = (state.flags.sicknessApPenalty as number) > 0 || state.flags.burnoutActive || state.attributes.health <= 0;
+
   return Object.values(ACTIONS).filter((action) => {
     if (action.phase !== 'any' && action.phase !== state.phase) return false;
     if (action.precondition && !action.precondition(state)) return false;
     return true;
+  }).map((action) => {
+    // Rest and hospital are free when sick/burnout
+    if (isSick && (action.id === 'rest' || action.id === 'hospital' || action.id === 'exercise')) {
+      return { ...action, apCost: 0, tipsZh: (action.tipsZh || '') + ' | 🏥 生病期间免费' };
+    }
+    return action;
   });
 }
 

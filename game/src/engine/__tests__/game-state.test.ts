@@ -48,7 +48,7 @@ describe('Game State', () => {
       expect(getEffectiveAp(state, 'normal')).toBe(5);
     });
 
-    it('burnout = minimum 4 AP (can still rest/hospital)', () => {
+    it('burnout = minimum 4 AP (rest/hospital are free when sick)', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
       state.flags.burnoutActive = true;
       expect(getEffectiveAp(state, 'normal')).toBe(4);

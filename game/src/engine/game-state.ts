@@ -105,12 +105,12 @@ export function getEffectiveAp(state: GameState, workMode?: WorkMode | AcademicS
     base -= 3;
   }
 
-  // Sickness reduces AP but never below 4 (enough for rest + hospital visit)
+  // Sickness reduces AP but never below 4
   const sicknessPenalty = (state.flags.sicknessApPenalty as number) || 0;
   base -= sicknessPenalty;
   base = Math.max(base, 4);
 
-  // Burnout = minimum AP (can still rest)
+  // Burnout = minimum AP
   if (state.flags.burnoutActive) return 4;
   // Hospitalized = minimum AP
   if (state.attributes.health <= 0) return 4;
