@@ -14,7 +14,7 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
     effects: {}, description: 'Prepare for job change: leetcode + interviews',
     tipsZh: '✅ 每季度准备+10%拿offer概率 | ⚠️ 占3AP，工作可能只能躺平 | ⚠️ 跳槽会重置PERM（I-140前）',
     precondition: (s) => s.career.employed === 'employed' && !s.career.onPip,
-    exclusive: ['travel'],
+    exclusive: ['travel', 'prepJobChangeIntensive'],
   },
   prepJobChangeIntensive: {
     id: 'prepJobChangeIntensive', nameZh: '全力求职', apCost: 5, phase: 'career',
