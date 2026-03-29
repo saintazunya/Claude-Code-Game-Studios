@@ -30,7 +30,7 @@ describe('Attribute System', () => {
     it('maps geo location to intern bonus', () => {
       const { geoBonus: low } = createStartingAttributes({ constitution: 3, schoolRanking: 3, geoLocation: 0 });
       const { geoBonus: high } = createStartingAttributes({ constitution: 3, schoolRanking: 3, geoLocation: 5 });
-      expect(low).toBeCloseTo(-0.05, 2);
+      expect(low).toBeCloseTo(-0.10, 2);
       expect(high).toBeCloseTo(0.20, 2);
     });
 

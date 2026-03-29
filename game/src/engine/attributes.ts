@@ -23,8 +23,8 @@ export function createStartingAttributes(creation: CreationAttributes): {
     },
     // School 0=-5%, 1=-1%, 2=+3%, 3=+7%, 4=+11%, 5=+15%
     schoolModifier: -0.05 + creation.schoolRanking * 0.04,
-    // Geo 0=-5%, 1=0%, 2=+5%, 3=+10%, 4=+15%, 5=+20%
-    geoBonus: -0.05 + creation.geoLocation * 0.05,
+    // Geo 0=-10%, 1=-4%, 2=+2%, 3=+8%, 4=+14%, 5=+20%
+    geoBonus: -0.10 + creation.geoLocation * 0.06,
     constitutionSicknessModifier: (2.5 - creation.constitution) * 0.01,
   };
 }
