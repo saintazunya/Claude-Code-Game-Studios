@@ -486,7 +486,7 @@ export function processTurn(
   const homeEquity = s.economy.ownsHome
     ? Math.max(0, s.economy.homeValue - s.economy.homeMortgageRemaining)
     : 0;
-  s.attributes.netWorth = s.economy.cash + portfolioValue + homeEquity - s.economy.studentLoanRemaining;
+  s.attributes.netWorth = Math.max(0, s.economy.cash + portfolioValue + homeEquity - s.economy.studentLoanRemaining);
 
   // 9. Record quarter
   const record = {
@@ -526,7 +526,7 @@ export function resolveEvent(state: GameState, event: import('./types').GameEven
   const homeEquity = s.economy.ownsHome
     ? Math.max(0, s.economy.homeValue - s.economy.homeMortgageRemaining)
     : 0;
-  s.attributes.netWorth = s.economy.cash + portfolioValue + homeEquity - s.economy.studentLoanRemaining;
+  s.attributes.netWorth = Math.max(0, s.economy.cash + portfolioValue + homeEquity - s.economy.studentLoanRemaining);
 
   // Add to timeline
   const lastRecord = s.timeline[s.timeline.length - 1];

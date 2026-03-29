@@ -75,11 +75,22 @@ export function processImmigrationQuarter(state: GameState): {
     }
   }
 
-  // --- OPT Expiry tracking ---
+  // --- OPT Expiry tracking + auto STEM extension ---
   if (imm.visaType === 'opt' && state.turn >= 8) {
     // OPT: 4 quarters from graduation (turn 8)
     if (!updates.visaExpiryTurn && imm.visaExpiryTurn === 999) {
       updates.visaExpiryTurn = 8 + 4; // 12
+    }
+  }
+
+  // Auto-apply OPT STEM extension when OPT is about to expire (all players have STEM degree)
+  if (imm.visaType === 'opt' && state.career.employed === 'employed') {
+    const remaining = imm.visaExpiryTurn - state.turn;
+    if (remaining <= 1 && remaining > 0) {
+      updates.visaType = 'optStem';
+      updates.visaExpiryTurn = imm.visaExpiryTurn + 8; // 24 month extension
+      events.push('opt_stem_activated');
+      mentalDelta += 5;
     }
   }
 
@@ -257,25 +268,27 @@ export function processImmigrationQuarter(state: GameState): {
     updates.unemploymentQuarters = 0;
   }
 
-  // --- H1B Renewal ---
+  // --- H1B Renewal (including 7th year re-extension) ---
   if (
-    (imm.visaType === 'h1b' || imm.visaType === 'h1bRenewal') &&
+    ['h1b', 'h1bRenewal', 'h1b7thYear'].includes(imm.visaType) &&
     state.career.employed === 'employed' &&
-    imm.visaExpiryTurn - state.turn <= 2
+    imm.visaExpiryTurn - state.turn <= 2 &&
+    imm.visaExpiryTurn - state.turn > 0
   ) {
-    // Auto-renew if employed
     if (imm.i140Status === 'approved' || (imm.permStatus !== 'none' && state.turn - imm.permStartTurn > 4)) {
-      // Eligible for 7th year extension
+      // Eligible for 7th year extension (1-year renewals indefinitely)
       updates.visaType = 'h1b7thYear';
       updates.visaExpiryTurn = state.turn + 4; // 1-year renewal
       economyCost += 2000;
       events.push('h1b_7th_year_extension');
-    } else {
+    } else if (imm.visaType === 'h1b' || imm.visaType === 'h1bRenewal') {
+      // Standard 3-year renewal (only for first 6 years)
       updates.visaType = 'h1bRenewal';
       updates.visaExpiryTurn = state.turn + 12;
       economyCost += 2000;
       events.push('h1b_renewed');
     }
+    // h1b7thYear without I-140/PERM can't renew further — will expire
   }
 
   // --- Layoff impact on immigration ---

@@ -63,6 +63,8 @@
     community_support: { icon: '🤝', text: '找到了组织', color: 'text-green-400', detail: '发现了当地的华人互助社群，大家互相支持。' },
     identity_crisis: { icon: '💭', text: '身份认同危机', color: 'text-amber-400', detail: '"来美国这些年，值得吗？"' },
     immigration_policy_change: { icon: '📜', text: '移民政策变动', color: 'text-purple-400', detail: '新的移民政策法案通过，可能影响签证和绿卡处理。' },
+    opt_stem_activated: { icon: '📋', text: 'OPT STEM延期激活', color: 'text-blue-400', detail: 'STEM学位自动延长OPT 24个月，争取更多时间抽H-1B。' },
+    grace_period_ticking: { icon: '⏰', text: '宽限期倒计时中', color: 'text-red-400', detail: '必须尽快找到工作或获得新签证状态！' },
   };
 
   // Detect milestones for celebration — show ALL events with Chinese text
