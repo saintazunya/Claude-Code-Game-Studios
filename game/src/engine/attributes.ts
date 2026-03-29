@@ -21,8 +21,9 @@ export function createStartingAttributes(creation: CreationAttributes): {
       mental: 70,
       netWorth: 0,
     },
-    schoolModifier: (creation.schoolRanking - 2.5) * 0.06,
-    geoBonus: (creation.geoLocation - 2.5) * 0.06,
+    // School 0=-5%, 1=-1%, 2=+3%, 3=+7%, 4=+11%, 5=+15%
+    schoolModifier: -0.05 + creation.schoolRanking * 0.04,
+    geoBonus: (creation.geoLocation - 2.5) * 0.08,
     constitutionSicknessModifier: (2.5 - creation.constitution) * 0.01,
   };
 }
