@@ -22,7 +22,7 @@
 
   const workModes = $derived(isAcademic
     ? [
-        { id: 'light' as AcademicStudyMode, label: '轻松', emoji: '☕', cost: 3, desc: 'GPA+0.05, 精神+3' },
+        { id: 'light' as AcademicStudyMode, label: '轻松', emoji: '☕', cost: 3, desc: 'GPA-0.10, 精神+3' },
         { id: 'normal' as AcademicStudyMode, label: '正常', emoji: '📚', cost: 4, desc: 'GPA+0.15, 精神-2' },
         { id: 'intense' as AcademicStudyMode, label: '拼命', emoji: '🔥', cost: 4, desc: 'GPA+0.30, 健康-10, +3AP' },
       ]

@@ -86,7 +86,7 @@ export function graduatePhd(state: GameState): {
 
 export function getGpaGain(studyMode: string): number {
   switch (studyMode) {
-    case 'light': return 0.05;
+    case 'light': return -0.10;
     case 'normal': return 0.15;
     case 'intense': return 0.30;
     default: return 0.10;
