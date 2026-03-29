@@ -40,20 +40,19 @@ export const effectiveAp = derived([gameState, selectedWorkMode], ([$gs, $wm]) =
   return getEffectiveAp($gs, $wm);
 });
 
+export const availableActions = derived(gameState, ($gs) => {
+  if (!$gs) return [];
+  return getAvailableActions($gs);
+});
+
 export const remainingAp = derived([effectiveAp, selectedWorkMode, selectedActions, availableActions], ([$eap, $wm, $sa, $avail]) => {
   if (!$wm) return $eap;
   let remaining = $eap - getWorkModeCost($wm);
   for (const actionId of $sa) {
-    // Use available actions (which have modified AP costs when sick)
     const action = $avail.find(a => a.id === actionId) || ACTIONS[actionId];
     if (action) remaining -= action.apCost;
   }
   return Math.max(0, remaining);
-});
-
-export const availableActions = derived(gameState, ($gs) => {
-  if (!$gs) return [];
-  return getAvailableActions($gs);
 });
 
 export const portfolio = derived(gameState, ($gs) => {

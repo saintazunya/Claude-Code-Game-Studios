@@ -4,10 +4,22 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>game</title>
+    <title>绿卡之路</title>
+    <style>
+      body { background: #0a0e17; margin: 0; }
+      #error-display { color: #ef4444; font-family: monospace; font-size: 12px; padding: 20px; white-space: pre-wrap; display: none; }
+    </style>
   </head>
   <body>
     <div id="app"></div>
+    <div id="error-display"></div>
+    <script>
+      window.onerror = function(msg, url, line, col, err) {
+        var el = document.getElementById('error-display');
+        el.style.display = 'block';
+        el.textContent = 'Error: ' + msg + '\nFile: ' + url + '\nLine: ' + line + ':' + col + '\n' + (err && err.stack || '');
+      };
+    </script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
