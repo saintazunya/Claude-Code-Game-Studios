@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { gameState, returnToTitle, turnInfo } from '../engine/store';
+  import { gameState, returnToTitle, turnInfo, exportGameLog } from '../engine/store';
   import { calculateFinalScore, getTurnInfo } from '../engine/game-state';
 
   const gs = $derived($gameState);
@@ -185,13 +185,22 @@
   </div>
 
   <!-- Bottom Buttons -->
-  <div class="px-5 pb-6 pt-2 flex gap-3">
-    <button
-      class="flex-1 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 text-white text-base font-bold active:scale-[0.98] transition-transform shadow-lg shadow-blue-600/20"
-      onclick={returnToTitle}
-    >
-      再来一局
-    </button>
+  <div class="px-5 pb-6 pt-2 space-y-2">
+    <div class="flex gap-3">
+      <button
+        class="flex-1 py-4 rounded-2xl bg-[#1a2234] text-gray-400 text-sm font-bold border border-[#2a3050] active:scale-[0.98] transition-transform"
+        onclick={exportGameLog}
+      >
+        📥 下载游戏记录
+      </button>
+      <button
+        class="flex-1 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 text-white text-base font-bold active:scale-[0.98] transition-transform shadow-lg shadow-blue-600/20"
+        onclick={returnToTitle}
+      >
+        再来一局
+      </button>
+    </div>
+    <p class="text-[9px] text-gray-700 text-center">游戏记录包含每回合的选择、属性变化和事件，可用于复盘分析</p>
   </div>
 </div>
 {/if}

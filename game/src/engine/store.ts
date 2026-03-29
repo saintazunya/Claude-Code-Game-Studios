@@ -7,6 +7,7 @@ import { preview } from './probability';
 import { getPortfolioStatus } from './economic-cycle';
 import { getHealthThreshold, getMentalThreshold } from './attributes';
 import { EVENT_POOL } from './events';
+import { startLog, logTurn, logEventChoice, endLog, downloadLog } from './logger';
 
 export type Screen = 'title' | 'creation' | 'game' | 'event' | 'summary' | 'endgame';
 
@@ -68,6 +69,7 @@ export function startNewGame(creation: CreationAttributes) {
   gameState.set(state);
   selectedWorkMode.set(null);
   selectedActions.set([]);
+  startLog(creation, state.schoolModifier, state.geoBonus);
   screen.set('game');
 }
 
@@ -116,8 +118,10 @@ export function endTurn() {
   if (!gs || !wm) return;
 
   const actions = get(selectedActions);
+  const stateBefore = gs;
   const newState = processTurn(gs, wm, actions);
   gameState.set(newState);
+  logTurn(stateBefore, newState, wm, actions);
 
   selectedWorkMode.set(null);
   selectedActions.set([]);
@@ -127,6 +131,10 @@ export function endTurn() {
   const pendingGameEvents = pendingIds
     .map(id => EVENT_POOL.find(e => e.id === id))
     .filter((e): e is GameEvent => e !== undefined);
+
+  if (newState.endingType) {
+    endLog(newState.endingType, calculateFinalScore(newState));
+  }
 
   if (pendingGameEvents.length > 0) {
     // Show events one by one
@@ -146,6 +154,7 @@ export function resolveCurrentEvent(choiceId: string) {
   if (!gs || !event) return;
 
   // Apply the player's choice
+  logEventChoice(event.id, choiceId);
   const newState = resolveEvent(gs, event, choiceId);
   gameState.set(newState);
 
@@ -170,6 +179,10 @@ export function resolveCurrentEvent(choiceId: string) {
 
 export function continueTurn() {
   screen.set('game');
+}
+
+export function exportGameLog() {
+  downloadLog();
 }
 
 export function returnToTitle() {
