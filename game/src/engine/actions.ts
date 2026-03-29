@@ -102,7 +102,7 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
     effects: {}, description: 'Search for internship opportunities',
     tipsZh: '✅ 搜索实习（立即判定成功/失败）| ✅ 有实习→找工作概率+25% | ⚠️ 没实习→找工作概率大幅下降 | 💡 Q3-Q4是实习季',
     precondition: (s) => {
-      return s.turn >= 2 && s.turn <= 7;
+      return s.turn >= 2 && s.turn <= 7 && !s.academic.hadIntern;
     },
   },
   thesisResearch: {
