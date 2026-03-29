@@ -78,6 +78,7 @@ export function loadGame(id: string): GameState | null {
 
 export function getSaveIndex(): SaveMeta[] {
   try {
+    if (typeof localStorage === 'undefined') return [];
     const json = localStorage.getItem(SAVE_INDEX_KEY);
     if (!json) return [];
     return JSON.parse(json);

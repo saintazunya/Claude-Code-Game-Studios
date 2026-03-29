@@ -2,7 +2,7 @@
   import { screen, resumeGame, refreshSaveList, saveList } from '../engine/store';
   import type { SaveMeta } from '../engine/save';
 
-  refreshSaveList();
+  try { refreshSaveList(); } catch(e) { console.warn('Could not load saves:', e); }
   const saves = $derived($saveList);
   let showSaves = $state(false);
 
