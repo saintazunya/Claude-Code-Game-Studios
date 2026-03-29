@@ -269,7 +269,7 @@ export function processTurn(
         s.academic.gpa = Math.min(4.0, s.academic.gpa + 0.30);
       }
       if (actionId === 'studyGpa') {
-        s.academic.gpa = Math.min(4.0, s.academic.gpa + 0.20);
+        s.academic.gpa = Math.min(4.0, s.academic.gpa + 0.10);
       }
       if (actionId === 'travel') {
         s.economy.cash -= 2000 + Math.random() * 3000;
@@ -299,9 +299,10 @@ export function processTurn(
   // 5. Apply natural decay
   const decay = computeNaturalDecay(s);
   // Performance decays if no work action taken (career phase)
-  const workedThisTurn = selectedActions.some(id => ['workHard', 'workSuperHard'].includes(id));
+  // workSlack counts as working (but its effect is performance -3, handled in action effects)
+  const workedThisTurn = selectedActions.some(id => ['workSlack', 'workHard', 'workSuperHard'].includes(id));
   if (!workedThisTurn && s.phase === 'career' && s.career.employed === 'employed') {
-    s.attributes = applyDeltas(s.attributes, { performance: -3 }); // idle performance decay
+    s.attributes = applyDeltas(s.attributes, { performance: -5 }); // no work action = worse than slacking
   }
   s.attributes = applyDeltas(s.attributes, {
     skills: decay.skills,

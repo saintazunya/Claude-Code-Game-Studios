@@ -174,6 +174,7 @@ export type ActionId =
   | 'sideProject'
   | 'urgentJobSearch'
   | 'internWork'
+  | 'workSlack'
   | 'workHard'
   | 'workSuperHard'
   | 'studySlack'
