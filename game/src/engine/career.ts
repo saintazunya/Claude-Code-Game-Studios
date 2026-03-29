@@ -201,9 +201,10 @@ export function generateJobOffers(
     const offerLevel = externalPromo ? Math.min(state.career.level + 1, 7) : state.career.level;
     const company = generateCompany(offerLevel);
 
-    // Job hop premium: 15-40%
+    // Job hop premium: 15-40% base + skills bonus (up to +20% extra at skills 100)
     const currentTC = state.career.salary + state.career.rsu;
-    const hopPremium = randomUniform(0.15, 0.40);
+    const skillsBonus = state.attributes.skills * 0.002; // skills 50 = +10%, skills 100 = +20%
+    const hopPremium = randomUniform(0.15, 0.40) + skillsBonus;
     const targetTC = currentTC * (1 + hopPremium);
 
     const band = SALARY_BANDS[offerLevel];
