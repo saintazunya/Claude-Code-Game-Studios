@@ -146,6 +146,8 @@
         {/if}
         <span class="text-gray-400">连续卷王</span><span class="text-right {gs.career.grindConsecutive > 2 ? 'text-red-400' : 'text-gray-300'}">{gs.career.grindConsecutive}季度</span>
         <span class="text-gray-400">连续躺平</span><span class="text-right {gs.career.coastConsecutive > 2 ? 'text-amber-400' : 'text-gray-300'}">{gs.career.coastConsecutive}季度</span>
+        <span class="text-gray-400">当前生病</span><span class="text-right {(gs.flags.sicknessApPenalty as number) > 0 ? 'text-red-400 font-bold' : 'text-green-400'}">{(gs.flags.sicknessApPenalty as number) > 0 ? `是 🤒 (AP-${gs.flags.sicknessApPenalty})` : '健康 ✅'}</span>
+        <span class="text-gray-400">Burnout</span><span class="text-right {gs.flags.burnoutActive ? 'text-red-400 font-bold' : 'text-green-400'}">{gs.flags.burnoutActive ? '是 💀' : '否 ✅'}</span>
       </div>
     </div>
 

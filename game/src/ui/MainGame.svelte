@@ -78,6 +78,8 @@
   }
 
   const modeInfo = $derived(modeLabel(mode));
+  const hasStudy = $derived(actions.some(id => ['studySlack', 'studyNormal', 'studyHard'].includes(id)));
+  const needsStudy = $derived(isAcademic && !hasStudy);
 </script>
 
 {#if gs}
@@ -337,10 +339,11 @@
         🤖
       </button>
       <button
-        class="flex-1 py-4 rounded-2xl text-white text-base font-bold transition-all duration-200 bg-gradient-to-r from-blue-600 to-blue-700 active:scale-[0.98] shadow-lg shadow-blue-600/20"
+        class="flex-1 py-4 rounded-2xl text-white text-base font-bold transition-all duration-200 {needsStudy ? 'bg-gray-800 opacity-40' : 'bg-gradient-to-r from-blue-600 to-blue-700 active:scale-[0.98] shadow-lg shadow-blue-600/20'}"
+        disabled={needsStudy}
         onclick={endTurn}
       >
-        结束本季度 ➜
+        {needsStudy ? '请先选择学习态度' : '结束本季度 ➜'}
       </button>
     </div>
   </div>
