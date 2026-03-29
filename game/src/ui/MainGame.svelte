@@ -285,6 +285,14 @@
     </div>
   {/if}
 
+  <!-- Intern Work Notice -->
+  {#if isAcademic && gs.academic.hadIntern}
+    <div class="mx-4 mb-2 p-3 rounded-xl bg-green-950/30 border border-green-900/40 text-xs">
+      <span class="text-green-400 font-bold">💼 实习中</span>
+      <span class="text-green-400/70"> — 自动占用3AP，每季度收入+$15K，技能+5</span>
+    </div>
+  {/if}
+
   <!-- Status Warnings -->
   {#if (gs.flags.sicknessApPenalty as number) > 0}
     <div class="mx-4 mb-2 p-3 rounded-xl bg-red-950/40 border border-red-900/50 text-xs">

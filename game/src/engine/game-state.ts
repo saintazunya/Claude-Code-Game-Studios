@@ -100,6 +100,11 @@ export function getEffectiveAp(state: GameState, workMode?: WorkMode | AcademicS
   const isGrind = workMode === 'grind' || workMode === 'intense';
   if (isGrind && state.grindLockQuarters <= 0) base += 3;
 
+  // Intern work takes 3AP automatically
+  if (state.phase === 'academic' && state.academic.hadIntern) {
+    base -= 3;
+  }
+
   // Sickness reduces AP but never below 4 (enough for rest + hospital visit)
   const sicknessPenalty = (state.flags.sicknessApPenalty as number) || 0;
   base -= sicknessPenalty;
@@ -167,6 +172,12 @@ export function processTurn(
     s.economicPhaseQuarters = 0;
   }
 
+  // 2b. Intern work: if student has intern, auto-deduct 3AP and earn $15K
+  if (s.phase === 'academic' && s.academic.hadIntern) {
+    s.economy.cash += 15000;
+    s.attributes = applyDeltas(s.attributes, { skills: 5 }); // intern experience
+  }
+
   // 3. Apply work mode effects
   const workEffects = getWorkModeEffects(workMode, s);
   s.attributes = applyDeltas(s.attributes, workEffects);
@@ -201,6 +212,9 @@ export function processTurn(
         if (internRoll.success) {
           s.academic.hadIntern = true;
           s.academic.internQuality = Math.random() < 0.3 ? 'top' : 'mid';
+          turnEvents.push({ id: 'intern_found', choiceId: s.academic.internQuality });
+        } else {
+          turnEvents.push({ id: 'intern_not_found', choiceId: '' });
         }
       }
       if (actionId === 'thesisResearch') {
