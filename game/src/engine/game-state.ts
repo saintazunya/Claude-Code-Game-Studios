@@ -5,7 +5,7 @@ import { createStartingAttributes, applyDeltas, computeNaturalDecay, computeSick
 import { roll, preview } from './probability';
 import { rollInitialPhase, checkPhaseTransition, rollMarketReturn, rollHousingChange, updateSharePrice, rollEventCount, INITIAL_SHARE_PRICE } from './economic-cycle';
 import { ACTIONS, getAvailableActions } from './actions';
-import { processAnnualReview, checkPip, processPipQuarter, checkLayoff, shouldRotateBoss, rollBossType, computeSalary } from './career';
+import { processAnnualReview, checkPip, processPipQuarter, checkLayoff, shouldRotateBoss, rollBossType, computeSalary, generateCompany } from './career';
 import { processImmigrationQuarter, activateOpt } from './immigration';
 import { isGraduationTurn, processGraduation, getGpaGain } from './academic';
 import { selectEvents, applyEventChoice } from './events';
@@ -245,8 +245,29 @@ export function processTurn(
       s.attributes = applyDeltas(s.attributes, effects);
 
       // Handle special action side-effects
-      if (actionId === 'prepJobChange' || actionId === 'prepJobChangeIntensive') {
-        s.jobSearchQuarters++;
+      if (actionId === 'prepJobChange') {
+        // Roll for job offer this quarter
+        const offerRoll = roll('jobOffer', s);
+        if (offerRoll.success) {
+          // Generate offer details
+          const currentTC = s.career.salary + s.career.rsu;
+          const skillsBonus = s.attributes.skills * 0.002;
+          const hopPremium = 0.15 + Math.random() * 0.25 + skillsBonus;
+          const newTC = Math.round(currentTC * (1 + hopPremium));
+          const externalPromo = Math.random() < 0.15;
+          const offerLevel = externalPromo ? Math.min(s.career.level + 1, 7) : s.career.level;
+
+          s.flags.pendingJobOffer = {
+            salary: Math.round(newTC * 0.7),
+            rsu: Math.round(newTC * 0.3),
+            level: offerLevel,
+            premium: Math.round(hopPremium * 100),
+            signingBonus: Math.round(newTC * 0.1),
+          };
+          turnEvents.push({ id: 'job_offer_received', choiceId: '' });
+        } else {
+          turnEvents.push({ id: 'job_offer_rejected', choiceId: '' });
+        }
       }
       if (actionId === 'prepH1b') {
         s.immigration.h1bFiled = true;
@@ -557,7 +578,12 @@ export function processTurn(
   // 7e. Random events — select but don't resolve (UI handles interactive choice)
   const randomEvents = selectEvents(s);
   // Store pending events on the state for the UI to present
-  s.flags.pendingRandomEvents = randomEvents.map(e => e.id);
+  const pendingIds = randomEvents.map(e => e.id);
+  // Add job offer event if one was generated this turn
+  if (s.flags.pendingJobOffer) {
+    pendingIds.unshift('job_offer_received'); // show first
+  }
+  s.flags.pendingRandomEvents = pendingIds;
   // Mark cooldowns and one-time flags now (selection is committed)
   for (const event of randomEvents) {
     s.eventCooldowns[event.id] = s.turn;
@@ -602,6 +628,39 @@ export function resolveEvent(state: GameState, event: import('./types').GameEven
   s.attributes = applyDeltas(s.attributes, result.effects);
   if (result.flags) {
     Object.assign(s.flags, result.flags);
+  }
+
+  // Handle job offer acceptance
+  if (result.flags?.acceptJobOffer && s.flags.pendingJobOffer) {
+    const offer = s.flags.pendingJobOffer as { salary: number; rsu: number; level: number; signingBonus: number };
+    // Apply job change
+    s.career.salary = offer.salary;
+    s.career.rsu = offer.rsu;
+    s.career.level = offer.level;
+    s.career.tenure = 0;
+    s.career.coastConsecutive = 0;
+    s.career.grindConsecutive = 0;
+    s.career.onPip = false;
+    s.career.pipQuartersRemaining = 0;
+    s.career.bossType = rollBossType();
+    s.career.company = generateCompany(offer.level);
+    s.attributes.performance = 50; // new job baseline
+    s.economy.cash += offer.signingBonus;
+
+    // Green card impact: reset if no I-140
+    if (s.immigration.i140Status !== 'approved') {
+      // No I-140 = total green card reset
+      if (s.immigration.permStatus !== 'none') {
+        s.immigration.permStatus = 'none';
+        s.immigration.permStartTurn = 0;
+      }
+      s.immigration.i140Status = 'none';
+      // No priority date without I-140
+    }
+    // If I-140 approved: priority date preserved (locked at approval time)
+    // New company will need new PERM + I-140 but old priority date carries over
+
+    s.flags.pendingJobOffer = null;
   }
 
   // Update net worth after event effects

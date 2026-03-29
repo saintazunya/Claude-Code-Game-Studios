@@ -26,7 +26,7 @@ function validateAvailableActions(state: GameState): ActionIssue[] {
   // Career actions during academic phase
   if (state.phase === 'academic') {
     // urgentJobSearch is allowed in last academic quarter (before graduation)
-    const careerOnly: ActionId[] = ['upskill', 'prepJobChange', 'prepJobChangeIntensive', 'entrepreneurship'];
+    const careerOnly: ActionId[] = ['upskill', 'prepJobChange', 'entrepreneurship'];
     for (const id of careerOnly) {
       if (availableIds.includes(id)) {
         issues.push({ turn: state.turn, age: ti.age, phase: state.phase, issue: `Career action "${id}" available during academic phase` });
@@ -66,7 +66,7 @@ function validateAvailableActions(state: GameState): ActionIssue[] {
   }
 
   // prepJobChange should NOT be available during PIP
-  if (state.career.onPip && (availableIds.includes('prepJobChange') || availableIds.includes('prepJobChangeIntensive'))) {
+  if (state.career.onPip && availableIds.includes('prepJobChange')) {
     issues.push({ turn: state.turn, age: ti.age, phase: state.phase, issue: 'Job change prep available during PIP' });
   }
 

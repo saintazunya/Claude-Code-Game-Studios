@@ -96,6 +96,8 @@
     sickness_hospitalized: { icon: '🚑', text: '住院' },
     burnout: { icon: '💀', text: 'Burnout' },
     priority_date_retrogression: { icon: '😤', text: '排期倒退' },
+    job_offer_received: { icon: '🎉', text: '收到Offer' },
+    job_offer_rejected: { icon: '😔', text: '面试没过' },
     recruiter_call: { icon: '📞', text: '猎头来电' },
     market_crash: { icon: '📉', text: '股市暴跌' },
     performance_bonus: { icon: '💰', text: '绩效奖金' },

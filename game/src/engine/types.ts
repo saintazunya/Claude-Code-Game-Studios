@@ -156,7 +156,6 @@ export interface Portfolio {
 export type ActionId =
   | 'upskill'
   | 'prepJobChange'
-  | 'prepJobChangeIntensive'
   | 'entrepreneurship'
   | 'prepH1b'
   | 'researchNiw'

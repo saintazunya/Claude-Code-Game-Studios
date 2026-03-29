@@ -38,18 +38,11 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
     tipsZh: '✅ 技能+8，提高跳槽和升职概率 | ⚠️ 不直接影响绩效',
   },
   prepJobChange: {
-    id: 'prepJobChange', nameZh: '准备跳槽', apCost: 3, phase: 'career',
-    effects: {}, description: 'Prepare for job change: leetcode + interviews',
-    tipsZh: '✅ 每季度准备+10%拿offer概率 | ⚠️ 占3AP，工作可能只能躺平 | ⚠️ 跳槽会重置PERM（I-140前）',
+    id: 'prepJobChange', nameZh: '跳槽面试', apCost: 3, phase: 'career',
+    effects: { mental: -3 }, description: 'Interview for new jobs this quarter',
+    tipsZh: '✅ 本季度判定是否拿到offer | ✅ 技能越高offer越大 | ⚠️ 没有I-140跳槽会重置绿卡进度！ | ⚠️ 精神-3',
     precondition: (s) => s.career.employed === 'employed' && !s.career.onPip,
-    exclusive: ['travel', 'prepJobChangeIntensive'],
-  },
-  prepJobChangeIntensive: {
-    id: 'prepJobChangeIntensive', nameZh: '全力求职', apCost: 5, phase: 'career',
-    effects: {}, description: 'Intensive job search this quarter',
-    tipsZh: '✅ 本季度+20%拿offer概率 | ⚠️ 占5AP，几乎没时间干别的 | ⚠️ 适合急需跳槽的情况',
-    precondition: (s) => s.career.employed === 'employed' && !s.career.onPip,
-    exclusive: ['travel', 'prepJobChange'],
+    exclusive: ['travel'],
   },
   entrepreneurship: {
     id: 'entrepreneurship', nameZh: '创业调研', apCost: 4, phase: 'career',
@@ -102,7 +95,7 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
     id: 'travel', nameZh: '旅游度假', apCost: 3, phase: 'any',
     effects: { health: 20, mental: 25 }, description: 'Travel for recovery ($2K-5K, visa risk on H1B)',
     tipsZh: '✅ 健康+20，精神+25（最强恢复）| ⚠️ 花费$2K-5K | ⚠️ H-1B出境有5%签证被拒风险 | ✅ Combo卡/绿卡后无风险',
-    exclusive: ['prepJobChange', 'prepJobChangeIntensive'],
+    exclusive: ['prepJobChange'],
   },
   exercise: {
     id: 'exercise', nameZh: '锻炼身体', apCost: 1, phase: 'any',

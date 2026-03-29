@@ -16,6 +16,19 @@ function weightedPick<T>(options: { value: T; weight: number }[]): T {
 
 // MVP Event pool — 15 core events for initial playability
 export const EVENT_POOL: GameEvent[] = [
+  // JOB OFFER (triggered by prepJobChange action, not random)
+  {
+    id: 'job_offer_received', type: 'opportunity', nameZh: '收到Offer！', phase: 'career',
+    descZh: '面试通过了！新公司给了你一个offer。要接受吗？\n\n⚠️ 没有I-140的话跳槽会重置绿卡进度（PERM归零）！\n✅ 有I-140的话排期保留。',
+    weight: 0, // not randomly triggered
+    cooldownQuarters: 0, oneTime: false,
+    precondition: () => false, // manual trigger only
+    immediateEffects: { mental: 5 },
+    choices: [
+      { id: 'accept', textKey: '', nameZh: '接受Offer，跳槽！', descZh: '新公司、新薪资、新开始。', tag: 'risky', effects: { mental: 10 }, flags: { acceptJobOffer: true } },
+      { id: 'decline', textKey: '', nameZh: '婉拒，留在现公司', descZh: '现在不是跳槽的好时机。', tag: 'stable', effects: {} },
+    ],
+  },
   // CRISIS
   {
     id: 'layoff_wave', type: 'crisis', nameZh: '裁员预警', phase: 'career',

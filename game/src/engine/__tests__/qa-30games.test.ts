@@ -140,7 +140,7 @@ function validateTurn(state: GameState, prevState: GameState, gameNum: number): 
 
   // Career actions should not appear in academic phase (except urgentJobSearch edge case)
   if (state.phase === 'academic') {
-    for (const id of ['upskill', 'prepJobChange', 'prepJobChangeIntensive', 'entrepreneurship']) {
+    for (const id of ['upskill', 'prepJobChange', 'entrepreneurship']) {
       if (availIds.has(id as ActionId)) {
         add('actions', `Career action ${id} available in academic phase`);
       }
