@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { gameState, returnToTitle, turnInfo, exportGameLog } from '../engine/store';
+  import { gameState, returnToTitle, turnInfo, exportGameLog, shareGameResult } from '../engine/store';
+
+  let shareStatus = $state('');
   import { calculateFinalScore, getTurnInfo } from '../engine/game-state';
 
   const gs = $derived($gameState);
@@ -186,21 +188,36 @@
 
   <!-- Bottom Buttons -->
   <div class="px-5 pb-6 pt-2 space-y-2">
+    <!-- Share button -->
+    <button
+      class="w-full py-4 rounded-2xl bg-gradient-to-r from-green-600 to-emerald-600 text-white text-base font-bold active:scale-[0.98] transition-transform shadow-lg shadow-green-600/20"
+      onclick={async () => {
+        const ok = await shareGameResult();
+        shareStatus = ok ? '已复制到剪贴板！' : '分享失败';
+        setTimeout(() => shareStatus = '', 3000);
+      }}
+    >
+      📤 分享我的移民之路
+    </button>
+    {#if shareStatus}
+      <p class="text-xs text-green-400 text-center">{shareStatus}</p>
+    {/if}
+
     <div class="flex gap-3">
       <button
-        class="flex-1 py-4 rounded-2xl bg-[#1a2234] text-gray-400 text-sm font-bold border border-[#2a3050] active:scale-[0.98] transition-transform"
+        class="flex-1 py-3 rounded-2xl bg-[#1a2234] text-gray-400 text-sm font-bold border border-[#2a3050] active:scale-[0.98] transition-transform"
         onclick={exportGameLog}
       >
-        📥 下载游戏记录
+        📥 下载记录
       </button>
       <button
-        class="flex-1 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 text-white text-base font-bold active:scale-[0.98] transition-transform shadow-lg shadow-blue-600/20"
+        class="flex-1 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-bold active:scale-[0.98] transition-transform shadow-lg shadow-blue-600/20"
         onclick={returnToTitle}
       >
         再来一局
       </button>
     </div>
-    <p class="text-[9px] text-gray-700 text-center">游戏记录包含每回合的选择、属性变化和事件，可用于复盘分析</p>
+    <p class="text-[9px] text-gray-700 text-center">游戏自动保存 · 可从标题页恢复</p>
   </div>
 </div>
 {/if}

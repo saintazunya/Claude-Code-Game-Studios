@@ -8,6 +8,8 @@ import { getPortfolioStatus } from './economic-cycle';
 import { getHealthThreshold, getMentalThreshold } from './attributes';
 import { EVENT_POOL } from './events';
 import { startLog, logTurn, logEventChoice, endLog, downloadLog } from './logger';
+import { autoSave, loadGame, getSaveIndex, type SaveMeta } from './save';
+import { shareResult } from './share';
 
 export type Screen = 'title' | 'creation' | 'game' | 'event' | 'summary' | 'endgame';
 
@@ -21,6 +23,10 @@ export const selectedActions = writable<ActionId[]>([]);
 // Current event being shown to player
 export const currentEvent = writable<GameEvent | null>(null);
 export const eventQueue = writable<GameEvent[]>([]);
+
+// Session tracking
+export const currentSessionId = writable<string | null>(null);
+export const saveList = writable<SaveMeta[]>([]);
 
 // Derived stores
 export const turnInfo = derived(gameState, ($gs) => {
@@ -70,7 +76,25 @@ export function startNewGame(creation: CreationAttributes) {
   selectedWorkMode.set(null);
   selectedActions.set([]);
   startLog(creation, state.schoolModifier, state.geoBonus);
+  const id = autoSave(state);
+  currentSessionId.set(id);
+  refreshSaveList();
   screen.set('game');
+}
+
+export function resumeGame(id: string) {
+  const state = loadGame(id);
+  if (!state) return false;
+  gameState.set(state);
+  selectedWorkMode.set(null);
+  selectedActions.set([]);
+  currentSessionId.set(id);
+  screen.set('game');
+  return true;
+}
+
+export function refreshSaveList() {
+  saveList.set(getSaveIndex());
 }
 
 export function selectWorkModeAction(mode: WorkMode | AcademicStudyMode) {
@@ -122,6 +146,10 @@ export function endTurn() {
   const newState = processTurn(gs, wm, actions);
   gameState.set(newState);
   logTurn(stateBefore, newState, wm, actions);
+
+  // Auto-save
+  const sessionId = get(currentSessionId);
+  if (sessionId) autoSave(newState, sessionId);
 
   selectedWorkMode.set(null);
   selectedActions.set([]);
@@ -183,6 +211,12 @@ export function continueTurn() {
 
 export function exportGameLog() {
   downloadLog();
+}
+
+export async function shareGameResult(): Promise<boolean> {
+  const gs = get(gameState);
+  if (!gs) return false;
+  return shareResult(gs);
 }
 
 export function returnToTitle() {
