@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createGameState, getTurnInfo, getEffectiveAp, getWorkModeCost, processTurn, calculateFinalScore } from '../game-state';
+import { createGameState, getTurnInfo, getEffectiveAp, getWorkModeCost, processTurn, calculateFinalScore, getMaxAp, inferWorkMode } from '../game-state';
 
 describe('Game State', () => {
   describe('createGameState', () => {
@@ -31,48 +31,58 @@ describe('Game State', () => {
     });
   });
 
-  describe('getEffectiveAp', () => {
-    it('normal = 6 AP', () => {
+  describe('getMaxAp', () => {
+    it('max AP is 10 normally', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
-      expect(getEffectiveAp(state, 'normal')).toBe(6);
+      expect(getMaxAp(state)).toBe(10);
     });
 
-    it('grind = 10 AP', () => {
-      const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
-      expect(getEffectiveAp(state, 'grind')).toBe(10);
-    });
-
-    it('coast = 5 AP', () => {
-      const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
-      expect(getEffectiveAp(state, 'coast')).toBe(5);
-    });
-
-    it('sickness penalty reduces AP but floors at 4', () => {
-      const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
-      state.flags.sicknessApPenalty = 5;
-      expect(getEffectiveAp(state, 'normal')).toBe(4); // 6 - 5 = 1, but floor at 4
-    });
-
-    it('burnout = minimum 4 AP (rest/hospital are free when sick)', () => {
-      const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
-      state.flags.burnoutActive = true;
-      expect(getEffectiveAp(state, 'normal')).toBe(4);
-    });
-
-    it('grind locked falls back to 6 AP', () => {
+    it('grind locked caps at 7', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
       state.grindLockQuarters = 2;
-      expect(getEffectiveAp(state, 'grind')).toBe(6); // locked = normal AP
+      expect(getMaxAp(state)).toBe(7);
+    });
+
+    it('sickness reduces max AP but floors at 4', () => {
+      const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
+      state.flags.sicknessApPenalty = 8;
+      expect(getMaxAp(state)).toBe(4);
+    });
+
+    it('burnout = 4 AP', () => {
+      const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
+      state.flags.burnoutActive = true;
+      expect(getMaxAp(state)).toBe(4);
+    });
+  });
+
+  describe('inferWorkMode', () => {
+    it('≤5 AP used = coast', () => {
+      expect(inferWorkMode(3, false)).toBe('coast');
+      expect(inferWorkMode(5, false)).toBe('coast');
+    });
+
+    it('6-7 AP used = normal', () => {
+      expect(inferWorkMode(6, false)).toBe('normal');
+      expect(inferWorkMode(7, false)).toBe('normal');
+    });
+
+    it('>7 AP used = grind', () => {
+      expect(inferWorkMode(8, false)).toBe('grind');
+      expect(inferWorkMode(10, false)).toBe('grind');
+    });
+
+    it('urgent job search forces at least normal', () => {
+      expect(inferWorkMode(3, true)).toBe('normal');
+      expect(inferWorkMode(9, true)).toBe('grind');
     });
   });
 
   describe('getWorkModeCost', () => {
-    it('work mode cost is always 0 (AP budget set by getEffectiveAp)', () => {
+    it('work mode cost is always 0 (AP budget set by getMaxAp)', () => {
       expect(getWorkModeCost('coast')).toBe(0);
-      expect(getWorkModeCost('light')).toBe(0);
       expect(getWorkModeCost('normal')).toBe(0);
       expect(getWorkModeCost('grind')).toBe(0);
-      expect(getWorkModeCost('intense')).toBe(0);
     });
   });
 
@@ -83,19 +93,19 @@ describe('Game State', () => {
       expect(next.turn).toBe(1);
     });
 
-    it('applies work mode effects', () => {
+    it('infers coast mode when few actions used', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
-      const next = processTurn(state, 'normal', []);
-      // Normal academic mode: skills +5, mental -2
-      expect(next.attributes.skills).toBeGreaterThan(state.attributes.skills);
+      const next = processTurn(state, 'normal', ['exercise']); // 1 AP used
+      const record = next.timeline[0];
+      expect(record.workMode).toBe('coast');
     });
 
-    it('applies action effects', () => {
+    it('infers grind mode when many actions used', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
-      const next = processTurn(state, 'normal', ['rest']);
-      // Rest: health +10, mental +8 (minus decay)
-      // Health starts at 64, rest +10, decay ~-2 = ~72
-      expect(next.attributes.health).toBeGreaterThan(60);
+      // Use 8+ AP worth of actions
+      const next = processTurn(state, 'normal', ['rest', 'exercise', 'studyGpa', 'networking']); // 2+1+3+2 = 8
+      const record = next.timeline[0];
+      expect(record.workMode).toBe('grind');
     });
 
     it('records quarter in timeline', () => {
@@ -103,22 +113,11 @@ describe('Game State', () => {
       const next = processTurn(state, 'normal', []);
       expect(next.timeline).toHaveLength(1);
       expect(next.timeline[0].turn).toBe(1);
-      expect(next.timeline[0].workMode).toBe('normal');
-    });
-
-    it('tracks consecutive grind quarters', () => {
-      let state = createGameState({ constitution: 5, schoolRanking: 3, geoLocation: 2 });
-      state = processTurn(state, 'intense', []);
-      expect(state.career.grindConsecutive).toBe(1);
-      state = processTurn(state, 'intense', []);
-      expect(state.career.grindConsecutive).toBe(2);
-      state = processTurn(state, 'normal', []);
-      expect(state.career.grindConsecutive).toBe(0);
     });
 
     it('game ends at turn 148', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
-      state.turn = 147; // next processTurn will make it 148
+      state.turn = 147;
       const next = processTurn(state, 'normal', []);
       expect(next.turn).toBe(148);
       expect(next.endingType).not.toBeNull();
@@ -130,28 +129,24 @@ describe('Game State', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
       state.attributes.netWorth = 1000000;
       state.immigration.hasGreenCard = true;
-      state.turn = 80; // age ~42
+      state.turn = 80;
       const score = calculateFinalScore(state);
-      // 1M * 1.5 + (59-42)*10000 = 1,500,000 + 170,000 = 1,670,000
       expect(score).toBe(1670000);
     });
 
-    it('no GC = 1.0 multiplier, no early bonus', () => {
+    it('no GC = 1.0 multiplier', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
       state.attributes.netWorth = 1000000;
       state.immigration.hasGreenCard = false;
       state.turn = 148;
-      const score = calculateFinalScore(state);
-      expect(score).toBe(1000000);
+      expect(calculateFinalScore(state)).toBe(1000000);
     });
 
     it('deportation = 0.8 penalty', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
       state.attributes.netWorth = 1000000;
-      state.immigration.hasGreenCard = false;
       state.endingType = 'deported';
-      const score = calculateFinalScore(state);
-      expect(score).toBe(800000);
+      expect(calculateFinalScore(state)).toBe(800000);
     });
   });
 });

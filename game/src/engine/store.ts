@@ -1,7 +1,7 @@
 // Reactive game store — bridges engine to Svelte UI
 import { writable, derived, get } from 'svelte/store';
 import type { GameState, CreationAttributes, WorkMode, AcademicStudyMode, ActionId, GameEvent } from './types';
-import { createGameState, getTurnInfo, getEffectiveAp, getWorkModeCost, getWorkModeEffects, processTurn, calculateFinalScore, resolveEvent } from './game-state';
+import { createGameState, getTurnInfo, getEffectiveAp, getWorkModeCost, getWorkModeEffects, processTurn, calculateFinalScore, resolveEvent, inferWorkMode, getMaxAp } from './game-state';
 import { getAvailableActions, canSelectAction, ACTIONS } from './actions';
 import { preview } from './probability';
 import { getPortfolioStatus } from './economic-cycle';
@@ -35,9 +35,9 @@ export const turnInfo = derived(gameState, ($gs) => {
   return getTurnInfo($gs.turn);
 });
 
-export const effectiveAp = derived([gameState, selectedWorkMode], ([$gs, $wm]) => {
-  if (!$gs || !$wm) return 10;
-  return getEffectiveAp($gs, $wm);
+export const effectiveAp = derived(gameState, ($gs) => {
+  if (!$gs) return 7;
+  return getEffectiveAp($gs);
 });
 
 export const availableActions = derived(gameState, ($gs) => {
@@ -45,14 +45,20 @@ export const availableActions = derived(gameState, ($gs) => {
   return getAvailableActions($gs);
 });
 
-export const remainingAp = derived([effectiveAp, selectedWorkMode, selectedActions, availableActions], ([$eap, $wm, $sa, $avail]) => {
-  if (!$wm) return $eap;
-  let remaining = $eap - getWorkModeCost($wm);
+export const remainingAp = derived([effectiveAp, selectedActions, availableActions], ([$eap, $sa, $avail]) => {
+  let remaining = $eap;
   for (const actionId of $sa) {
     const action = $avail.find(a => a.id === actionId) || ACTIONS[actionId];
     if (action) remaining -= action.apCost;
   }
   return Math.max(0, remaining);
+});
+
+// Inferred work mode from current AP usage
+export const inferredMode = derived([effectiveAp, remainingAp, selectedActions], ([$eap, $rem, $sa]) => {
+  const used = $eap - $rem;
+  const hasUrgent = $sa.includes('urgentJobSearch');
+  return inferWorkMode(used, hasUrgent);
 });
 
 export const portfolio = derived(gameState, ($gs) => {
@@ -98,36 +104,13 @@ export function refreshSaveList() {
   saveList.set(getSaveIndex());
 }
 
-export function selectWorkModeAction(mode: WorkMode | AcademicStudyMode) {
-  selectedWorkMode.set(mode);
-  const gs = get(gameState);
-  if (!gs) return;
-  const totalAp = getEffectiveAp(gs, mode);
-  const workCost = getWorkModeCost(mode);
-  let remaining = totalAp - workCost;
-
-  const current = get(selectedActions);
-  const avail = get(availableActions);
-  const valid: ActionId[] = [];
-  for (const id of current) {
-    const action = avail.find(a => a.id === id) || ACTIONS[id];
-    if (action && action.apCost <= remaining) {
-      valid.push(id);
-      remaining -= action.apCost;
-    }
-  }
-  selectedActions.set(valid);
-}
-
 export function toggleAction(actionId: ActionId) {
   const current = get(selectedActions);
   if (current.includes(actionId)) {
     selectedActions.set(current.filter((id) => id !== actionId));
   } else {
     const gs = get(gameState);
-    const wm = get(selectedWorkMode);
-    if (!gs || !wm) return;
-    // Use available actions for correct AP cost (may be 0 when sick)
+    if (!gs) return;
     const avail = get(availableActions);
     const action = avail.find(a => a.id === actionId) || ACTIONS[actionId];
     if (!action) return;
@@ -153,14 +136,15 @@ export function autoSelect() {
 
 export function endTurn() {
   const gs = get(gameState);
-  const wm = get(selectedWorkMode);
-  if (!gs || !wm) return;
+  if (!gs) return;
 
   const actions = get(selectedActions);
   const stateBefore = gs;
-  const newState = processTurn(gs, wm, actions);
+  // Work mode is inferred from AP usage inside processTurn
+  const newState = processTurn(gs, 'normal', actions);
+  const mode = get(inferredMode);
   gameState.set(newState);
-  logTurn(stateBefore, newState, wm, actions);
+  logTurn(stateBefore, newState, mode, actions);
 
   // Auto-save
   const sessionId = get(currentSessionId);

@@ -97,44 +97,44 @@ export function getTurnInfo(turn: number) {
   return { year, quarter, age };
 }
 
-export function getEffectiveAp(state: GameState, workMode?: WorkMode | AcademicStudyMode): number {
-  let base: number;
-  if (workMode === 'grind' || workMode === 'intense') {
-    base = state.grindLockQuarters <= 0 ? 10 : 6;
-  } else if (workMode === 'normal') {
-    base = 6;
-  } else if (workMode === 'coast' || workMode === 'light') {
-    base = 5;
-  } else {
-    base = 6; // default if no mode selected
-  }
+// Max AP is always 10 (can overdraft from base 7 up to 10 = grind territory)
+// Base AP = 7, overdraft to 10 allowed but triggers grind health penalty
+export function getMaxAp(state: GameState): number {
+  let max = 10;
 
-  // Base work occupies 3 AP when employed in career phase
-  if (state.phase === 'career' && state.career.employed === 'employed') {
-    base -= 3;
-  }
+  // Grind locked: can't overdraft, cap at 7
+  if (state.grindLockQuarters > 0) max = 7;
 
-  // Intern work takes 3AP for one quarter only
-  if (state.phase === 'academic' && state.flags.internActiveThisQuarter) {
-    base -= 3;
-  }
-
-  // Mental stress reduces AP: below 50 = -1, below 30 = -2
-  if (state.attributes.mental < 30) {
-    base -= 2;
-  } else if (state.attributes.mental < 50) {
-    base -= 1;
-  }
-
-  // Sickness reduces AP but never below 4
+  // Sickness reduces max
   const sicknessPenalty = (state.flags.sicknessApPenalty as number) || 0;
-  base -= sicknessPenalty;
-  base = Math.max(base, 4);
+  max -= sicknessPenalty;
+  max = Math.max(max, 4);
 
-  // Burnout = minimum AP
-  if (state.flags.burnoutActive) return 4;
-  // Hospitalized = minimum AP
-  if (state.attributes.health <= 0) return 4;
+  // Burnout / hospitalized
+  if (state.flags.burnoutActive || state.attributes.health <= 0) return 4;
+
+  return max;
+}
+
+export function getBaseAp(state: GameState): number {
+  return 7;
+}
+
+// Determine work mode from AP actually used
+export function inferWorkMode(apUsed: number, hasUrgentJobSearch: boolean): WorkMode {
+  if (hasUrgentJobSearch) {
+    // Urgent job search forces at least normal mode
+    return apUsed > 7 ? 'grind' : 'normal';
+  }
+  if (apUsed > 7) return 'grind';
+  if (apUsed <= 5) return 'coast';
+  return 'normal';
+}
+
+export function getEffectiveAp(state: GameState, workMode?: WorkMode | AcademicStudyMode): number {
+  // workMode parameter kept for compatibility but now ignored
+  // Always return max AP — player decides how much to use
+  return getMaxAp(state);
 
   return Math.max(0, base);
 }
@@ -211,15 +211,23 @@ export function processTurn(
     }
   }
 
-  // 3. Apply work mode effects
-  const workEffects = getWorkModeEffects(workMode, s);
+  // 3. Calculate total AP used and infer work mode
+  const totalApUsed = selectedActions.reduce((sum, id) => {
+    const action = ACTIONS[id];
+    return sum + (action?.apCost || 0);
+  }, 0);
+  const hasUrgentJob = selectedActions.includes('urgentJobSearch');
+  const inferredMode = inferWorkMode(totalApUsed, hasUrgentJob);
+  // Use inferred mode for effects (workMode param now ignored)
+  const actualWorkMode = inferredMode;
+  const workEffects = getWorkModeEffects(actualWorkMode, s);
   s.attributes = applyDeltas(s.attributes, workEffects);
 
   // Track consecutive modes
-  if (workMode === 'grind' || workMode === 'intense') {
+  if (actualWorkMode === 'grind') {
     s.career.grindConsecutive++;
     s.career.coastConsecutive = 0;
-  } else if (workMode === 'coast' || workMode === 'light') {
+  } else if (actualWorkMode === 'coast') {
     s.career.coastConsecutive++;
     s.career.grindConsecutive = 0;
   } else {
@@ -517,7 +525,7 @@ export function processTurn(
     attributesBefore: attrsBefore,
     attributesAfter: { ...s.attributes },
     events: turnEvents,
-    workMode,
+    workMode: actualWorkMode,
     actions: selectedActions,
   };
   s.timeline.push(record);
