@@ -62,12 +62,12 @@ describe('Game State', () => {
   });
 
   describe('getWorkModeCost', () => {
-    it('coast/light = 3, normal = 4, grind/intense = 4', () => {
-      expect(getWorkModeCost('coast')).toBe(3);
-      expect(getWorkModeCost('light')).toBe(3);
-      expect(getWorkModeCost('normal')).toBe(4);
-      expect(getWorkModeCost('grind')).toBe(4);
-      expect(getWorkModeCost('intense')).toBe(4);
+    it('all work modes cost 0 AP (status effects only)', () => {
+      expect(getWorkModeCost('coast')).toBe(0);
+      expect(getWorkModeCost('light')).toBe(0);
+      expect(getWorkModeCost('normal')).toBe(0);
+      expect(getWorkModeCost('grind')).toBe(0);
+      expect(getWorkModeCost('intense')).toBe(0);
     });
   });
 

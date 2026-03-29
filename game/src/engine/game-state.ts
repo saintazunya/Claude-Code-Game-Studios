@@ -128,9 +128,9 @@ export function getEffectiveAp(state: GameState, workMode?: WorkMode | AcademicS
 
 export function getWorkModeCost(mode: WorkMode | AcademicStudyMode): number {
   switch (mode) {
-    case 'coast': case 'light': return 3;
-    case 'normal': return 4;
-    case 'grind': case 'intense': return 4;
+    case 'coast': case 'light': return 0;
+    case 'normal': return 0;
+    case 'grind': case 'intense': return 0;
   }
 }
 

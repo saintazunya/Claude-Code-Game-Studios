@@ -22,14 +22,14 @@
 
   const workModes = $derived(isAcademic
     ? [
-        { id: 'light' as AcademicStudyMode, label: '轻松', emoji: '☕', cost: 3, desc: 'GPA-0.10, 精神+3' },
-        { id: 'normal' as AcademicStudyMode, label: '正常', emoji: '📚', cost: 4, desc: 'GPA+0.15, 精神-2' },
-        { id: 'intense' as AcademicStudyMode, label: '拼命', emoji: '🔥', cost: 4, desc: 'GPA+0.15, 健康-, +3AP' },
+        { id: 'light' as AcademicStudyMode, label: '轻松', emoji: '☕', cost: 0, desc: 'GPA-0.10, 精神+3' },
+        { id: 'normal' as AcademicStudyMode, label: '正常', emoji: '📚', cost: 0, desc: 'GPA+0.15, 精神-2' },
+        { id: 'intense' as AcademicStudyMode, label: '拼命', emoji: '🔥', cost: 0, desc: 'GPA+0.15, 健康-, +3AP' },
       ]
     : [
-        { id: 'coast' as WorkMode, label: '躺平', emoji: '🛋️', cost: 3, desc: '绩效-5, 精神+3' },
-        { id: 'normal' as WorkMode, label: '正常', emoji: '💼', cost: 4, desc: '绩效+5, 精神-2' },
-        { id: 'grind' as WorkMode, label: '卷王', emoji: '🔥', cost: 4, desc: '绩效+15, 健康-15, +3AP' },
+        { id: 'coast' as WorkMode, label: '躺平', emoji: '🛋️', cost: 0, desc: '绩效-5, 精神+3' },
+        { id: 'normal' as WorkMode, label: '正常', emoji: '💼', cost: 0, desc: '绩效+5, 精神-2' },
+        { id: 'grind' as WorkMode, label: '卷王', emoji: '🔥', cost: 0, desc: '绩效+15, 健康-15, +3AP' },
       ]
   );
 
@@ -336,7 +336,6 @@
         >
           <div class="text-lg">{mode.emoji}</div>
           <div class="text-xs font-bold text-white">{mode.label}</div>
-          <div class="text-gray-500 text-[9px]">{mode.cost} AP</div>
           <div class="text-[8px] text-gray-600 mt-0.5">{mode.desc}</div>
           {#if isGrind && !disabled}
             <div class="text-red-400 text-[9px] font-bold mt-0.5">+3 AP</div>
