@@ -57,7 +57,7 @@
 
   function actionIcon(id: string): string {
     const icons: Record<string, string> = {
-      workHard: '💪', workSuperHard: '🏋️', upskill: '📖', prepJobChange: '🔍',
+      workHard: '💪', workSuperHard: '🏋️', studySlack: '☕', studyNormal: '📚', studyHard: '📖',  upskill: '📖', prepJobChange: '🔍',
       prepJobChangeIntensive: '🎯', hospital: '🏥', internWork: '💪',
       entrepreneurship: '🚀', prepH1b: '📋', researchNiw: '📝',
       publishPaper: '📄', consultLawyer: '⚖️', rest: '😴', travel: '✈️',
@@ -69,9 +69,9 @@
   }
 
   function modeLabel(m: string) {
-    if (m === 'grind') return { text: '🔥 卷王模式', color: 'text-red-400', desc: '健康⬇ 绩效+15' };
-    if (m === 'coast') return { text: '🛋️ 躺平模式', color: 'text-green-400', desc: '精神+3 绩效-5' };
-    return { text: '💼 正常模式', color: 'text-blue-400', desc: '绩效+5 精神-2' };
+    if (m === 'grind') return { text: '🔥 卷王模式', color: 'text-red-400', desc: '健康⬇ 精神-8' };
+    if (m === 'coast') return { text: '🛋️ 躺平模式', color: 'text-green-400', desc: '精神+3' };
+    return { text: '💼 正常模式', color: 'text-blue-400', desc: '精神-2' };
   }
 
   const modeInfo = $derived(modeLabel(mode));

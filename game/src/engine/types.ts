@@ -175,7 +175,10 @@ export type ActionId =
   | 'urgentJobSearch'
   | 'internWork'
   | 'workHard'
-  | 'workSuperHard';
+  | 'workSuperHard'
+  | 'studySlack'
+  | 'studyNormal'
+  | 'studyHard';
 
 export interface ActionDef {
   id: ActionId;

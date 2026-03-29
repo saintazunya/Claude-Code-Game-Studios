@@ -6,15 +6,15 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
   // Career actions
   workHard: {
     id: 'workHard', nameZh: '努力工作', apCost: 1, phase: 'career',
-    effects: { performance: 3, mental: -1 }, description: 'Put in extra effort at work',
-    tipsZh: '✅ 绩效+3 | ⚠️ 精神-1 | 💡 基础工作之外的额外投入',
+    effects: { performance: 5, mental: -1 }, description: 'Put in extra effort at work',
+    tipsZh: '✅ 绩效+5 | ⚠️ 精神-1 | 💡 稳步积累绩效',
     precondition: (s) => s.career.employed === 'employed',
     exclusive: ['workSuperHard'],
   },
   workSuperHard: {
     id: 'workSuperHard', nameZh: '超级努力工作', apCost: 2, phase: 'career',
-    effects: { performance: 7, mental: -3 }, description: 'Go above and beyond',
-    tipsZh: '✅ 绩效+7 | ⚠️ 精神-3 | 💡 冲绩效升职用',
+    effects: { performance: 12, mental: -3 }, description: 'Go above and beyond',
+    tipsZh: '✅ 绩效+12 | ⚠️ 精神-3 | 💡 冲绩效升职用',
     precondition: (s) => s.career.employed === 'employed',
     exclusive: ['workHard'],
   },
@@ -106,10 +106,28 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
   },
 
   // Academic phase actions
+  studySlack: {
+    id: 'studySlack', nameZh: '摸鱼学习', apCost: 1, phase: 'academic',
+    effects: { skills: 1 }, description: 'Minimal study effort',
+    tipsZh: '✅ GPA+0.05 | ✅ 技能+1 | 💡 省AP但GPA涨得慢',
+    exclusive: ['studyNormal', 'studyHard'],
+  },
+  studyNormal: {
+    id: 'studyNormal', nameZh: '正常学习', apCost: 2, phase: 'academic',
+    effects: { skills: 3 }, description: 'Regular study effort',
+    tipsZh: '✅ GPA+0.15 | ✅ 技能+3 | 💡 稳步提升',
+    exclusive: ['studySlack', 'studyHard'],
+  },
+  studyHard: {
+    id: 'studyHard', nameZh: '努力学习', apCost: 3, phase: 'academic',
+    effects: { skills: 5, mental: -2 }, description: 'Intensive study',
+    tipsZh: '✅ GPA+0.30 | ✅ 技能+5 | ⚠️ 精神-2 | 💡 快速刷GPA',
+    exclusive: ['studySlack', 'studyNormal'],
+  },
   studyGpa: {
     id: 'studyGpa', nameZh: '刷GPA', apCost: 3, phase: 'academic',
-    effects: {}, description: 'Study to improve GPA (+0.2)',
-    tipsZh: '✅ GPA+0.2 | ✅ 高GPA提高找实习和工作概率 | 💡 GPA 3.5+有明显加成',
+    effects: {}, description: 'Extra GPA study session (+0.2)',
+    tipsZh: '✅ 额外GPA+0.2 | 💡 可以和学习行动叠加',
   },
   searchIntern: {
     id: 'searchIntern', nameZh: '找实习', apCost: 3, phase: 'academic',

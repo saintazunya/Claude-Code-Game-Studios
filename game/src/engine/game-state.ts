@@ -147,24 +147,17 @@ export function getWorkModeCost(mode: WorkMode | AcademicStudyMode): number {
   }
 }
 
+// Mode effects: only lifestyle impact (mental/health). Performance/skills come from actions.
 export function getWorkModeEffects(mode: WorkMode | AcademicStudyMode, state: GameState): Partial<CoreAttributes> {
-  const perfMult = getPerformanceGainMultiplier(state);
-
-  // Constitution reduces grind/intense health cost: 0 = full, 5 = 50% reduced
   const grindReduction = state.creation.constitution * 0.1;
 
-  if (state.phase === 'academic') {
-    switch (mode as AcademicStudyMode) {
-      case 'light': return { skills: 2, mental: 3 };
-      case 'normal': return { skills: 5, mental: -2 };
-      case 'intense': return { skills: 8, mental: -8, health: Math.round(-10 * (1 - grindReduction)) };
-    }
-  }
-
-  switch (mode as WorkMode) {
-    case 'coast': return { performance: Math.round(-5 * perfMult), mental: 3 };
-    case 'normal': return { performance: Math.round(5 * perfMult), mental: -2 };
-    case 'grind': return { performance: Math.round(15 * perfMult), mental: -8, health: Math.round(-15 * (1 - grindReduction)) };
+  switch (mode) {
+    case 'coast': case 'light':
+      return { mental: 3 }; // relaxed, recover mental
+    case 'normal':
+      return { mental: -2 }; // baseline stress
+    case 'grind': case 'intense':
+      return { mental: -8, health: Math.round(-15 * (1 - grindReduction)) }; // burnout risk
   }
 }
 
@@ -265,6 +258,19 @@ export function processTurn(
           s.attributes = applyDeltas(s.attributes, { academicImpact: 5 }); // Publication bonus
         }
       }
+      // Study actions affect GPA
+      if (actionId === 'studySlack') {
+        s.academic.gpa = Math.min(4.0, s.academic.gpa + 0.05);
+      }
+      if (actionId === 'studyNormal') {
+        s.academic.gpa = Math.min(4.0, s.academic.gpa + 0.15);
+      }
+      if (actionId === 'studyHard') {
+        s.academic.gpa = Math.min(4.0, s.academic.gpa + 0.30);
+      }
+      if (actionId === 'studyGpa') {
+        s.academic.gpa = Math.min(4.0, s.academic.gpa + 0.20);
+      }
       if (actionId === 'travel') {
         s.economy.cash -= 2000 + Math.random() * 3000;
       }
@@ -292,10 +298,10 @@ export function processTurn(
 
   // 5. Apply natural decay
   const decay = computeNaturalDecay(s);
-  // Don't apply performance decay if player worked this turn
-  const workedThisTurn = workMode !== 'coast' && workMode !== 'light';
-  if (!workedThisTurn && decay.performance !== undefined) {
-    // Performance decays when coasting (already handled in work mode effects)
+  // Performance decays if no work action taken (career phase)
+  const workedThisTurn = selectedActions.some(id => ['workHard', 'workSuperHard'].includes(id));
+  if (!workedThisTurn && s.phase === 'career' && s.career.employed === 'employed') {
+    s.attributes = applyDeltas(s.attributes, { performance: -3 }); // idle performance decay
   }
   s.attributes = applyDeltas(s.attributes, {
     skills: decay.skills,
@@ -402,10 +408,13 @@ export function processTurn(
   // Career tenure
   if (s.career.employed === 'employed') s.career.tenure++;
 
-  // 7b. Academic phase: GPA gain from study mode, graduation check
+  // 7b. Academic phase: graduation check (GPA now comes from study actions above)
   if (s.phase === 'academic') {
-    const gpaGain = getGpaGain(workMode);
-    s.academic.gpa = Math.min(4.0, s.academic.gpa + gpaGain);
+    // GPA decay if no study action was taken this turn
+    const studiedThisTurn = selectedActions.some(id => ['studySlack', 'studyNormal', 'studyHard', 'studyGpa'].includes(id));
+    if (!studiedThisTurn) {
+      s.academic.gpa = Math.max(2.0, s.academic.gpa - 0.10); // GPA decays without study
+    }
 
     if (isGraduationTurn(s)) {
       const grad = processGraduation(s);
