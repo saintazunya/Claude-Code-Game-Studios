@@ -22,14 +22,14 @@
 
   const workModes = $derived(isAcademic
     ? [
-        { id: 'light' as AcademicStudyMode, label: '轻松', emoji: '☕', cost: 2, desc: '技能+2, 精神+3' },
+        { id: 'light' as AcademicStudyMode, label: '轻松', emoji: '☕', cost: 3, desc: '技能+2, 精神+3' },
         { id: 'normal' as AcademicStudyMode, label: '正常', emoji: '📚', cost: 4, desc: '技能+5, 精神-2' },
-        { id: 'intense' as AcademicStudyMode, label: '拼命', emoji: '🔥', cost: 6, desc: '技能+8, 健康-10' },
+        { id: 'intense' as AcademicStudyMode, label: '拼命', emoji: '🔥', cost: 4, desc: '技能+8, 健康-10, +3AP' },
       ]
     : [
-        { id: 'coast' as WorkMode, label: '躺平', emoji: '🛋️', cost: 2, desc: '绩效-5, 精神+3' },
+        { id: 'coast' as WorkMode, label: '躺平', emoji: '🛋️', cost: 3, desc: '绩效-5, 精神+3' },
         { id: 'normal' as WorkMode, label: '正常', emoji: '💼', cost: 4, desc: '绩效+5, 精神-2' },
-        { id: 'grind' as WorkMode, label: '卷王', emoji: '🔥', cost: 6, desc: '绩效+15, 健康-15' },
+        { id: 'grind' as WorkMode, label: '卷王', emoji: '🔥', cost: 4, desc: '绩效+15, 健康-15, +3AP' },
       ]
   );
 

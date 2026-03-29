@@ -62,12 +62,12 @@ describe('Game State', () => {
   });
 
   describe('getWorkModeCost', () => {
-    it('coast/light = 2, normal = 4, grind/intense = 6', () => {
-      expect(getWorkModeCost('coast')).toBe(2);
-      expect(getWorkModeCost('light')).toBe(2);
+    it('coast/light = 3, normal = 4, grind/intense = 4', () => {
+      expect(getWorkModeCost('coast')).toBe(3);
+      expect(getWorkModeCost('light')).toBe(3);
       expect(getWorkModeCost('normal')).toBe(4);
-      expect(getWorkModeCost('grind')).toBe(6);
-      expect(getWorkModeCost('intense')).toBe(6);
+      expect(getWorkModeCost('grind')).toBe(4);
+      expect(getWorkModeCost('intense')).toBe(4);
     });
   });
 
