@@ -100,7 +100,7 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
     id: 'hospital', nameZh: '去医院看病', apCost: 3, phase: 'any',
     effects: { health: 25, mental: 5 }, description: 'Visit hospital for treatment ($3,000)',
     tipsZh: '✅ 健康+25（最强治疗）| ✅ 清除生病状态，减少下季度AP惩罚 | ⚠️ 花费$3,000',
-    precondition: (s) => (s.flags.gotSick as boolean) || s.attributes.health < 50,
+    precondition: (s) => (s.flags.gotSick as boolean) || (s.flags.sicknessApPenalty as number) > 0 || s.attributes.health < 50,
   },
   travel: {
     id: 'travel', nameZh: '旅游度假', apCost: 3, phase: 'any',

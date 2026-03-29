@@ -362,6 +362,9 @@ export function processTurn(
     s.economy.homeValue *= (1 + housingChange);
   }
 
+  // 6b. Grind lock countdown (before new locks can be set by sickness/burnout)
+  if (s.grindLockQuarters > 0) s.grindLockQuarters--;
+
   // 7. Probability checks
   // Sickness (immune during first year — turns 1-4)
   s.flags.sicknessApPenalty = 0;
@@ -417,8 +420,7 @@ export function processTurn(
     s.flags.burnoutActive = false;
   }
 
-  // Grind lock countdown
-  if (s.grindLockQuarters > 0) s.grindLockQuarters--;
+  // Grind lock countdown (moved after sickness/burnout can set new locks)
 
   // Career tenure
   if (s.career.employed === 'employed') s.career.tenure++;
