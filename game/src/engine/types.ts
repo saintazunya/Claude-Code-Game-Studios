@@ -138,6 +138,7 @@ export interface AcademicState {
   gpa: number; // 2.0-4.0
   hadIntern: boolean;
   internQuality: 'none' | 'mid' | 'top';
+  hasReturnOffer: boolean;
   isPhd: boolean;
   thesisPoints: number;
 }
@@ -170,7 +171,8 @@ export type ActionId =
   | 'taRaWork'
   | 'networking'
   | 'sideProject'
-  | 'urgentJobSearch';
+  | 'urgentJobSearch'
+  | 'internWork';
 
 export interface ActionDef {
   id: ActionId;

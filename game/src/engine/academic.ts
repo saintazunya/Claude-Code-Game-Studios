@@ -29,6 +29,15 @@ export function processFirstJobSearch(state: GameState): {
   rsu: number;
   mentalDelta: number;
 } {
+  // Return offer = guaranteed job (skip the roll)
+  if (state.academic.hasReturnOffer) {
+    const level = state.academic.isPhd ? 4 : 3;
+    const company = generateCompany(level);
+    const salaryBonus = state.academic.internQuality === 'top' ? 1.15 : 1.05;
+    const { salary, rsu } = computeSalary(level, company, 55);
+    return { found: true, company, level, salary: Math.round(salary * salaryBonus), rsu, mentalDelta: 25 };
+  }
+
   const result = roll('firstJob', state);
   if (!result.success) {
     return { found: false, company: null, level: 3, salary: 0, rsu: 0, mentalDelta: -15 };

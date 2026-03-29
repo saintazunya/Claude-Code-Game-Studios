@@ -72,7 +72,7 @@
 
   function actionIcon(id: string): string {
     const icons: Record<string, string> = {
-      upskill: '📖', prepJobChange: '🔍', prepJobChangeIntensive: '🎯', hospital: '🏥',
+      upskill: '📖', prepJobChange: '🔍', prepJobChangeIntensive: '🎯', hospital: '🏥', internWork: '💪',
       entrepreneurship: '🚀', prepH1b: '📋', researchNiw: '📝',
       publishPaper: '📄', consultLawyer: '⚖️', rest: '😴', travel: '✈️',
       exercise: '🏃', therapist: '🧠', studyGpa: '📚', searchIntern: '🔎',
@@ -293,7 +293,11 @@
     </div>
   {:else if isAcademic && gs.academic.hadIntern}
     <div class="mx-4 mb-2 p-3 rounded-xl bg-[#1a2234] border border-[#2a3050] text-xs">
-      <span class="text-green-400/60">✅ 已完成实习（{gs.academic.internQuality === 'top' ? '大厂' : '普通'}）— 找工作概率已提升</span>
+      {#if gs.academic.hasReturnOffer}
+        <span class="text-green-400 font-bold">🎊 已拿到Return Offer！毕业直接入职</span>
+      {:else}
+        <span class="text-green-400/60">✅ 已完成实习（{gs.academic.internQuality === 'top' ? '大厂' : '普通'}）— 找工作概率已提升</span>
+      {/if}
     </div>
   {/if}
 

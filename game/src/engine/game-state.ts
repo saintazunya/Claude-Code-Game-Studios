@@ -69,6 +69,7 @@ export function createGameState(creation: CreationAttributes): GameState {
       gpa: 3.0,
       hadIntern: false,
       internQuality: 'none',
+      hasReturnOffer: false,
       isPhd: false,
       thesisPoints: 0,
     },
@@ -172,11 +173,22 @@ export function processTurn(
     s.economicPhaseQuarters = 0;
   }
 
-  // 2b. Intern work: one quarter only, then intern ends (but hadIntern flag stays for job search bonus)
+  // 2b. Intern work: one quarter only, then resolve return offer
   if (s.phase === 'academic' && s.flags.internActiveThisQuarter) {
     s.economy.cash += 15000;
     s.attributes = applyDeltas(s.attributes, { skills: 5 });
     s.flags.internActiveThisQuarter = false; // intern ends after 1 quarter
+
+    // Return offer probability: base 40%, +30% if worked hard (internWork action selected)
+    const workedHard = selectedActions.includes('internWork');
+    const returnOfferProb = workedHard ? 0.70 : 0.40;
+    const topCompanyBonus = s.academic.internQuality === 'top' ? 0.10 : 0;
+    if (Math.random() < returnOfferProb + topCompanyBonus) {
+      s.academic.hasReturnOffer = true;
+      turnEvents.push({ id: 'return_offer_received', choiceId: '' });
+    } else {
+      turnEvents.push({ id: 'return_offer_not_received', choiceId: '' });
+    }
   }
 
   // 3. Apply work mode effects

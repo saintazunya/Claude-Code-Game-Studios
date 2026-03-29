@@ -117,6 +117,12 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
     tipsZh: '✅ 技能+2，赚$7,000/季度 | ✅ 博士补贴减少学贷 | 💡 博士专属',
     precondition: (s) => s.academic.isPhd,
   },
+  internWork: {
+    id: 'internWork', nameZh: '实习努力表现', apCost: 3, phase: 'academic',
+    effects: { skills: 5 }, description: 'Work hard at internship for return offer',
+    tipsZh: '✅ 技能+5 | ✅ 大幅提高拿return offer概率（base 40%→70%）| ⚠️ 仅实习期间可用',
+    precondition: (s) => s.flags.internActiveThisQuarter as boolean,
+  },
   networking: {
     id: 'networking', nameZh: '社交/招聘会', apCost: 2, phase: 'academic',
     effects: { skills: 3 }, description: 'Network at career fairs (+5% to next search)',
