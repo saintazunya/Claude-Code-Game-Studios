@@ -4,26 +4,33 @@ import type { ActionDef, ActionId, GameState } from './types';
 
 export const ACTIONS: Record<ActionId, ActionDef> = {
   // Career actions
+  workNone: {
+    id: 'workNone', nameZh: '完全不工作', apCost: 0, phase: 'career',
+    effects: { performance: -5, mental: 5 }, description: 'Take the quarter off',
+    tipsZh: '⚠️ 绩效-5 | ✅ 精神+5 | 💡 0AP但绩效大降',
+    precondition: (s) => s.career.employed === 'employed',
+    exclusive: ['workSlack', 'workHard', 'workSuperHard'],
+  },
   workSlack: {
     id: 'workSlack', nameZh: '摸鱼工作', apCost: 1, phase: 'career',
     effects: { performance: -3, mental: 2 }, description: 'Slack off at work',
     tipsZh: '⚠️ 绩效-3 | ✅ 精神+2 | 💡 摸鱼省精力但绩效下降',
     precondition: (s) => s.career.employed === 'employed',
-    exclusive: ['workHard', 'workSuperHard'],
+    exclusive: ['workNone', 'workHard', 'workSuperHard'],
   },
   workHard: {
     id: 'workHard', nameZh: '努力工作', apCost: 2, phase: 'career',
     effects: { performance: 5, mental: -1 }, description: 'Put in extra effort at work',
     tipsZh: '✅ 绩效+5 | ⚠️ 精神-1 | 💡 稳步积累绩效',
     precondition: (s) => s.career.employed === 'employed',
-    exclusive: ['workSlack', 'workSuperHard'],
+    exclusive: ['workNone', 'workSlack', 'workSuperHard'],
   },
   workSuperHard: {
     id: 'workSuperHard', nameZh: '超级努力工作', apCost: 3, phase: 'career',
     effects: { performance: 12, mental: -3 }, description: 'Go above and beyond',
     tipsZh: '✅ 绩效+12 | ⚠️ 精神-3 | 💡 冲绩效升职用',
     precondition: (s) => s.career.employed === 'employed',
-    exclusive: ['workSlack', 'workHard'],
+    exclusive: ['workNone', 'workSlack', 'workHard'],
   },
   upskill: {
     id: 'upskill', nameZh: '技能进修', apCost: 2, phase: 'career',

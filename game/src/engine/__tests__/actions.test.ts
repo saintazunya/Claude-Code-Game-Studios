@@ -8,7 +8,7 @@ describe('Action Point System', () => {
       for (const action of Object.values(ACTIONS)) {
         expect(action.id).toBeDefined();
         expect(action.nameZh).toBeDefined();
-        expect(action.apCost).toBeGreaterThan(0);
+        expect(action.apCost).toBeGreaterThanOrEqual(0);
         expect(action.phase).toBeDefined();
         expect(action.effects).toBeDefined();
       }

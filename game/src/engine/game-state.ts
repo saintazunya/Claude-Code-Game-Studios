@@ -235,8 +235,8 @@ export function processTurn(
     const action = ACTIONS[actionId];
     if (action) {
       let effects = { ...action.effects };
-      // School ranking adds bonus to work performance actions
-      if (['workSlack', 'workHard', 'workSuperHard'].includes(actionId) && effects.performance !== undefined) {
+      // School ranking adds +1 per point to all work performance actions
+      if (['workNone', 'workSlack', 'workHard', 'workSuperHard'].includes(actionId) && effects.performance !== undefined) {
         effects.performance = (effects.performance as number) + schoolPerfBonus;
       }
       s.attributes = applyDeltas(s.attributes, effects);
@@ -305,12 +305,7 @@ export function processTurn(
 
   // 5. Apply natural decay
   const decay = computeNaturalDecay(s);
-  // Performance decays if no work action taken (career phase)
-  // workSlack counts as working (but its effect is performance -3, handled in action effects)
-  const workedThisTurn = selectedActions.some(id => ['workSlack', 'workHard', 'workSuperHard'].includes(id));
-  if (!workedThisTurn && s.phase === 'career' && s.career.employed === 'employed') {
-    s.attributes = applyDeltas(s.attributes, { performance: -5 }); // no work action = worse than slacking
-  }
+  // Performance change is now fully handled by work actions (workNone/workSlack/workHard/workSuperHard)
   s.attributes = applyDeltas(s.attributes, {
     skills: decay.skills,
     health: decay.health,
