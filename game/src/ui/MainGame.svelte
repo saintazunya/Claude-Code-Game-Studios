@@ -285,6 +285,26 @@
     </div>
   {/if}
 
+  <!-- Status Warnings -->
+  {#if (gs.flags.sicknessApPenalty as number) > 0}
+    <div class="mx-4 mb-2 p-3 rounded-xl bg-red-950/40 border border-red-900/50 text-xs">
+      <span class="text-red-400 font-bold">🤒 生病中</span>
+      <span class="text-red-400/70"> — 本季度行动点 -{gs.flags.sicknessApPenalty}（上季度生病的后遗症）</span>
+    </div>
+  {/if}
+  {#if gs.flags.burnoutActive}
+    <div class="mx-4 mb-2 p-3 rounded-xl bg-red-950/40 border border-red-900/50 text-xs">
+      <span class="text-red-400 font-bold">💀 Burnout</span>
+      <span class="text-red-400/70"> — 本季度无法行动，强制休息</span>
+    </div>
+  {/if}
+  {#if gs.grindLockQuarters > 0}
+    <div class="mx-4 mb-2 p-2.5 rounded-xl bg-amber-950/30 border border-amber-900/40 text-xs">
+      <span class="text-amber-400">🔒 卷王模式锁定</span>
+      <span class="text-amber-400/70"> — 还需 {gs.grindLockQuarters} 个季度恢复</span>
+    </div>
+  {/if}
+
   <!-- Work Mode Selection -->
   <div class="px-4 mb-3">
     <p class="text-xs text-gray-500 mb-2">{isAcademic ? '学习模式' : '工作模式'}（必选一个）</p>

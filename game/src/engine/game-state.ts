@@ -284,10 +284,13 @@ export function processTurn(
   }
 
   // 7. Probability checks
-  // Sickness
+  // Sickness (immune during first year — turns 1-4)
   s.flags.sicknessApPenalty = 0;
-  const sicknessRoll = roll('sickness', s);
+  s.flags.gotSick = false;
+  const sicknessImmune = s.turn <= 4;
+  const sicknessRoll = sicknessImmune ? { success: false, probability: 0, rollValue: 1 } : roll('sickness', s);
   if (sicknessRoll.success) {
+    s.flags.gotSick = true;
     const severity = Math.random();
     let apPenalty: number;
     let medicalCost: number;
@@ -296,7 +299,7 @@ export function processTurn(
     const isUpgraded = s.attributes.health < 20;
 
     if (severity < (isUpgraded ? 0.30 : 0.50)) {
-      apPenalty = 3; medicalCost = 1000 + Math.random() * 2000; grindLock = 1; mentalHit = -5;
+      apPenalty = 2; medicalCost = 1000 + Math.random() * 2000; grindLock = 1; mentalHit = -5;
     } else if (severity < (isUpgraded ? 0.70 : 0.85)) {
       apPenalty = 5; medicalCost = 3000 + Math.random() * 5000; grindLock = 2; mentalHit = -10;
     } else if (severity < (isUpgraded ? 0.90 : 0.97)) {
@@ -307,9 +310,11 @@ export function processTurn(
     }
 
     s.flags.sicknessApPenalty = apPenalty;
+    s.flags.sicknessSeverity = apPenalty <= 2 ? 'mild' : apPenalty <= 5 ? 'moderate' : apPenalty <= 8 ? 'severe' : 'hospitalized';
     s.economy.cash -= medicalCost;
     s.grindLockQuarters = Math.max(s.grindLockQuarters, grindLock);
     s.attributes = applyDeltas(s.attributes, { mental: mentalHit, health: 5 }); // forced minor recovery
+    turnEvents.push({ id: `sickness_${s.flags.sicknessSeverity}`, choiceId: '' });
   }
 
   // Burnout
@@ -320,6 +325,7 @@ export function processTurn(
       s.attributes.mental = 30;
       s.attributes = applyDeltas(s.attributes, { performance: -10 });
       s.grindLockQuarters = Math.max(s.grindLockQuarters, 2);
+      turnEvents.push({ id: 'burnout', choiceId: '' });
     }
   } else {
     s.flags.burnoutActive = false;
