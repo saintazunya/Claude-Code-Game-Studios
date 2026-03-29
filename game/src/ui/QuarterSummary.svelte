@@ -44,7 +44,7 @@
     sickness_moderate: { icon: '🤒', text: '中度生病', color: 'text-amber-400', detail: '身体撑不住了。下季度行动点-5，医疗费$3K-8K。卷王锁定2季度。' },
     sickness_severe: { icon: '🏥', text: '严重生病', color: 'text-red-400', detail: '需要住院治疗。下季度行动点-8，医疗费$8K-20K。卷王锁定3季度。' },
     sickness_hospitalized: { icon: '🚑', text: '紧急住院', color: 'text-red-400', detail: '身体彻底崩溃！下季度完全无法行动，医疗费$15K-30K。卷王锁定4季度。' },
-    burnout: { icon: '💀', text: 'Burnout — 精神崩溃', color: 'text-red-400', detail: '精神状态跌破底线，被迫休息一整个季度。所有行动点归零。' },
+    burnout: { icon: '💀', text: 'Burnout — 精神崩溃', color: 'text-red-400', detail: '精神状态跌破底线，被迫休息。下季度最多4个行动点。' },
     rfe_resolved: { icon: '📋', text: 'RFE补件完成', color: 'text-amber-400' },
     i485_rfe: { icon: '📋', text: 'I-485被要求补件(RFE)', color: 'text-amber-400', detail: '需要额外材料，处理时间延长。' },
     visa_expired_deported: { icon: '✈️', text: '签证过期，被遣返', color: 'text-red-400' },

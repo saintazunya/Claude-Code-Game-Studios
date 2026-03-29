@@ -255,6 +255,7 @@
   {#if gs.flags.burnoutActive}
     <div class="mx-4 mb-2 p-2.5 rounded-xl bg-red-950/40 border border-red-900/50 text-xs">
       <span class="text-red-400 font-bold">💀 Burnout</span>
+      <span class="text-red-400/70"> — 精神崩溃，本季度最多4AP</span>
     </div>
   {/if}
   {#if gs.grindLockQuarters > 0}
