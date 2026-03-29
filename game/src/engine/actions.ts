@@ -58,10 +58,17 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
     precondition: (s) => s.attributes.netWorth > 50000,
   },
   urgentJobSearch: {
-    id: 'urgentJobSearch', nameZh: '紧急求职', apCost: 5, phase: 'career',
-    effects: { mental: -10 }, description: 'Desperate job search after layoff',
-    tipsZh: '✅ +25%拿offer概率（紧急模式）| ⚠️ 精神-10 | ⚠️ 失业状态专用',
-    precondition: (s) => s.career.employed === 'unemployed',
+    id: 'urgentJobSearch', nameZh: '紧急求职', apCost: 5, phase: 'any',
+    effects: { mental: -10 }, description: 'Desperate job search',
+    tipsZh: '✅ +25%拿offer概率（紧急模式）| ⚠️ 精神-10 | 💡 失业或毕业前可用',
+    precondition: (s) => {
+      // Available when unemployed in career phase
+      if (s.phase === 'career' && s.career.employed === 'unemployed') return true;
+      // Available in last quarter before graduation (no return offer)
+      const gradTurn = s.academic.isPhd ? 16 : 8;
+      if (s.phase === 'academic' && s.turn === gradTurn - 1 && !s.academic.hasReturnOffer) return true;
+      return false;
+    },
   },
 
   // Immigration actions

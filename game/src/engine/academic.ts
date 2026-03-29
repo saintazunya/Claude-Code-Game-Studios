@@ -122,8 +122,9 @@ export function processGraduation(state: GameState): {
 
   events.push(isPhd ? 'phd_graduated' : 'masters_graduated');
 
-  // Only return offer = auto employment. Otherwise enter unemployed.
-  if (state.academic.hasReturnOffer) {
+  // Return offer or urgent job search = attempt to find job at graduation
+  const triedUrgentSearch = state.flags.urgentJobSearch as boolean;
+  if (state.academic.hasReturnOffer || triedUrgentSearch) {
     const jobResult = processFirstJobSearch(state);
     if (jobResult.found && jobResult.company) {
       events.push('first_job_found');

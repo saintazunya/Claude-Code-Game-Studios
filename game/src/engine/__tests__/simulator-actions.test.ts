@@ -25,7 +25,8 @@ function validateAvailableActions(state: GameState): ActionIssue[] {
 
   // Career actions during academic phase
   if (state.phase === 'academic') {
-    const careerOnly: ActionId[] = ['upskill', 'prepJobChange', 'prepJobChangeIntensive', 'entrepreneurship', 'urgentJobSearch'];
+    // urgentJobSearch is allowed in last academic quarter (before graduation)
+    const careerOnly: ActionId[] = ['upskill', 'prepJobChange', 'prepJobChangeIntensive', 'entrepreneurship'];
     for (const id of careerOnly) {
       if (availableIds.includes(id)) {
         issues.push({ turn: state.turn, age: ti.age, phase: state.phase, issue: `Career action "${id}" available during academic phase` });
@@ -69,9 +70,14 @@ function validateAvailableActions(state: GameState): ActionIssue[] {
     issues.push({ turn: state.turn, age: ti.age, phase: state.phase, issue: 'Job change prep available during PIP' });
   }
 
-  // urgentJobSearch should ONLY be available when unemployed
-  if (state.career.employed !== 'unemployed' && availableIds.includes('urgentJobSearch')) {
-    issues.push({ turn: state.turn, age: ti.age, phase: state.phase, issue: 'urgentJobSearch available but not unemployed' });
+  // urgentJobSearch: available when unemployed OR in last academic quarter without return offer
+  if (availableIds.includes('urgentJobSearch')) {
+    const gradTurn = state.academic.isPhd ? 16 : 8;
+    const isLastAcademicQ = state.phase === 'academic' && state.turn === gradTurn - 1 && !state.academic.hasReturnOffer;
+    const isUnemployed = state.career.employed === 'unemployed';
+    if (!isUnemployed && !isLastAcademicQ) {
+      issues.push({ turn: state.turn, age: ti.age, phase: state.phase, issue: 'urgentJobSearch available but not unemployed or pre-graduation' });
+    }
   }
 
   // entrepreneurship should NOT be available if net worth < 50K

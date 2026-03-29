@@ -280,6 +280,9 @@ export function processTurn(
       if (actionId === 'studyGpa') {
         s.academic.gpa = Math.min(4.0, s.academic.gpa + 0.10);
       }
+      if (actionId === 'urgentJobSearch' && s.phase === 'academic') {
+        s.flags.urgentJobSearch = true; // Flag for graduation job search
+      }
       if (actionId === 'travel') {
         s.economy.cash -= 2000 + Math.random() * 3000;
       }
