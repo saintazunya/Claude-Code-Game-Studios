@@ -47,6 +47,22 @@
     rfe_resolved: { icon: '📋', text: 'RFE补件完成', color: 'text-amber-400' },
     i485_rfe: { icon: '📋', text: 'I-485被要求补件(RFE)', color: 'text-amber-400', detail: '需要额外材料，处理时间延长。' },
     visa_expired_deported: { icon: '✈️', text: '签证过期，被遣返', color: 'text-red-400' },
+    // Random events from event pool
+    layoff_wave: { icon: '💥', text: '公司大裁员', color: 'text-red-400', detail: '你的公司宣布裁员，签证持有者面临双重危机。' },
+    market_crash: { icon: '📉', text: '股市暴跌', color: 'text-red-400', detail: '市场突然暴跌，投资组合缩水。' },
+    pip_warning: { icon: '⚠️', text: '收到PIP警告', color: 'text-red-400', detail: '被放入绩效改进计划，2个季度内需要证明自己。' },
+    recruiter_call: { icon: '📞', text: '猎头来电', color: 'text-blue-400', detail: '有人看上了你的简历，想挖你跳槽。' },
+    conference_invite: { icon: '🎤', text: '受邀参加技术大会', color: 'text-blue-400', detail: '收到知名技术大会的邀请，是提升影响力的机会。' },
+    priority_date_jump: { icon: '🎉', text: '排期大幅前进！', color: 'text-green-400', detail: '签证公告牌排期突然大幅前进了！' },
+    team_reorg: { icon: '🔄', text: '团队重组', color: 'text-gray-400', detail: '公司组织架构调整，你将迎来新老板。' },
+    performance_bonus: { icon: '💰', text: '绩效奖金', color: 'text-green-400', detail: '年度评估结果出来了，你获得了绩效奖金！' },
+    toxic_incident: { icon: '😤', text: '职场冲突', color: 'text-amber-400', detail: '老板当众批评了你，让你很难堪。' },
+    holiday_loneliness: { icon: '🎄', text: '节日里的孤独', color: 'text-amber-400', detail: '节日里朋友们都回家了，只剩你一个人。' },
+    cultural_friction: { icon: '🌏', text: '文化冲突', color: 'text-amber-400', detail: '在团队讨论中感到被忽视，不确定是文化差异还是偏见。' },
+    family_emergency: { icon: '🏥', text: '家人生病', color: 'text-red-400', detail: '国内的父母突然生病，但签证身份让回国变得复杂。' },
+    community_support: { icon: '🤝', text: '找到了组织', color: 'text-green-400', detail: '发现了当地的华人互助社群，大家互相支持。' },
+    identity_crisis: { icon: '💭', text: '身份认同危机', color: 'text-amber-400', detail: '"来美国这些年，值得吗？"' },
+    immigration_policy_change: { icon: '📜', text: '移民政策变动', color: 'text-purple-400', detail: '新的移民政策法案通过，可能影响签证和绿卡处理。' },
   };
 
   // Detect milestones for celebration — show ALL events with Chinese text
