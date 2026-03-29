@@ -147,35 +147,63 @@
         <div class="text-[10px] text-red-400 font-bold animate-pulse">⚠️ PIP中 ({gs.career.pipQuartersRemaining}季度)</div>
       {/if}
     </div>
-    <div class="bg-[#1a2234] rounded-xl p-3 border border-[#2a3050]">
-      <div class="text-[10px] text-gray-500 mb-0.5">S&P 500</div>
-      {#if pf.currentValue > 0}
-        <div class="text-sm font-bold {pf.unrealizedPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}">
-          {formatMoney(pf.currentValue)}
+    {#if isAcademic}
+      <!-- Academic: GPA card -->
+      <div class="bg-[#1a2234] rounded-xl p-3 border border-[#2a3050]">
+        <div class="text-[10px] text-gray-500 mb-0.5">GPA</div>
+        <div class="text-xl font-black {gs.academic.gpa >= 3.7 ? 'text-green-400' : gs.academic.gpa >= 3.3 ? 'text-blue-400' : gs.academic.gpa >= 3.0 ? 'text-amber-400' : 'text-red-400'}">
+          {gs.academic.gpa.toFixed(2)}
         </div>
-        <div class="text-[10px] {pf.unrealizedPnl >= 0 ? 'text-emerald-500/60' : 'text-red-500/60'}">
-          {pf.unrealizedPnlPercent >= 0 ? '+' : ''}{pf.unrealizedPnlPercent.toFixed(1)}%
+        <div class="text-[10px] text-gray-600">
+          {gs.academic.gpa >= 3.7 ? '优秀 — 实习加成大' : gs.academic.gpa >= 3.3 ? '良好 — 有一定加成' : gs.academic.gpa >= 3.0 ? '及格 — 加成很小' : '偏低 — 会拖后腿'}
         </div>
-      {:else}
-        <div class="text-sm text-gray-600">未投资</div>
-      {/if}
-    </div>
-    <div class="bg-[#1a2234] rounded-xl p-3 border border-[#2a3050]">
-      <div class="text-[10px] text-gray-500 mb-0.5">绿卡</div>
-      <div class="text-sm font-bold">
-        {#if gs.immigration.hasGreenCard}
-          <span class="text-green-400">✅ 已获批</span>
-        {:else if gs.immigration.hasComboCard}
-          <span class="text-teal-400">🎫 Combo卡</span>
-        {:else if gs.immigration.i140Status === 'approved'}
-          <span class="text-purple-400">📋 等排期中</span>
-        {:else if gs.immigration.permStatus !== 'none'}
-          <span class="text-amber-400">⏳ PERM: {gs.immigration.permStatus === 'pending' ? '审批中' : gs.immigration.permStatus === 'audited' ? '被Audit' : gs.immigration.permStatus === 'approved' ? '已批准' : gs.immigration.permStatus === 'filing' ? '提交中' : '准备中'}</span>
+      </div>
+      <!-- Academic: Intern status card -->
+      <div class="bg-[#1a2234] rounded-xl p-3 border border-[#2a3050]">
+        <div class="text-[10px] text-gray-500 mb-0.5">实习</div>
+        {#if gs.academic.hadIntern}
+          <div class="text-lg font-bold text-green-400">
+            ✅ {gs.academic.internQuality === 'top' ? '大厂实习' : '普通实习'}
+          </div>
+          <div class="text-[10px] text-gray-600">找工作概率{gs.academic.internQuality === 'top' ? '+40%' : '+25%'}</div>
         {:else}
-          <span class="text-gray-500">未开始</span>
+          <div class="text-lg font-bold text-gray-500">❌ 还没有</div>
+          <div class="text-[10px] text-red-400/60">无实习→找工作概率大幅下降</div>
         {/if}
       </div>
-    </div>
+    {:else}
+      <!-- Career: S&P 500 -->
+      <div class="bg-[#1a2234] rounded-xl p-3 border border-[#2a3050]">
+        <div class="text-[10px] text-gray-500 mb-0.5">S&P 500</div>
+        {#if pf.currentValue > 0}
+          <div class="text-sm font-bold {pf.unrealizedPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}">
+            {formatMoney(pf.currentValue)}
+          </div>
+          <div class="text-[10px] {pf.unrealizedPnl >= 0 ? 'text-emerald-500/60' : 'text-red-500/60'}">
+            {pf.unrealizedPnlPercent >= 0 ? '+' : ''}{pf.unrealizedPnlPercent.toFixed(1)}%
+          </div>
+        {:else}
+          <div class="text-sm text-gray-600">未投资</div>
+        {/if}
+      </div>
+      <!-- Career: Green card -->
+      <div class="bg-[#1a2234] rounded-xl p-3 border border-[#2a3050]">
+        <div class="text-[10px] text-gray-500 mb-0.5">绿卡</div>
+        <div class="text-sm font-bold">
+          {#if gs.immigration.hasGreenCard}
+            <span class="text-green-400">✅ 已获批</span>
+          {:else if gs.immigration.hasComboCard}
+            <span class="text-teal-400">🎫 Combo卡</span>
+          {:else if gs.immigration.i140Status === 'approved'}
+            <span class="text-purple-400">📋 等排期中</span>
+          {:else if gs.immigration.permStatus !== 'none'}
+            <span class="text-amber-400">⏳ PERM: {gs.immigration.permStatus === 'pending' ? '审批中' : gs.immigration.permStatus === 'audited' ? '被Audit' : gs.immigration.permStatus === 'approved' ? '已批准' : gs.immigration.permStatus === 'filing' ? '提交中' : '准备中'}</span>
+          {:else}
+            <span class="text-gray-500">未开始</span>
+          {/if}
+        </div>
+      </div>
+    {/if}
   </div>
 
   <!-- Health & Mental Bars -->
