@@ -62,6 +62,7 @@
     h1b_denied: { icon: '😰', text: 'H-1B未中签' },
     h1b_activated: { icon: '🎊', text: 'H-1B生效' },
     h1b_pending_lost: { icon: '💔', text: 'H-1B作废' },
+    h1b_6year_expired: { icon: '💀', text: 'H-1B 6年到期' },
     h1b_auto_filed: { icon: '📝', text: 'H-1B已提交' },
     h1b_renewed: { icon: '📄', text: 'H-1B续签' },
     h1b_7th_year_extension: { icon: '📄', text: 'H-1B 7年延期' },

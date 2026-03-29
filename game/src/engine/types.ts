@@ -117,6 +117,7 @@ export interface ImmigrationState {
   h1bAttempts: number;
   h1bFiled: boolean;
   h1bPending: boolean; // selected in lottery but not yet activated (Q2→Q4)
+  h1bStartTurn: number; // turn when H1B first activated (for 6-year cap)
   unemploymentQuarters: number; // for NOID tracking
   graceQuartersRemaining: number; // 60-day H1B grace
 }

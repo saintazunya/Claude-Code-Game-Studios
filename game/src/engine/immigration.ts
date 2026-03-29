@@ -93,8 +93,9 @@ export function processImmigrationQuarter(state: GameState): {
   if (quarter === 4 && imm.h1bPending) {
     if (state.career.employed === 'employed') {
       updates.visaType = 'h1b';
-      updates.visaExpiryTurn = state.turn + 12;
+      updates.visaExpiryTurn = state.turn + 12; // first 3-year term
       updates.h1bPending = false;
+      updates.h1bStartTurn = state.turn; // track start for 6-year cap
       events.push('h1b_activated');
       mentalDelta += 5;
     } else {
@@ -297,27 +298,35 @@ export function processImmigrationQuarter(state: GameState): {
     updates.unemploymentQuarters = 0;
   }
 
-  // --- H1B Renewal (including 7th year re-extension) ---
+  // --- H1B Renewal (6-year cap without I-140) ---
   if (
     ['h1b', 'h1bRenewal', 'h1b7thYear'].includes(imm.visaType) &&
     state.career.employed === 'employed' &&
     imm.visaExpiryTurn - state.turn <= 2 &&
     imm.visaExpiryTurn - state.turn > 0
   ) {
-    if (imm.i140Status === 'approved' || (imm.permStatus !== 'none' && state.turn - imm.permStartTurn > 4)) {
+    const h1bYearsUsed = imm.h1bStartTurn > 0 ? (state.turn - imm.h1bStartTurn) / 4 : 0;
+    const hasI140OrPendingPerm = imm.i140Status === 'approved' ||
+      (imm.permStatus !== 'none' && state.turn - imm.permStartTurn > 4);
+
+    if (hasI140OrPendingPerm) {
       // Eligible for 7th year extension (1-year renewals indefinitely)
       updates.visaType = 'h1b7thYear';
       updates.visaExpiryTurn = state.turn + 4; // 1-year renewal
       economyCost += 2000;
       events.push('h1b_7th_year_extension');
-    } else if (imm.visaType === 'h1b' || imm.visaType === 'h1bRenewal') {
-      // Standard 3-year renewal (only for first 6 years)
+    } else if (h1bYearsUsed < 6) {
+      // Standard renewal within 6-year cap
+      const remainingQuarters = Math.min(12, (6 - h1bYearsUsed) * 4);
       updates.visaType = 'h1bRenewal';
-      updates.visaExpiryTurn = state.turn + 12;
+      updates.visaExpiryTurn = state.turn + Math.max(4, Math.round(remainingQuarters));
       economyCost += 2000;
       events.push('h1b_renewed');
+    } else {
+      // 6 years used, no I-140 → cannot renew. H1B will expire → deportation.
+      mentalDelta -= 30;
+      events.push('h1b_6year_expired');
     }
-    // h1b7thYear without I-140/PERM can't renew further — will expire
   }
 
   // --- Layoff impact on immigration ---

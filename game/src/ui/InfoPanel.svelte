@@ -106,6 +106,10 @@
           <span class="text-gray-400">到期</span><span class="text-right {visaRemaining <= 4 ? 'text-red-400 font-bold' : visaRemaining <= 8 ? 'text-amber-400' : 'text-gray-300'}">{visaRemaining}季度</span>
         {/if}
         <span class="text-gray-400">H1B尝试</span><span class="text-white text-right">{gs.immigration.h1bAttempts}次</span>
+        {#if gs.immigration.h1bStartTurn > 0 && ['h1b', 'h1bRenewal'].includes(gs.immigration.visaType)}
+          {@const yearsUsed = Math.round((gs.turn - gs.immigration.h1bStartTurn) / 4 * 10) / 10}
+          <span class="text-gray-400">H1B已用</span><span class="text-right {yearsUsed > 4 ? 'text-red-400 font-bold' : 'text-amber-400'}">{yearsUsed}/6年{yearsUsed > 4 ? ' ⚠️' : ''}</span>
+        {/if}
         {#if gs.immigration.h1bPending}
           <span class="text-purple-400 font-bold">H1B待生效</span><span class="text-purple-400 text-right">Q4激活</span>
         {/if}

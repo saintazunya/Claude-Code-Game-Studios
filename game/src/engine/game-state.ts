@@ -50,6 +50,7 @@ export function createGameState(creation: CreationAttributes): GameState {
       h1bAttempts: 0,
       h1bFiled: false,
       h1bPending: false,
+      h1bStartTurn: 0,
       unemploymentQuarters: 0,
       graceQuartersRemaining: 0,
     },
