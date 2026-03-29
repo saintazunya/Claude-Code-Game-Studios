@@ -34,8 +34,8 @@ export interface ProbabilityBreakdown {
 const EVENT_TYPES: Record<string, EventTypeDef> = {
   promotion: { base: 0.15, attrKey: 'performance', attrWeight: 0.004, floor: 0.02, cap: 0.85, usesSchoolMod: true, usesEconCycle: true },
   pip: { base: 0.05, attrKey: 'performance', attrWeight: 0.003, inverseAttr: true, floor: 0.01, cap: 0.60, usesEconCycle: true },
-  h1bLottery: { base: 0.27, floor: 0.27, cap: 0.27 }, // pure lottery
-  h1bLotteryMasters: { base: 0.35, floor: 0.35, cap: 0.35 },
+  h1bLottery: { base: 0.18, floor: 0.13, cap: 0.23 }, // 18% base, ±5% annual variance
+  h1bLotteryMasters: { base: 0.23, floor: 0.18, cap: 0.28 }, // masters gets +5% base
   permApproval: { base: 0.70, floor: 0.30, cap: 0.90, usesEconCycle: true },
   permAudit: { base: 0.10, floor: 0.05, cap: 0.30, usesEconCycle: true },
   i140Approval: { base: 0.85, attrKey: 'performance', attrWeight: 0.001, floor: 0.50, cap: 0.95 },
@@ -94,9 +94,19 @@ export function getEventBreakdown(
   const def = EVENT_TYPES[eventType];
   if (!def) return { base: 0, attributeContribution: 0, schoolModifier: 0, econModifier: 0, situational: 0, final: 0 };
 
-  // Base — may be overridden by level for promotion
+  // Base — may be overridden by level for promotion or H1B annual variance
   let base = def.base;
   let cap = def.cap;
+
+  // H1B annual variance: ±5% based on year (deterministic per year)
+  if (eventType === 'h1bLottery' || eventType === 'h1bLotteryMasters') {
+    const year = 2024 + Math.floor(state.turn / 4);
+    // Simple hash: same year always gives same variance
+    const yearHash = ((year * 2654435761) >>> 0) / 4294967296; // 0-1 deterministic
+    const variance = (yearHash - 0.5) * 0.10; // -5% to +5%
+    base = Math.max(def.floor, Math.min(def.cap, def.base + variance));
+  }
+
   if (eventType === 'promotion') {
     base = PROMOTION_BASE_BY_LEVEL[state.career.level] ?? 0.15;
     cap = PROMOTION_CAP_BY_LEVEL[state.career.level] ?? 0.85;

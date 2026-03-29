@@ -4,17 +4,21 @@ import { createGameState } from '../game-state';
 
 describe('Probability Engine', () => {
   describe('H1B lottery', () => {
-    it('is exactly 27% for bachelors regardless of attributes', () => {
+    it('is ~18% for bachelors (±5% annual variance)', () => {
       const state = createGameState({ constitution: 5, schoolRanking: 5, geoLocation: 5 });
       state.hasUsMasters = false;
       state.attributes.performance = 100;
       state.attributes.skills = 100;
-      expect(preview('h1bLottery', state)).toBeCloseTo(0.27, 2);
+      const prob = preview('h1bLottery', state);
+      expect(prob).toBeGreaterThanOrEqual(0.13);
+      expect(prob).toBeLessThanOrEqual(0.23);
     });
 
-    it('is exactly 35% for masters', () => {
+    it('is ~23% for masters (±5% annual variance)', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
-      expect(preview('h1bLotteryMasters', state)).toBeCloseTo(0.35, 2);
+      const prob = preview('h1bLotteryMasters', state);
+      expect(prob).toBeGreaterThanOrEqual(0.18);
+      expect(prob).toBeLessThanOrEqual(0.28);
     });
   });
 
@@ -124,7 +128,8 @@ describe('Probability Engine', () => {
       expect(result).toHaveProperty('success');
       expect(result).toHaveProperty('probability');
       expect(result).toHaveProperty('rollValue');
-      expect(result.probability).toBeCloseTo(0.27, 2);
+      expect(result.probability).toBeGreaterThanOrEqual(0.13);
+      expect(result.probability).toBeLessThanOrEqual(0.23);
       expect(result.rollValue).toBeGreaterThanOrEqual(0);
       expect(result.rollValue).toBeLessThanOrEqual(1);
     });
