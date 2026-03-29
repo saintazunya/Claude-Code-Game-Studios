@@ -1,14 +1,17 @@
 // Auto-play: greedy rule-based action selection for each turn
 
 import type { GameState, WorkMode, AcademicStudyMode, ActionId } from './types';
-import { getEffectiveAp, getWorkModeCost } from './game-state';
-import { getAvailableActions, canSelectAction } from './actions';
+import { getEffectiveAp, getWorkModeCost, getMaxAp } from './game-state';
+import { getAvailableActions, canSelectAction, ACTIONS } from './actions';
 import { preview } from './probability';
+
+const ATTITUDE_ACTION_IDS = ['workNone', 'workSlack', 'workHard', 'workSuperHard', 'studySlack', 'studyNormal', 'studyHard'];
 
 export interface AutoPlayResult {
   workMode: WorkMode | AcademicStudyMode;
   actions: ActionId[];
   reasoning: string[];
+  attitudeLevel: number;
 }
 
 export function autoSelectTurn(state: GameState): AutoPlayResult {
@@ -56,9 +59,50 @@ export function autoSelectTurn(state: GameState): AutoPlayResult {
     }
   }
 
+  // === ATTITUDE LEVEL ===
+  let attitudeLevel: number;
+  if (isAcademic) {
+    if (state.attributes.mental < 30 || state.attributes.health < 40) {
+      attitudeLevel = 0; // slack
+      reasoning.push('摸鱼学习：需要恢复');
+    } else if (state.attributes.health > 70 && state.attributes.mental > 50) {
+      attitudeLevel = 2; // hard
+      reasoning.push('努力学习：状态好');
+    } else {
+      attitudeLevel = 1; // normal
+      reasoning.push('正常学习');
+    }
+  } else {
+    if (state.career.onPip) {
+      attitudeLevel = 3; // super hard to fight PIP
+      reasoning.push('超级努力：PIP中必须拼');
+    } else if (state.attributes.mental < 30 || state.attributes.health < 40) {
+      attitudeLevel = 0; // not working
+      reasoning.push('完全不工作：需要恢复');
+    } else if (state.attributes.performance < 30) {
+      attitudeLevel = 3; // super hard to avoid PIP
+      reasoning.push('超级努力：绩效太低');
+    } else if (state.attributes.health > 75 && state.attributes.mental > 55) {
+      attitudeLevel = 2; // hard
+      reasoning.push('努力工作：状态好');
+    } else {
+      attitudeLevel = 1; // slack
+      reasoning.push('摸鱼工作：保持平衡');
+    }
+  }
+
+  // Calculate AP budget after attitude cost
+  const attitudeActionIds: ActionId[][] = isAcademic
+    ? [['studySlack'], ['studyNormal'], ['studyHard']]
+    : [['workNone'], ['workSlack'], ['workHard'], ['workSuperHard']];
+  const attActionId = attitudeActionIds[attitudeLevel]?.[0];
+  const attCost = attActionId ? (ACTIONS[attActionId]?.apCost || 0) : 0;
+
   // === ACTION SELECTION ===
-  let remainingAp = getEffectiveAp(state, workMode) - getWorkModeCost(workMode);
-  const available = getAvailableActions(state);
+  const maxAp = getMaxAp(state);
+  let remainingAp = maxAp - attCost;
+  // Filter out attitude actions from available list
+  const available = getAvailableActions(state).filter(a => !ATTITUDE_ACTION_IDS.includes(a.id));
   const selected: ActionId[] = [];
 
   function trySelect(id: ActionId, reason: string): boolean {
@@ -162,5 +206,5 @@ export function autoSelectTurn(state: GameState): AutoPlayResult {
     trySelect('travel', '有Combo卡/绿卡，旅游安全且恢复大');
   }
 
-  return { workMode, actions: selected, reasoning };
+  return { workMode, actions: selected, reasoning, attitudeLevel };
 }

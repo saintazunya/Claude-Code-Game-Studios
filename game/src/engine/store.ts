@@ -156,6 +156,7 @@ export function autoSelect() {
   selectedWorkMode.set(result.workMode);
   selectedActions.set(result.actions);
   autoPlayReasoning.set(result.reasoning);
+  attitudeLevel.set(result.attitudeLevel);
 }
 
 export function endTurn() {
