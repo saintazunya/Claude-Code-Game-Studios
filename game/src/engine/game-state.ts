@@ -5,6 +5,10 @@ import { createStartingAttributes, applyDeltas, computeNaturalDecay, computeSick
 import { roll, preview } from './probability';
 import { rollInitialPhase, checkPhaseTransition, rollMarketReturn, rollHousingChange, updateSharePrice, rollEventCount, INITIAL_SHARE_PRICE } from './economic-cycle';
 import { ACTIONS, getAvailableActions } from './actions';
+import { processAnnualReview, checkPip, processPipQuarter, checkLayoff, shouldRotateBoss, rollBossType, computeSalary } from './career';
+import { processImmigrationQuarter, activateOpt } from './immigration';
+import { isGraduationTurn, processGraduation, getGpaGain } from './academic';
+import { selectEvents, applyEventChoice } from './events';
 
 export function createGameState(creation: CreationAttributes): GameState {
   const { attributes, schoolModifier, geoBonus, constitutionSicknessModifier } =
@@ -146,6 +150,7 @@ export function processTurn(
 
   const turnInfo = getTurnInfo(s.turn);
   const attrsBefore = { ...s.attributes };
+  const turnEvents: { id: string; choiceId: string }[] = [];
 
   // 1. Advance turn
   s.turn++;
@@ -326,6 +331,120 @@ export function processTurn(
   // Career tenure
   if (s.career.employed === 'employed') s.career.tenure++;
 
+  // 7b. Academic phase: GPA gain from study mode, graduation check
+  if (s.phase === 'academic') {
+    const gpaGain = getGpaGain(workMode);
+    s.academic.gpa = Math.min(4.0, s.academic.gpa + gpaGain);
+
+    if (isGraduationTurn(s)) {
+      const grad = processGraduation(s);
+      s.phase = grad.newPhase;
+      Object.assign(s.career, grad.careerUpdates);
+      s.economy.studentLoanRemaining = grad.studentDebt;
+      s.attributes = applyDeltas(s.attributes, { mental: grad.mentalDelta });
+
+      // Activate OPT
+      const optUpdates = activateOpt(s);
+      Object.assign(s.immigration, optUpdates);
+
+      turnEvents.push(...grad.events.map(id => ({ id, choiceId: '' })));
+    }
+  }
+
+  // 7c. Career system: annual review (Q4), PIP check, layoff check, boss rotation
+  if (s.phase === 'career' && s.career.employed === 'employed') {
+    const currentQ = ((s.turn - 1) % 4) + 1;
+
+    // Q4: Annual performance review
+    if (currentQ === 4) {
+      const review = processAnnualReview(s);
+      if (review.promoted) {
+        s.career.level = review.newLevel;
+        s.attributes.performance = review.performanceReset ?? 60;
+        if (review.salaryChange) {
+          s.career.salary = review.salaryChange.salary;
+          s.career.rsu = review.salaryChange.rsu;
+        }
+        turnEvents.push({ id: 'promoted', choiceId: '' });
+      }
+      s.attributes = applyDeltas(s.attributes, { mental: review.mentalDelta });
+    }
+
+    // PIP check
+    if (s.career.onPip) {
+      s.career.pipQuartersRemaining--;
+      const pipResult = processPipQuarter(s);
+      if (pipResult.terminated) {
+        s.career.employed = 'unemployed';
+        s.career.onPip = false;
+        s.flags.justLaidOff = true;
+        s.attributes = applyDeltas(s.attributes, { mental: -25 });
+        turnEvents.push({ id: 'pip_terminated', choiceId: '' });
+      } else if (pipResult.resolved) {
+        s.career.onPip = false;
+        s.attributes = applyDeltas(s.attributes, { mental: 10 });
+        turnEvents.push({ id: 'pip_resolved', choiceId: '' });
+      }
+    } else {
+      const pipCheck = checkPip(s);
+      if (pipCheck.pipTriggered) {
+        s.career.onPip = true;
+        s.career.pipQuartersRemaining = 2;
+        s.attributes = applyDeltas(s.attributes, { mental: -20 });
+        turnEvents.push({ id: 'pip_started', choiceId: '' });
+      }
+    }
+
+    // Layoff check
+    if (!s.career.onPip) {
+      const layoffCheck = checkLayoff(s);
+      if (layoffCheck.laidOff) {
+        s.career.employed = 'unemployed';
+        s.economy.cash += layoffCheck.severance;
+        s.flags.justLaidOff = true;
+        s.attributes = applyDeltas(s.attributes, { mental: -25 });
+        turnEvents.push({ id: 'laid_off', choiceId: '' });
+      }
+    }
+
+    // Boss rotation
+    if (shouldRotateBoss(s.career.tenure)) {
+      s.career.bossType = rollBossType();
+      turnEvents.push({ id: 'boss_changed', choiceId: '' });
+    }
+  }
+
+  // 7d. Immigration processing
+  if (s.phase === 'career') {
+    const immResult = processImmigrationQuarter(s);
+    Object.assign(s.immigration, immResult.updates);
+    s.attributes = applyDeltas(s.attributes, { mental: immResult.mentalDelta });
+    s.economy.cash -= immResult.economyCost;
+    turnEvents.push(...immResult.events.map(id => ({ id, choiceId: '' })));
+
+    if (immResult.gameOver) {
+      s.endingType = 'deported';
+    }
+  }
+  s.flags.justLaidOff = false;
+
+  // 7e. Random events
+  const randomEvents = selectEvents(s);
+  for (const event of randomEvents) {
+    // Auto-select first choice for now (UI will handle interactive selection later)
+    const choice = event.choices[0];
+    if (choice) {
+      const result = applyEventChoice(s, event, choice.id);
+      s.attributes = applyDeltas(s.attributes, result.effects);
+      if (result.flags) {
+        Object.assign(s.flags, result.flags);
+      }
+    }
+    s.eventCooldowns[event.id] = s.turn;
+    if (event.oneTime) s.eventFired.add(event.id);
+    turnEvents.push({ id: event.id, choiceId: event.choices[0]?.id || '' });
+  }
+
   // 8. Update net worth
   const portfolioValue = s.economy.portfolioShares * s.economy.sharePrice;
   const homeEquity = s.economy.ownsHome
@@ -341,7 +460,7 @@ export function processTurn(
     age: getTurnInfo(s.turn).age,
     attributesBefore: attrsBefore,
     attributesAfter: { ...s.attributes },
-    events: [],
+    events: turnEvents,
     workMode,
     actions: selectedActions,
   };

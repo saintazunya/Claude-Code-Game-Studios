@@ -1,0 +1,335 @@
+// Immigration System — visa state machine, PERM, I-140, I-485, green card
+
+import type { GameState, VisaType, PermStatus, I140Status, I485Status, ImmigrationState } from './types';
+import { roll } from './probability';
+
+// Processing time ranges (in quarters)
+const PERM_BASE_QUARTERS = 3;
+const PERM_AUDIT_EXTRA_MIN = 2;
+const PERM_AUDIT_EXTRA_MAX = 6;
+const I140_NORMAL_MIN = 2;
+const I140_NORMAL_MAX = 4;
+const I140_PREMIUM_COST = 2500;
+const I485_PROCESSING_MIN = 4;
+const I485_PROCESSING_MAX = 12;
+const EB2_WAIT_BASE = 30;
+const EB2_WAIT_VARIANCE = 12;
+
+const GC_WILLINGNESS_DELAY: Record<string, [number, number]> = {
+  eager: [0, 2],
+  standard: [2, 4],
+  reluctant: [4, 8],
+};
+
+function randomInt(min: number, max: number): number {
+  return Math.floor(min + Math.random() * (max - min + 1));
+}
+
+export function processImmigrationQuarter(state: GameState): {
+  updates: Partial<ImmigrationState>;
+  mentalDelta: number;
+  economyCost: number;
+  events: string[];
+  gameOver: boolean;
+} {
+  const imm = state.immigration;
+  const updates: Partial<ImmigrationState> = {};
+  let mentalDelta = 0;
+  let economyCost = 0;
+  const events: string[] = [];
+  let gameOver = false;
+
+  const quarter = ((state.turn - 1) % 4) + 1;
+
+  // --- Visa countdown ---
+  if (!imm.hasGreenCard && !imm.hasComboCard) {
+    const remaining = imm.visaExpiryTurn - state.turn;
+    if (remaining <= 0) {
+      // Check grace period
+      if (imm.graceQuartersRemaining > 0) {
+        updates.graceQuartersRemaining = imm.graceQuartersRemaining - 1;
+        events.push('grace_period_ticking');
+      } else {
+        // Deportation
+        gameOver = true;
+        events.push('visa_expired_deported');
+      }
+    }
+  }
+
+  // --- H1B Lottery (Q2) ---
+  if (quarter === 2 && imm.h1bFiled) {
+    const eventType = state.hasUsMasters ? 'h1bLotteryMasters' : 'h1bLottery';
+    const result = roll(eventType, state);
+    updates.h1bFiled = false;
+    updates.h1bAttempts = imm.h1bAttempts + 1;
+
+    if (result.success) {
+      updates.visaType = 'h1b';
+      updates.visaExpiryTurn = state.turn + 12; // 3 years
+      mentalDelta += 20;
+      events.push('h1b_approved');
+    } else {
+      mentalDelta -= 20;
+      events.push('h1b_denied');
+    }
+  }
+
+  // --- OPT Expiry tracking ---
+  if (imm.visaType === 'opt' && state.turn >= 8) {
+    // OPT: 4 quarters from graduation (turn 8)
+    if (!updates.visaExpiryTurn && imm.visaExpiryTurn === 999) {
+      updates.visaExpiryTurn = 8 + 4; // 12
+    }
+  }
+
+  // --- PERM Processing ---
+  if (imm.permStatus === 'pending' || imm.permStatus === 'audited') {
+    // Advance PERM timer
+    const permQuarters = state.turn - imm.permStartTurn;
+
+    if (imm.permStatus === 'pending' && permQuarters >= PERM_BASE_QUARTERS) {
+      // Check for audit
+      const auditResult = roll('permAudit', state);
+      if (auditResult.success) {
+        updates.permStatus = 'audited';
+        mentalDelta -= 10;
+        events.push('perm_audited');
+      } else {
+        // PERM approved!
+        updates.permStatus = 'approved';
+        mentalDelta += 5;
+        events.push('perm_approved');
+      }
+    }
+
+    if (imm.permStatus === 'audited') {
+      const auditDuration = randomInt(PERM_AUDIT_EXTRA_MIN, PERM_AUDIT_EXTRA_MAX);
+      const totalWait = PERM_BASE_QUARTERS + auditDuration;
+      if (permQuarters >= totalWait) {
+        // Audit resolved, PERM approved
+        updates.permStatus = 'approved';
+        mentalDelta += 5;
+        events.push('perm_audit_resolved');
+      }
+    }
+  }
+
+  // --- Employer initiating PERM ---
+  if (
+    imm.permStatus === 'none' &&
+    state.career.employed === 'employed' &&
+    state.career.company &&
+    (imm.visaType === 'h1b' || imm.visaType === 'h1bRenewal' || imm.visaType === 'h1b7thYear')
+  ) {
+    const willingness = state.career.company.gcWillingness;
+    const [delayMin, delayMax] = GC_WILLINGNESS_DELAY[willingness];
+    const delay = randomInt(delayMin, delayMax);
+
+    if (state.career.tenure >= delay) {
+      // Recession may freeze GC initiation
+      if (state.economicPhase === 'recession' && willingness === 'reluctant') {
+        if (Math.random() < 0.15) {
+          events.push('gc_frozen_by_employer');
+          // Don't start PERM
+        } else {
+          updates.permStatus = 'filing';
+        }
+      } else {
+        updates.permStatus = 'filing';
+      }
+    }
+  }
+
+  // PERM filing -> pending
+  if (imm.permStatus === 'filing') {
+    updates.permStatus = 'pending';
+    updates.permStartTurn = state.turn;
+    updates.gcTrack = 'perm';
+    economyCost += 3000; // Legal fees
+    events.push('perm_filed');
+  }
+
+  // --- I-140 Processing ---
+  if (imm.permStatus === 'approved' && imm.i140Status === 'none') {
+    // File I-140
+    updates.i140Status = 'pending';
+    economyCost += I140_PREMIUM_COST; // Use premium processing by default (smart play)
+    events.push('i140_filed');
+  }
+
+  if (imm.i140Status === 'pending') {
+    // Premium processing: approve this quarter
+    const result = roll('i140Approval', state);
+    if (result.success) {
+      updates.i140Status = 'approved';
+      updates.priorityDate = imm.permStartTurn; // Priority date = when PERM was filed
+      mentalDelta += 10;
+      events.push('i140_approved');
+    } else {
+      mentalDelta -= 10;
+      events.push('i140_denied');
+      updates.i140Status = 'none'; // Can refile
+    }
+  }
+
+  // --- Priority Date Queue ---
+  if (imm.i140Status === 'approved' && imm.priorityDate !== null && imm.i485Status === 'none') {
+    // Advance priority date cursor
+    const baseAdvance = 1.0;
+    const variance = -2 + Math.random() * 5; // -2 to +3
+    const movement = Math.max(-4, Math.min(6, baseAdvance + variance));
+
+    const newCurrent = imm.priorityDateCurrent + movement;
+    updates.priorityDateCurrent = newCurrent;
+
+    if (variance < -1) {
+      mentalDelta -= 15;
+      events.push('priority_date_retrogression');
+    }
+
+    // Check if priority date is current
+    if (newCurrent >= (imm.priorityDate || 0)) {
+      // Can file I-485!
+      updates.i485Status = 'pending';
+      updates.hasComboCard = true;
+      economyCost += 5000; // I-485 + legal fees
+      mentalDelta += 20; // Combo card!
+      events.push('i485_filed_combo_card');
+    }
+  }
+
+  // --- I-485 Processing ---
+  if (imm.i485Status === 'pending') {
+    // Check for RFE
+    if (Math.random() < 0.05) { // 5% per quarter chance
+      updates.i485Status = 'rfe';
+      mentalDelta -= 15;
+      economyCost += 3000;
+      events.push('i485_rfe');
+    } else {
+      // Processing progress — approve after random 4-12 quarters
+      const processingStart = state.timeline.findIndex(
+        (r) => r.events?.some((e) => e.id === 'i485_filed_combo_card')
+      );
+      const quartersProcessing = processingStart >= 0 ? state.turn - processingStart : 0;
+      const requiredQuarters = randomInt(I485_PROCESSING_MIN, I485_PROCESSING_MAX);
+
+      if (quartersProcessing >= requiredQuarters) {
+        // GREEN CARD APPROVED!
+        updates.i485Status = 'approved';
+        updates.hasGreenCard = true;
+        updates.visaType = 'greenCard';
+        updates.visaExpiryTurn = 9999;
+        mentalDelta += 30;
+        events.push('green_card_approved');
+      }
+    }
+  }
+
+  if (imm.i485Status === 'rfe') {
+    // RFE response — resolve in 1-2 quarters
+    if (Math.random() < 0.5) {
+      updates.i485Status = 'pending';
+      events.push('rfe_resolved');
+    }
+  }
+
+  // --- NOID check for combo card holders who are unemployed ---
+  if (imm.hasComboCard && !imm.hasGreenCard && state.career.employed === 'unemployed') {
+    updates.unemploymentQuarters = imm.unemploymentQuarters + 1;
+    if (imm.unemploymentQuarters >= 1) { // 1 quarter grace, then risk
+      const noidResult = roll('i485Noid', state);
+      if (noidResult.success) {
+        mentalDelta -= 25;
+        events.push('noid_received');
+        // Player has 1 quarter to find employment or I-485 denied
+        if (imm.unemploymentQuarters >= 3) {
+          // If already been unemployed 3+ quarters and NOID fires, very bad
+          updates.i485Status = 'none';
+          updates.hasComboCard = false;
+          mentalDelta -= 10;
+          events.push('i485_denied_noid');
+        }
+      }
+    }
+  } else if (state.career.employed === 'employed') {
+    updates.unemploymentQuarters = 0;
+  }
+
+  // --- H1B Renewal ---
+  if (
+    (imm.visaType === 'h1b' || imm.visaType === 'h1bRenewal') &&
+    state.career.employed === 'employed' &&
+    imm.visaExpiryTurn - state.turn <= 2
+  ) {
+    // Auto-renew if employed
+    if (imm.i140Status === 'approved' || (imm.permStatus !== 'none' && state.turn - imm.permStartTurn > 4)) {
+      // Eligible for 7th year extension
+      updates.visaType = 'h1b7thYear';
+      updates.visaExpiryTurn = state.turn + 4; // 1-year renewal
+      economyCost += 2000;
+      events.push('h1b_7th_year_extension');
+    } else {
+      updates.visaType = 'h1bRenewal';
+      updates.visaExpiryTurn = state.turn + 12;
+      economyCost += 2000;
+      events.push('h1b_renewed');
+    }
+  }
+
+  // --- Layoff impact on immigration ---
+  if (state.flags.justLaidOff) {
+    if (!imm.hasComboCard && !imm.hasGreenCard) {
+      // H1B holder laid off: 60-day grace (1 quarter)
+      updates.graceQuartersRemaining = 1;
+      events.push('h1b_grace_period_started');
+    }
+
+    // PERM reset if pre-I-140
+    if (imm.permStatus !== 'none' && imm.permStatus !== 'approved' && imm.i140Status !== 'approved') {
+      updates.permStatus = 'none';
+      updates.permStartTurn = 0;
+      mentalDelta -= 15;
+      events.push('perm_voided_layoff');
+    }
+  }
+
+  return { updates, mentalDelta, economyCost, events, gameOver };
+}
+
+export function getVisaLabel(type: VisaType): string {
+  const labels: Record<VisaType, string> = {
+    f1: 'F-1 学生', opt: 'OPT', optStem: 'OPT STEM',
+    h1b: 'H-1B', h1bRenewal: 'H-1B', h1b7thYear: 'H-1B 7th+',
+    o1: 'O-1', l1: 'L-1', cptDay1: 'Day-1 CPT',
+    comboCard: 'Combo卡 (EAD/AP)', greenCard: '绿卡 (永久居民)',
+  };
+  return labels[type] || type;
+}
+
+export function canChangeEmployerFreely(state: GameState): boolean {
+  return state.immigration.hasGreenCard || state.immigration.hasComboCard;
+}
+
+export function getTravelRisk(state: GameState): number {
+  if (state.immigration.hasGreenCard) return 0;
+  if (state.immigration.hasComboCard) return 0;
+  if (['h1b', 'h1bRenewal', 'h1b7thYear'].includes(state.immigration.visaType)) return 0.05;
+  if (['opt', 'optStem'].includes(state.immigration.visaType)) return 0.03;
+  return 0;
+}
+
+export function activateOpt(state: GameState): Partial<ImmigrationState> {
+  return {
+    visaType: 'opt',
+    visaExpiryTurn: state.turn + 4, // 12 months
+  };
+}
+
+export function activateOptStem(state: GameState): Partial<ImmigrationState> {
+  return {
+    visaType: 'optStem',
+    visaExpiryTurn: state.turn + 8, // 24 months extension
+  };
+}
