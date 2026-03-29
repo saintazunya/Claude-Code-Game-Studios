@@ -229,10 +229,17 @@ export function processTurn(
   }
 
   // 4. Apply selected action effects
+  // School ranking bonus: +1 performance per school point for work actions
+  const schoolPerfBonus = s.creation.schoolRanking;
   for (const actionId of selectedActions) {
     const action = ACTIONS[actionId];
     if (action) {
-      s.attributes = applyDeltas(s.attributes, action.effects);
+      let effects = { ...action.effects };
+      // School ranking adds bonus to work performance actions
+      if (['workSlack', 'workHard', 'workSuperHard'].includes(actionId) && effects.performance !== undefined) {
+        effects.performance = (effects.performance as number) + schoolPerfBonus;
+      }
+      s.attributes = applyDeltas(s.attributes, effects);
 
       // Handle special action side-effects
       if (actionId === 'prepJobChange' || actionId === 'prepJobChangeIntensive') {
