@@ -1,5 +1,8 @@
 <script lang="ts">
   import { gameState, selectedActions, remainingAp, effectiveAp, availableActions, turnInfo, toggleAction, endTurn, portfolio, healthState, mentalState, autoSelect, autoPlayReasoning, inferredMode } from '../engine/store';
+  import InfoPanel from './InfoPanel.svelte';
+
+  let showInfo = $state(false);
   import { canSelectAction, ACTIONS } from '../engine/actions';
   import { computeSicknessChance } from '../engine/attributes';
   import type { ActionId } from '../engine/types';
@@ -97,6 +100,9 @@
         <span class="px-2.5 py-0.5 rounded-full bg-[#1e3a5f] text-sky-300 text-xs font-semibold">
           {ti.age}岁
         </span>
+        <button class="px-2 py-0.5 rounded-full bg-[#1a2234] text-gray-400 text-xs border border-[#2a3050] active:scale-95" onclick={() => showInfo = true}>
+          📊
+        </button>
       </div>
     </div>
     <div class="flex items-center gap-2 text-[10px]">
@@ -339,6 +345,9 @@
     </div>
   </div>
 </div>
+{#if showInfo}
+  <InfoPanel onclose={() => showInfo = false} />
+{/if}
 {/if}
 
 <style>
