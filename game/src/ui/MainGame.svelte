@@ -259,7 +259,7 @@
   {/if}
   {#if gs.grindLockQuarters > 0}
     <div class="mx-4 mb-2 p-2 rounded-xl bg-amber-950/30 border border-amber-900/40 text-xs">
-      <span class="text-amber-400">🔒 卷王模式锁定 {gs.grindLockQuarters}季度（AP上限7）</span>
+      <span class="text-amber-400">🔒 卷王模式锁定 {gs.grindLockQuarters}季度（AP上限{totalAp}）</span>
     </div>
   {/if}
 
