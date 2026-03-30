@@ -134,30 +134,26 @@ export function processImmigrationQuarter(state: GameState): {
   if (imm.permStatus === 'pending') {
     const permQuarters = state.turn - imm.permStartTurn;
 
-    // First 4 quarters: cannot be approved
-    if (permQuarters < 4) {
-      // Rejection check: Q1=20%, Q2=10%, Q3+=2% (lawyer reduces rejection chance)
-      let rejectChance = 0;
-      if (permQuarters === 0) rejectChance = 0.20;
-      else if (permQuarters === 1) rejectChance = 0.10;
-      else rejectChance = 0.02;
-      rejectChance = Math.max(0, rejectChance - lawyerBoost);
-
-      if (Math.random() < rejectChance) {
-        updates.permStatus = 'none'; // rejected, must refile
+    // PERM processing: ~4-6 quarters (1-1.5 years) realistic
+    // First 3 quarters: processing, small audit/reject risk
+    if (permQuarters < 3) {
+      // Audit risk: 5% per quarter (lawyer reduces)
+      const auditChance = Math.max(0, 0.05 - lawyerBoost);
+      if (Math.random() < auditChance) {
+        updates.permStatus = 'none'; // audited → must refile
         updates.permStartTurn = 0;
         mentalDelta -= 15;
         events.push('perm_rejected');
       }
     } else {
-      // From Q5 onwards: each quarter +12% approval chance
-      const approvalChance = Math.min(0.95, (permQuarters - 6) * 0.12 + lawyerBoost);
+      // From Q4 onwards: high approval chance, most PERMs get approved
+      // Q4: 40%, Q5: 65%, Q6: 85%, Q7+: 95%
+      const approvalChance = Math.min(0.95, 0.40 + (permQuarters - 3) * 0.25 + lawyerBoost);
       if (Math.random() < approvalChance) {
         updates.permStatus = 'approved';
         mentalDelta += 5;
         events.push('perm_approved');
       }
-      // Still pending — keep waiting
     }
   }
 
