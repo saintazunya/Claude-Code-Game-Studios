@@ -117,7 +117,7 @@ export function processGraduation(state: GameState): {
 } {
   const isPhd = state.academic.isPhd;
   const events: string[] = [];
-  const debt = isPhd ? 20000 : 50000;
+  const debt = 0; // no student loans
   const level = isPhd ? 4 : 3;
 
   events.push(isPhd ? 'phd_graduated' : 'masters_graduated');
