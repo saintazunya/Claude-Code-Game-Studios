@@ -124,35 +124,33 @@ export function processImmigrationQuarter(state: GameState): {
     }
   }
 
-  // --- PERM Processing ---
-  if (imm.permStatus === 'pending' || imm.permStatus === 'audited') {
-    // Advance PERM timer
+  // --- PERM Processing (probability-based) ---
+  if (imm.permStatus === 'pending') {
     const permQuarters = state.turn - imm.permStartTurn;
 
-    if (imm.permStatus === 'pending' && permQuarters >= PERM_BASE_QUARTERS) {
-      // Check for audit
-      const auditResult = roll('permAudit', state);
-      if (auditResult.success) {
-        updates.permStatus = 'audited';
-        mentalDelta -= 10;
-        events.push('perm_audited');
-      } else {
-        // PERM approved!
+    // First 4 quarters: cannot be approved
+    if (permQuarters < 4) {
+      // Rejection check: Q1=20%, Q2=10%, Q3+=2%
+      let rejectChance = 0;
+      if (permQuarters === 0) rejectChance = 0.20;
+      else if (permQuarters === 1) rejectChance = 0.10;
+      else rejectChance = 0.02;
+
+      if (Math.random() < rejectChance) {
+        updates.permStatus = 'none'; // rejected, must refile
+        updates.permStartTurn = 0;
+        mentalDelta -= 15;
+        events.push('perm_rejected');
+      }
+    } else {
+      // From Q5 onwards: each quarter +20% approval chance
+      const approvalChance = Math.min(0.95, (permQuarters - 3) * 0.20);
+      if (Math.random() < approvalChance) {
         updates.permStatus = 'approved';
         mentalDelta += 5;
         events.push('perm_approved');
       }
-    }
-
-    if (imm.permStatus === 'audited') {
-      const auditDuration = randomInt(PERM_AUDIT_EXTRA_MIN, PERM_AUDIT_EXTRA_MAX);
-      const totalWait = PERM_BASE_QUARTERS + auditDuration;
-      if (permQuarters >= totalWait) {
-        // Audit resolved, PERM approved
-        updates.permStatus = 'approved';
-        mentalDelta += 5;
-        events.push('perm_audit_resolved');
-      }
+      // Still pending — keep waiting
     }
   }
 

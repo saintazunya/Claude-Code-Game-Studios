@@ -71,6 +71,7 @@
     i140_approved: { icon: '✅', text: 'I-140批准' },
     i140_filed: { icon: '📝', text: 'I-140提交' },
     i140_denied: { icon: '❌', text: 'I-140被拒' },
+    perm_rejected: { icon: '❌', text: 'PERM被拒' },
     perm_approved: { icon: '✅', text: 'PERM批准' },
     perm_filed: { icon: '📝', text: 'PERM提交' },
     perm_audited: { icon: '🔍', text: 'PERM被Audit' },

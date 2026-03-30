@@ -14,6 +14,7 @@
     green_card_approved: { icon: '🏆', text: '绿卡批准！！！', color: 'text-green-400', detail: '漫长的等待终于结束了！你现在是美国永久居民。' },
     i485_filed_combo_card: { icon: '🎫', text: 'Combo卡到手！', color: 'text-teal-400', detail: '拿到EAD/AP，不再绑定雇主，可以自由换工作和旅行！' },
     i140_approved: { icon: '📋', text: 'I-140批准！', color: 'text-purple-400', detail: '排期已锁定。即使换工作也保留优先日期。关键里程碑！' },
+    perm_rejected: { icon: '❌', text: 'PERM被拒', color: 'text-red-400', detail: 'PERM申请被劳工部拒绝，需要重新提交。' },
     perm_approved: { icon: '✅', text: 'PERM批准！', color: 'text-amber-400', detail: 'PERM劳工证批准，下一步提交I-140。' },
     perm_filed: { icon: '📝', text: '公司开始办PERM', color: 'text-amber-400', detail: '雇主启动了绿卡流程，PERM申请已提交。' },
     perm_audited: { icon: '⚠️', text: 'PERM被Audit', color: 'text-amber-400', detail: 'PERM申请被劳工部抽查，处理时间将延长2-6个季度。' },
