@@ -479,12 +479,12 @@ describe('Event Preconditions & Guaranteed Triggers', () => {
       expect(true).toBe(true);
     });
 
-    it('warns at 1 quarter unemployed on OPT', () => {
+    it('warns at 2 quarters unemployed on OPT', () => {
       const s = makeCareerState();
       s.immigration.visaType = 'opt';
       s.immigration.visaExpiryTurn = 30;
       s.career.employed = 'unemployed';
-      s.flags.optUnemployedQuarters = 0; // will become 1 after this turn
+      s.flags.optUnemployedQuarters = 1; // will become 2 after this turn
       const next = processTurn(s, 'normal', []);
       expect(next.timeline[0].events.some(e => e.id === 'opt_unemployment_warning')).toBe(true);
     });

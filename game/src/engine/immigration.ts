@@ -117,11 +117,11 @@ export function processImmigrationQuarter(state: GameState): {
   // optUnemployedQuarters is tracked/incremented in processTurn, just read it here
   if (imm.visaType === 'opt' || imm.visaType === 'optStem') {
     const optUnemployedQ = (state.flags.optUnemployedQuarters as number) || 0;
-    if (optUnemployedQ >= 2) {
+    if (optUnemployedQ >= 3) {
       gameOver = true;
       events.push('opt_unemployment_exceeded');
       mentalDelta -= 20;
-    } else if (optUnemployedQ >= 1) {
+    } else if (optUnemployedQ >= 2) {
       events.push('opt_unemployment_warning');
       mentalDelta -= 10;
     }

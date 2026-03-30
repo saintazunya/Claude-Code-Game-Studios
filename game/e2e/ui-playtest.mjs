@@ -117,6 +117,13 @@ const AGENTS = [
 async function dismissPopups(page) {
   for (let attempt = 0; attempt < 15; attempt++) {
     let dismissed = false;
+    // Stock trading popup — click cancel
+    const cancelBtn = page.locator('button').filter({ hasText: '取消' }).first();
+    if (await cancelBtn.isVisible({ timeout: 60 }).catch(() => false)) {
+      await cancelBtn.click().catch(() => {});
+      await page.waitForTimeout(80);
+      dismissed = true;
+    }
     // Event choice popup — click first choice tag
     for (const tag of ['稳妥', '中立', '冒险', '节约', '花钱']) {
       const el = page.locator(`text=${tag}`).first();
@@ -216,7 +223,7 @@ async function selectActions(page, agent, state) {
     for (let i = 0; i < count && selected < 2; i++) {
       const btn = allBtns.nth(i);
       const txt = await btn.innerText().catch(() => '');
-      if (txt.includes('AP') && !txt.includes('结束') && !txt.includes('🤖') && await btn.isEnabled()) {
+      if (txt.includes('AP') && !txt.includes('结束') && !txt.includes('🤖') && !txt.includes('股票') && await btn.isEnabled()) {
         await btn.click().catch(() => {});
         await page.waitForTimeout(80);
         selected++;
@@ -226,11 +233,11 @@ async function selectActions(page, agent, state) {
 }
 
 async function playGame(page, agent, gameNum) {
-  await page.goto('http://localhost:4174');
+  await page.goto('http://localhost:4174/Claude-Code-Game-Studios/');
   await page.waitForTimeout(1000);
 
   // Start new game
-  const newGame = page.locator('button').filter({ hasText: '新游戏' }).first();
+  const newGame = page.locator('button').filter({ hasText: '开始新游戏' }).first();
   if (await newGame.isVisible({ timeout: 2000 }).catch(() => false)) {
     await newGame.click();
     await page.waitForTimeout(400);
@@ -327,19 +334,24 @@ async function main() {
   const results = [];
 
   console.log('═'.repeat(60));
-  console.log('  UI PLAYTEST: 10 Agents × 2 Games = 20 Games');
+  console.log('  UI PLAYTEST: 10 Agents × 5 Games = 50 Games');
   console.log('═'.repeat(60));
 
   for (const agent of AGENTS) {
     console.log(`\n── ${agent.name} ──`);
     const page = await browser.newPage({ viewport: { width: 430, height: 932 } });
 
-    for (let g = 1; g <= 2; g++) {
-      const result = await playGame(page, agent, g);
-      results.push(result);
-      console.log(`  Game ${g}: ${result.ending} @ T${result.turns} | ${result.milestones.join(' → ') || 'no milestones'}`);
-      if (result.issues.length > 0) {
-        result.issues.forEach(i => console.log(`    ⚠️ ${i}`));
+    for (let g = 1; g <= 5; g++) {
+      try {
+        const result = await playGame(page, agent, g);
+        results.push(result);
+        console.log(`  Game ${g}: ${result.ending} @ T${result.turns} | ${result.milestones.join(' → ') || 'no milestones'}`);
+        if (result.issues.length > 0) {
+          result.issues.forEach(i => console.log(`    ⚠️ ${i}`));
+        }
+      } catch (e) {
+        console.log(`  Game ${g}: CRASH — ${e.message.substring(0, 80)}`);
+        results.push({ agent: agent.name, game: g, turns: -1, ending: 'crash', milestones: [], issues: [`CRASH: ${e.message.substring(0, 100)}`] });
       }
     }
 
