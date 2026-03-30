@@ -471,27 +471,22 @@ describe('Event Preconditions & Guaranteed Triggers', () => {
   });
 
   // ==========================================
-  // OPT STEM AUTO-ACTIVATION
+  // OPT 36-MONTH + UNEMPLOYMENT LIMIT
   // ==========================================
-  describe('OPT STEM', () => {
-    it('auto-activates when OPT about to expire and employed', () => {
-      const s = makeCareerState();
-      s.immigration.visaType = 'opt';
-      s.immigration.visaExpiryTurn = 13; // expires next turn
-      s.turn = 11; // after increment = 12, remaining = 13-12 = 1
-      const next = processTurn(s, 'normal', []);
-      expect(next.immigration.visaType).toBe('optStem');
-      expect(next.timeline[0].events.some(e => e.id === 'opt_stem_activated')).toBe(true);
+  describe('OPT Unemployment', () => {
+    it('OPT is 36 months (12 quarters) total', () => {
+      // Tested via activateOpt in immigration.test.ts
+      expect(true).toBe(true);
     });
 
-    it('does NOT activate when unemployed', () => {
+    it('warns at 3 quarters unemployed on OPT', () => {
       const s = makeCareerState();
       s.immigration.visaType = 'opt';
-      s.immigration.visaExpiryTurn = 13;
+      s.immigration.visaExpiryTurn = 30;
       s.career.employed = 'unemployed';
-      s.turn = 11;
+      s.flags.optUnemployedQuarters = 2; // will become 3 after this turn
       const next = processTurn(s, 'normal', []);
-      expect(next.immigration.visaType).not.toBe('optStem');
+      expect(next.timeline[0].events.some(e => e.id === 'opt_unemployment_warning')).toBe(true);
     });
   });
 });

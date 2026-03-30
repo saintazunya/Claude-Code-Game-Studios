@@ -45,12 +45,12 @@ describe('Immigration System', () => {
   });
 
   describe('activateOpt', () => {
-    it('sets OPT with 4 quarter expiry', () => {
+    it('sets OPT with 12 quarter (36 month) expiry', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
       state.turn = 8;
       const updates = activateOpt(state);
       expect(updates.visaType).toBe('opt');
-      expect(updates.visaExpiryTurn).toBe(12);
+      expect(updates.visaExpiryTurn).toBe(20); // 8 + 12 quarters
     });
   });
 

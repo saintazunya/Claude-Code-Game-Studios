@@ -113,22 +113,17 @@ export function processImmigrationQuarter(state: GameState): {
     }
   }
 
-  // --- OPT Expiry tracking + auto STEM extension ---
-  if (imm.visaType === 'opt' && state.turn >= 8) {
-    // OPT: 4 quarters from graduation (turn 8)
-    if (!updates.visaExpiryTurn && imm.visaExpiryTurn === 999) {
-      updates.visaExpiryTurn = 8 + 4; // 12
-    }
-  }
-
-  // Auto-apply OPT STEM extension when OPT is about to expire (all players have STEM degree)
-  if (imm.visaType === 'opt' && state.career.employed === 'employed') {
-    const remaining = imm.visaExpiryTurn - state.turn;
-    if (remaining <= 1 && remaining > 0) {
-      updates.visaType = 'optStem';
-      updates.visaExpiryTurn = imm.visaExpiryTurn + 10; // ~30 month extension (slightly longer than real 24mo to give 3 lottery attempts)
-      events.push('opt_stem_activated');
-      mentalDelta += 5;
+  // --- OPT: 36 months total (OPT + STEM combined), 12-month unemployment limit ---
+  // optUnemployedQuarters is tracked/incremented in processTurn, just read it here
+  if (imm.visaType === 'opt' || imm.visaType === 'optStem') {
+    const optUnemployedQ = (state.flags.optUnemployedQuarters as number) || 0;
+    if (optUnemployedQ >= 4) {
+      gameOver = true;
+      events.push('opt_unemployment_exceeded');
+      mentalDelta -= 20;
+    } else if (optUnemployedQ >= 3) {
+      events.push('opt_unemployment_warning');
+      mentalDelta -= 10;
     }
   }
 
@@ -370,13 +365,6 @@ export function getTravelRisk(state: GameState): number {
 export function activateOpt(state: GameState): Partial<ImmigrationState> {
   return {
     visaType: 'opt',
-    visaExpiryTurn: state.turn + 4, // 12 months
-  };
-}
-
-export function activateOptStem(state: GameState): Partial<ImmigrationState> {
-  return {
-    visaType: 'optStem',
-    visaExpiryTurn: state.turn + 8, // 24 months extension
+    visaExpiryTurn: state.turn + 12, // 36 months (OPT + STEM combined)
   };
 }

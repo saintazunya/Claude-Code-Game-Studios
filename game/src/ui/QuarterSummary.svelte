@@ -49,6 +49,8 @@
     rfe_resolved: { icon: '📋', text: 'RFE补件完成', color: 'text-amber-400' },
     lawyer_consulted: { icon: '⚖️', text: '律师咨询完成', color: 'text-purple-400', detail: '解锁了新选项：Day1-CPT、NIW/EB1A、发论文。本季度移民审批+10%。' },
     cpt_enrolled: { icon: '🏫', text: '报名Day1-CPT学校', color: 'text-purple-400', detail: '转为CPT身份，可以合法工作+继续抽H1B。每季度学费$3K。' },
+    opt_unemployment_exceeded: { icon: '✈️', text: 'OPT失业超12个月，被迫离境', color: 'text-red-400', detail: '在OPT期间连续失业超过12个月，身份失效。' },
+    opt_unemployment_warning: { icon: '⚠️', text: 'OPT失业即将满12个月！', color: 'text-red-400', detail: '再找不到工作就要被迫回国了！赶紧投简历！' },
     i485_rfe: { icon: '📋', text: 'I-485被要求补件(RFE)', color: 'text-amber-400', detail: '需要额外材料，处理时间延长。' },
     visa_expired_deported: { icon: '✈️', text: '签证过期，被遣返', color: 'text-red-400' },
     // Random events from event pool

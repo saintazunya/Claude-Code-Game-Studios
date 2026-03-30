@@ -99,6 +99,8 @@
     priority_date_retrogression: { icon: '😤', text: '排期倒退' },
     lawyer_consulted: { icon: '⚖️', text: '律师咨询' },
     cpt_enrolled: { icon: '🏫', text: 'Day1-CPT入学' },
+    opt_unemployment_exceeded: { icon: '✈️', text: 'OPT失业超限' },
+    opt_unemployment_warning: { icon: '⚠️', text: 'OPT失业警告' },
     found_job_while_unemployed: { icon: '🎉', text: '重新就业' },
     job_search_failed: { icon: '😔', text: '求职失败' },
     job_offer_received: { icon: '🎉', text: '收到Offer' },

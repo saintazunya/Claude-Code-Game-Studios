@@ -644,7 +644,16 @@ export function processTurn(
     }
   }
 
-  // 7d. Immigration processing
+  // 7d. Track OPT unemployment for immigration
+  if (s.phase === 'career' && ['opt', 'optStem'].includes(s.immigration.visaType)) {
+    if (s.career.employed !== 'employed') {
+      s.flags.optUnemployedQuarters = ((s.flags.optUnemployedQuarters as number) || 0) + 1;
+    } else {
+      s.flags.optUnemployedQuarters = 0;
+    }
+  }
+
+  // Immigration processing
   if (s.phase === 'career') {
     const immResult = processImmigrationQuarter(s);
     Object.assign(s.immigration, immResult.updates);
