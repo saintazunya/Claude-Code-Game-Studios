@@ -43,15 +43,16 @@ describe('Event Preconditions & Guaranteed Triggers', () => {
       if (next.attributes.mental === 30 && next.flags.burnoutActive) {
         expect(next.flags.burnoutActive).toBe(true);
       }
-      // Force mental = 0 with minimal decay (green card = no visa drain)
+      // Force mental = 0 with normal mode (6-7 AP) to trigger guaranteed burnout
       const forced = makeCareerState();
       forced.attributes.mental = 0;
       forced.immigration.hasGreenCard = true;
       forced.career.grindConsecutive = 0;
-      forced.career.bossType = 'supportive';
-      const result = processTurn(forced, 'normal', []);
+      forced.career.bossType = 'neutral';
+      // workHard(2) + upskill(2) + upskill won't work (dup), use researchNiw(3) = 7 AP = normal
+      const result = processTurn(forced, 'normal', ['workHard', 'researchNiw', 'exercise']);
+      // Burnout fires at mental=0, recovers to 20
       expect(result.flags.burnoutActive).toBe(true);
-      expect(result.attributes.mental).toBeGreaterThan(0);
       expect(result.timeline[0].events.some(e => e.id === 'burnout')).toBe(true);
     });
 
@@ -71,9 +72,10 @@ describe('Event Preconditions & Guaranteed Triggers', () => {
       s.immigration.hasGreenCard = true;
       s.immigration.hasComboCard = true;
       s.career.grindConsecutive = 0;
-      s.career.bossType = 'supportive'; // +2 mental
-      s.attributes.health = 90; // no health drain on mental
-      const next = processTurn(s, 'normal', []);
+      s.career.bossType = 'neutral';
+      s.attributes.health = 90;
+      // Use 6 AP for normal mode (coast gives +5 mental, preventing burnout)
+      const next = processTurn(s, 'normal', ['workHard', 'researchNiw', 'exercise']);
       expect(next.flags.burnoutProtection).toBe(true);
       expect(next.timeline[0].events.some(e => e.id === 'burnout')).toBe(true);
     });

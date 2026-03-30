@@ -55,7 +55,7 @@ export function createGameState(creation: CreationAttributes): GameState {
       graceQuartersRemaining: 0,
     },
     economy: {
-      cash: 50000,
+      cash: 80000,
 
       portfolioShares: 0,
       portfolioCostBasis: 0,
@@ -155,11 +155,11 @@ export function getWorkModeEffects(mode: WorkMode | AcademicStudyMode, state: Ga
 
   switch (mode) {
     case 'coast': case 'light':
-      return { mental: 3 }; // relaxed, recover mental
+      return { mental: 5 }; // relaxed, good recovery
     case 'normal':
-      return { mental: -2 }; // baseline stress
+      return { mental: -1 }; // baseline stress
     case 'grind': case 'intense':
-      return { mental: -8, health: Math.round(-15 * (1 - grindReduction)) }; // burnout risk
+      return { mental: -5, health: Math.round(-10 * (1 - grindReduction)) }; // burnout risk
   }
 }
 
@@ -248,20 +248,27 @@ export function processTurn(
         // Roll for job offer this quarter
         const offerRoll = roll('jobOffer', s);
         if (offerRoll.success) {
-          // Generate offer details
+          // Generate offer details (capped by salary band)
           const currentTC = s.career.salary + s.career.rsu;
-          const skillsBonus = s.attributes.skills * 0.002;
+          const skillsBonus = Math.min(s.attributes.skills * 0.002, 0.30); // cap skills bonus at 30%
           const hopPremium = 0.15 + Math.random() * 0.25 + skillsBonus;
-          const newTC = Math.round(currentTC * (1 + hopPremium));
+          const targetTC = Math.round(currentTC * (1 + hopPremium));
           const externalPromo = Math.random() < 0.15;
           const offerLevel = externalPromo ? Math.min(s.career.level + 1, 7) : s.career.level;
 
+          // Cap salary at band maximum (imported from career.ts salary bands)
+          const BAND_MAX: Record<number, { salary: number; rsu: number }> = {
+            3: { salary: 180000, rsu: 30000 }, 4: { salary: 250000, rsu: 60000 },
+            5: { salary: 350000, rsu: 100000 }, 6: { salary: 500000, rsu: 180000 },
+            7: { salary: 700000, rsu: 300000 },
+          };
+          const band = BAND_MAX[offerLevel] || BAND_MAX[3];
           s.flags.pendingJobOffer = {
-            salary: Math.round(newTC * 0.7),
-            rsu: Math.round(newTC * 0.3),
+            salary: Math.round(Math.min(band.salary, targetTC * 0.7)),
+            rsu: Math.round(Math.min(band.rsu, targetTC * 0.3)),
             level: offerLevel,
             premium: Math.round(hopPremium * 100),
-            signingBonus: Math.round(newTC * 0.1),
+            signingBonus: Math.round(Math.min(band.salary * 0.3, targetTC * 0.1)),
           };
           turnEvents.push({ id: 'job_offer_received', choiceId: '' });
         } else {
@@ -333,6 +340,22 @@ export function processTurn(
       }
       if (actionId === 'searchFullTimeJob') {
         s.flags.searchedFullTimeJob = true; // triggers job roll at graduation
+      }
+      if (actionId === 'invest') {
+        // Lump sum: invest 20% of available cash (or use pending invest amount from UI)
+        const investAmount = (s.flags.pendingInvestAmount as number) || Math.round(s.economy.cash * 0.20);
+        if (investAmount > 0 && s.economy.cash >= investAmount) {
+          const shares = investAmount / s.economy.sharePrice;
+          s.economy.portfolioShares += shares;
+          s.economy.portfolioCostBasis += investAmount;
+          s.economy.cash -= investAmount;
+        }
+        // Apply auto-invest setting change if pending
+        if (s.flags.pendingAutoInvestAmount !== undefined) {
+          s.economy.autoInvestAmount = s.flags.pendingAutoInvestAmount as number;
+          s.flags.pendingAutoInvestAmount = undefined;
+        }
+        s.flags.pendingInvestAmount = undefined;
       }
       if (actionId === 'travel') {
         s.economy.cash -= 2000 + Math.random() * 3000;
@@ -646,8 +669,8 @@ export function processTurn(
   s.timeline.push(record);
 
   // 10. Check game over
-  if (s.economy.cash < -20000 && !s.endingType) {
-    // Bankruptcy: cash below -$10K
+  if (s.economy.cash < -30000 && !s.endingType) {
+    // Bankruptcy: cash below -$30K
     s.endingType = 'bankrupt';
   }
   if (s.turn >= 72 && !s.endingType) {

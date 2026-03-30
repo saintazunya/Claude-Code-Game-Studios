@@ -162,6 +162,7 @@ export type ActionId =
   | 'researchNiw'
   | 'publishPaper'
   | 'consultLawyer'
+  | 'invest'
   | 'rest'
   | 'hospital'
   | 'travel'

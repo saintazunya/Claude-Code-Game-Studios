@@ -75,6 +75,14 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
   },
   // consultLawyer removed — not yet designed
 
+  // Investment
+  invest: {
+    id: 'invest', nameZh: '投资理财', apCost: 1, phase: 'any',
+    effects: {}, description: 'Invest in S&P500 or adjust auto-invest settings',
+    tipsZh: '✅ 一次性投资或调整定投金额 | ✅ 长期年化~8% | ⚠️ 经济衰退期可能亏损 | 💡 越早开始复利越大',
+    precondition: (s) => s.economy.cash > 1000,
+  },
+
   // Health & wellness
   rest: {
     id: 'rest', nameZh: '休息调整', apCost: 2, phase: 'any',

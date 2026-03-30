@@ -151,7 +151,7 @@ export function processImmigrationQuarter(state: GameState): {
         events.push('perm_rejected');
       }
     } else {
-      // From Q5 onwards: each quarter +20% approval chance
+      // From Q5 onwards: each quarter +12% approval chance
       const approvalChance = Math.min(0.95, (permQuarters - 6) * 0.12);
       if (Math.random() < approvalChance) {
         updates.permStatus = 'approved';

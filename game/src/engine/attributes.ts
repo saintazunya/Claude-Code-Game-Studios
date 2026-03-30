@@ -95,11 +95,13 @@ export function computeNaturalDecay(state: GameState): Partial<CoreAttributes> {
     (age > 40 ? -1 : 0) +
     grindHealthPenalty;
 
+  // Mental decay: capped so single-turn total (decay + mode + actions) doesn't spiral
+  // Visa stress reduced: -2 instead of -4 (was causing 40→0 in one turn)
   const mentalDecay =
-    -5 +
-    (visaInsecure ? -4 : 0) +
-    (grindActive ? -6 : 0) +
-    (state.attributes.health < 30 ? -5 : 0);
+    -3 +
+    (visaInsecure ? -2 : 0) +
+    (grindActive ? -4 : 0) +
+    (state.attributes.health < 30 ? -3 : 0);
 
   // Boss effects
   const boss = state.career.bossType;

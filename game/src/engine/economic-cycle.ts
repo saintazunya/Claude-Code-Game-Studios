@@ -13,11 +13,13 @@ interface PhaseConfig {
   transitions: { phase: EconomicPhase; weight: number }[];
 }
 
+// S&P500 model: target 8% annual (~2% quarterly) with ±10% annual variance
+// Quarterly returns = annual / 4, with random noise
 const PHASE_CONFIG: Record<EconomicPhase, PhaseConfig> = {
   boom: {
     minDuration: 6, maxDuration: 16,
-    returnMin: 0.03, returnMax: 0.08,
-    housingMin: 0.02, housingMax: 0.05,
+    returnMin: 0.03, returnMax: 0.06, // 12-24% annual
+    housingMin: 0.01, housingMax: 0.03,
     transitions: [
       { phase: 'normal', weight: 0.70 },
       { phase: 'recession', weight: 0.30 },
@@ -25,8 +27,8 @@ const PHASE_CONFIG: Record<EconomicPhase, PhaseConfig> = {
   },
   normal: {
     minDuration: 4, maxDuration: 12,
-    returnMin: 0.01, returnMax: 0.03,
-    housingMin: 0.00, housingMax: 0.02,
+    returnMin: 0.01, returnMax: 0.03, // 4-12% annual (centered ~8%)
+    housingMin: 0.00, housingMax: 0.015,
     transitions: [
       { phase: 'boom', weight: 0.30 },
       { phase: 'recession', weight: 0.25 },
@@ -35,8 +37,8 @@ const PHASE_CONFIG: Record<EconomicPhase, PhaseConfig> = {
   },
   recession: {
     minDuration: 3, maxDuration: 8,
-    returnMin: -0.15, returnMax: -0.05,
-    housingMin: -0.08, housingMax: -0.03,
+    returnMin: -0.08, returnMax: -0.02, // -8% to -32% annual
+    housingMin: -0.04, housingMax: -0.01,
     transitions: [
       { phase: 'recovery', weight: 0.80 },
       { phase: 'recession', weight: 0.20 },
@@ -44,8 +46,8 @@ const PHASE_CONFIG: Record<EconomicPhase, PhaseConfig> = {
   },
   recovery: {
     minDuration: 4, maxDuration: 8,
-    returnMin: 0.02, returnMax: 0.06,
-    housingMin: 0.01, housingMax: 0.03,
+    returnMin: 0.02, returnMax: 0.04, // 8-16% annual
+    housingMin: 0.005, housingMax: 0.02,
     transitions: [
       { phase: 'normal', weight: 0.60 },
       { phase: 'boom', weight: 0.40 },
