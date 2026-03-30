@@ -55,8 +55,7 @@ export function createGameState(creation: CreationAttributes): GameState {
       graceQuartersRemaining: 0,
     },
     economy: {
-      cash: 20000,
-      // No student loans in this game
+      cash: 50000,
 
       portfolioShares: 0,
       portfolioCostBasis: 0,
@@ -370,15 +369,21 @@ export function processTurn(
   });
 
   // 6. Process passive economy
-  // Salary
+  // Living costs: always apply
+  if (s.phase === 'academic') {
+    // Academic: based on geo location. Geo 5 = $3K/month = $9K/quarter, Geo 0 = $1.5K/month = $4.5K/quarter
+    const monthlyRent = 1500 + s.creation.geoLocation * 300; // $1500 (geo 0) to $3000 (geo 5)
+    s.economy.cash -= monthlyRent * 3;
+  } else {
+    // Career: $4K/month = $12K/quarter base
+    s.economy.cash -= 12000;
+  }
+
+  // Salary (career phase only)
   if (s.career.employed === 'employed') {
     const quarterlySalary = (s.career.salary + s.career.rsu) / 4;
-    // Simplified tax: ~35% effective rate
     const afterTax = quarterlySalary * 0.65;
-    // Living expenses (simplified by city tier)
-    const livingCosts: Record<string, number> = { tier1: 14000, tier2: 10000, tier3: 7000, tier4: 5500 };
-    const expenses = livingCosts[s.economy.city] || 10000;
-    s.economy.cash += afterTax - expenses;
+    s.economy.cash += afterTax;
   }
 
   // Student loan payment
@@ -641,7 +646,11 @@ export function processTurn(
   s.timeline.push(record);
 
   // 10. Check game over
-  if (s.turn >= 148) {
+  if (s.economy.cash < -10000 && !s.endingType) {
+    // Bankruptcy: cash below -$10K
+    s.endingType = 'bankrupt';
+  }
+  if (s.turn >= 148 && !s.endingType) {
     s.endingType = s.immigration.hasGreenCard ? 'age59WithGc' : 'age59WithoutGc';
   }
 
@@ -721,7 +730,7 @@ export function resolveEvent(state: GameState, event: import('./types').GameEven
 
 export function calculateFinalScore(state: GameState): number {
   const nw = Math.max(0, state.attributes.netWorth);
-  const gcMult = state.immigration.hasGreenCard ? 1.5 : state.endingType === 'deported' ? 0.8 : 1.0;
+  const gcMult = state.immigration.hasGreenCard ? 1.5 : (state.endingType === 'deported' || state.endingType === 'bankrupt') ? 0.8 : 1.0;
   const age = getTurnInfo(state.turn).age;
   const earlyBonus = state.immigration.hasGreenCard ? Math.max(0, (59 - age) * 10000) : 0;
   return Math.round(nw * gcMult + earlyBonus);

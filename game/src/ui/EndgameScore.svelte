@@ -31,6 +31,8 @@
         return { icon: '✈️', title: '被迫回国', sub: '签证到期，梦断异乡', gradient: 'from-red-400 to-red-600', won: false };
       case 'voluntaryDeparture':
         return { icon: '🏠', title: '落叶归根', sub: '选择回国', gradient: 'from-gray-400 to-gray-500', won: false };
+      case 'bankrupt':
+        return { icon: '💸', title: '破产', sub: '钱花光了...', gradient: 'from-red-400 to-red-600', won: false };
       default:
         return { icon: '🎮', title: '游戏结束', sub: '', gradient: 'from-gray-400 to-gray-500', won: false };
     }

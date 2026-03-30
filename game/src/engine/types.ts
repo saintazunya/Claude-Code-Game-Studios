@@ -72,7 +72,8 @@ export type EndingType =
   | 'age59WithGc'
   | 'age59WithoutGc'
   | 'deported'
-  | 'voluntaryDeparture';
+  | 'voluntaryDeparture'
+  | 'bankrupt';
 
 export interface Company {
   id: string;
