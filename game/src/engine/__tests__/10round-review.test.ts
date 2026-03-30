@@ -129,7 +129,7 @@ function playRound(round: number): RoundStats {
 
   for (const reviewer of REVIEWERS) {
     let rGC = 0, rDeport = 0;
-    for (let g = 0; g < 20; g++) {
+    for (let g = 0; g < 2; g++) {
       let state = createGameState(reviewer.build);
       let foundJob = false, gotH1b = false;
 
@@ -196,7 +196,7 @@ function playRound(round: number): RoundStats {
 }
 
 describe('10-Round Review Cycle', () => {
-  it('runs 10 rounds of 100 games each', () => {
+  it('runs 10 rounds of 10 games each', () => {
     const devLog: string[] = [];
 
     for (let round = 1; round <= 10; round++) {

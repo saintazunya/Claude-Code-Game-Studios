@@ -341,6 +341,22 @@ export function processTurn(
       if (actionId === 'searchFullTimeJob') {
         s.flags.searchedFullTimeJob = true; // triggers job roll at graduation
       }
+      if (actionId === 'consultLawyer') {
+        s.economy.cash -= 500;
+        // Lawyer consultation gives a small networking bonus for next job search
+        s.flags.networkingBonus = ((s.flags.networkingBonus as number) || 0) + 0.02;
+      }
+      if (actionId === 'day1Cpt') {
+        s.economy.cash -= 3000; // CPT school tuition
+        // Convert to F-1/CPT status — extends visa, allows work
+        if (!s.immigration.hasGreenCard && !s.immigration.hasComboCard) {
+          s.immigration.visaType = 'cptDay1';
+          s.immigration.visaExpiryTurn = s.turn + 8; // 2 years of CPT
+          // Can still enter H1B lottery while on CPT
+          s.flags.onCpt = true;
+          turnEvents.push({ id: 'cpt_enrolled', choiceId: '' });
+        }
+      }
       if (actionId === 'invest') {
         // Lump sum: invest 20% of available cash (or use pending invest amount from UI)
         const investAmount = (s.flags.pendingInvestAmount as number) || Math.round(s.economy.cash * 0.20);

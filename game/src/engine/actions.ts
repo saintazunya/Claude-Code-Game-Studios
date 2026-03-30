@@ -40,8 +40,8 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
   prepJobChange: {
     id: 'prepJobChange', nameZh: '跳槽面试', apCost: 3, phase: 'career',
     effects: { mental: -3 }, description: 'Interview for new jobs this quarter',
-    tipsZh: '✅ 本季度判定是否拿到offer | ✅ 技能越高offer越大 | ⚠️ 没有I-140跳槽会重置绿卡进度！ | ⚠️ 精神-3',
-    precondition: (s) => s.career.employed === 'employed' && !s.career.onPip,
+    tipsZh: '✅ 本季度判定是否拿到offer | ✅ 技能越高offer越大 | ⚠️ 没有I-140跳槽会重置绿卡进度！ | ⚠️ 精神-3 | 💡 PIP期间也可以面试（推荐）',
+    precondition: (s) => s.career.employed === 'employed',
     exclusive: ['travel'],
   },
   // entrepreneurship removed — not yet designed
@@ -62,6 +62,24 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
 
   // Immigration actions
   // prepH1b removed — employer auto-files H1B each Q1 when on OPT/STEM
+  consultLawyer: {
+    id: 'consultLawyer', nameZh: '咨询移民律师', apCost: 1, phase: 'career',
+    effects: { mental: 3 }, description: 'Consult immigration lawyer ($500)',
+    tipsZh: '✅ 精神+3（安心感）| ✅ 了解身份选项 | ⚠️ 花费$500 | 💡 危机时第一件事',
+  },
+  day1Cpt: {
+    id: 'day1Cpt', nameZh: '报名Day1-CPT学校', apCost: 2, phase: 'career',
+    effects: { mental: 10 }, description: 'Enroll in CPT school to maintain work authorization ($3K/quarter)',
+    tipsZh: '✅ 保持合法身份+工作许可 | ✅ 可以继续找工作/抽H1B | ⚠️ $3K/季度学费 | ⚠️ 有风险（USCIS审查）| 💡 签证快到期时的救命稻草',
+    precondition: (s) => {
+      // Available when visa is expiring within 2 quarters or unemployed on OPT
+      const expiryClose = s.immigration.visaExpiryTurn - s.turn <= 2;
+      const unemployedOnOpt = s.career.employed === 'unemployed' &&
+        ['opt', 'optStem'].includes(s.immigration.visaType);
+      const h1bExpiring = expiryClose && ['h1b', 'h1bRenewal', 'h1b7thYear'].includes(s.immigration.visaType);
+      return !s.immigration.hasGreenCard && !s.immigration.hasComboCard && (unemployedOnOpt || h1bExpiring || expiryClose);
+    },
+  },
   researchNiw: {
     id: 'researchNiw', nameZh: '研究NIW/EB1A', apCost: 3, phase: 'career',
     effects: { academicImpact: 5 }, description: 'Work toward self-petition immigration route',

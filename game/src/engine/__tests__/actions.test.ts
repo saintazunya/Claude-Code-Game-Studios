@@ -59,14 +59,14 @@ describe('Action Point System', () => {
       expect(ids).not.toContain('studyGpa'); // academic only
     });
 
-    it('blocks prepJobChange during PIP', () => {
+    it('allows prepJobChange during PIP (real-world: interview immediately when PIPed)', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
       state.phase = 'career';
       state.career.employed = 'employed';
       state.career.onPip = true;
       const available = getAvailableActions(state);
       const ids = available.map(a => a.id);
-      expect(ids).not.toContain('prepJobChange');
+      expect(ids).toContain('prepJobChange');
     });
 
     // entrepreneurship removed — not yet designed
