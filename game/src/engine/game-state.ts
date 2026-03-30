@@ -343,8 +343,13 @@ export function processTurn(
       }
       if (actionId === 'consultLawyer') {
         s.economy.cash -= 500;
-        // Lawyer consultation gives a small networking bonus for next job search
-        s.flags.networkingBonus = ((s.flags.networkingBonus as number) || 0) + 0.02;
+        // 1. Unlock hidden actions (day1Cpt, researchNiw, publishPaper)
+        s.flags.lawyerConsulted = true;
+        // 2. Boost next immigration roll by +10%
+        s.flags.lawyerImmigrationBoost = true;
+        // 3. Reveal probabilities (flag for UI to show)
+        s.flags.showProbabilities = true;
+        turnEvents.push({ id: 'lawyer_consulted', choiceId: '' });
       }
       if (actionId === 'day1Cpt') {
         s.economy.cash -= 3000; // CPT school tuition
@@ -645,6 +650,10 @@ export function processTurn(
     if (immResult.gameOver) {
       s.endingType = 'deported';
     }
+    // Consume lawyer boost after immigration processing (one-time use)
+    s.flags.lawyerImmigrationBoost = false;
+    // Consume probability reveal after one turn
+    s.flags.showProbabilities = false;
   }
   s.flags.justLaidOff = false;
 

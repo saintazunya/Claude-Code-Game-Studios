@@ -64,14 +64,17 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
   // prepH1b removed — employer auto-files H1B each Q1 when on OPT/STEM
   consultLawyer: {
     id: 'consultLawyer', nameZh: '咨询移民律师', apCost: 1, phase: 'career',
-    effects: { mental: 3 }, description: 'Consult immigration lawyer ($500)',
-    tipsZh: '✅ 精神+3（安心感）| ✅ 了解身份选项 | ⚠️ 花费$500 | 💡 危机时第一件事',
+    effects: { mental: 5 }, description: 'Consult immigration lawyer ($500) — unlocks hidden options',
+    tipsZh: '✅ 精神+5（安心感）| 🔓 解锁Day1-CPT和NIW/EB1A选项 | 📊 显示本季度移民/职业概率 | ✅ 下次移民审批+10% | ⚠️ $500 | 💡 第一次咨询最重要',
+    precondition: (s) => !s.immigration.hasGreenCard, // no point after GC
   },
   day1Cpt: {
     id: 'day1Cpt', nameZh: '报名Day1-CPT学校', apCost: 2, phase: 'career',
     effects: { mental: 10 }, description: 'Enroll in CPT school to maintain work authorization ($3K/quarter)',
     tipsZh: '✅ 保持合法身份+工作许可 | ✅ 可以继续找工作/抽H1B | ⚠️ $3K/季度学费 | ⚠️ 有风险（USCIS审查）| 💡 签证快到期时的救命稻草',
     precondition: (s) => {
+      // HIDDEN until lawyer consulted
+      if (!s.flags.lawyerConsulted) return false;
       // Available when visa is expiring within 2 quarters or unemployed on OPT
       const expiryClose = s.immigration.visaExpiryTurn - s.turn <= 2;
       const unemployedOnOpt = s.career.employed === 'unemployed' &&
@@ -84,12 +87,13 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
     id: 'researchNiw', nameZh: '研究NIW/EB1A', apCost: 3, phase: 'career',
     effects: { academicImpact: 5 }, description: 'Work toward self-petition immigration route',
     tipsZh: '✅ 学术+5，推进自主绿卡 | ✅ 不绑雇主，自由度高 | ⚠️ 需要学术影响力>50(NIW)或>75(EB1A)',
+    precondition: (s) => !!s.flags.lawyerConsulted, // HIDDEN until lawyer consulted
   },
   publishPaper: {
     id: 'publishPaper', nameZh: '发论文（副业）', apCost: 3, phase: 'career',
     effects: { academicImpact: 10 }, description: 'Write and publish a paper as side project',
     tipsZh: '✅ 学术+10，大幅推进NIW/EB1A | ⚠️ 占3AP | ⚠️ RS职业自带论文产出，不需要这个',
-    precondition: (s) => s.career.path !== 'rs',
+    precondition: (s) => s.career.path !== 'rs' && !!s.flags.lawyerConsulted,
   },
   // consultLawyer removed — not yet designed
 

@@ -335,6 +335,7 @@ const AGENTS: AgentProfile[] = [
         const gradTurn = s.academic.isPhd ? 16 : 8;
         if (s.turn === gradTurn - 1) p.push('searchFullTimeJob');
       } else {
+        if (!s.flags.lawyerConsulted) p.push('consultLawyer');
         p.push('publishPaper', 'researchNiw');
         if (s.attributes.health < 40) p.push('rest', 'hospital');
         if (s.attributes.mental < 35) p.push('therapist');
@@ -406,6 +407,7 @@ const AGENTS: AgentProfile[] = [
         if (s.attributes.mental < 30) p.push('therapist');
         if (s.career.employed === 'unemployed') p.push('urgentJobSearch');
         // Try self-petition if PERM is stuck
+        if (!s.flags.lawyerConsulted) p.push('consultLawyer');
         if (s.immigration.permStatus === 'audited' || s.immigration.permStatus === 'none') {
           p.push('publishPaper', 'researchNiw');
         }
@@ -496,6 +498,7 @@ const AGENTS: AgentProfile[] = [
         if (s.career.tenure >= 8) p.push('prepJobChange');
         // Only realize GC matters late game
         if (s.turn > 50 && s.immigration.i140Status !== 'approved') {
+          if (!s.flags.lawyerConsulted) p.push('consultLawyer');
           p.push('researchNiw', 'publishPaper');
         }
       }

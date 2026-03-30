@@ -132,17 +132,21 @@ export function processImmigrationQuarter(state: GameState): {
     }
   }
 
+  // --- Lawyer boost: +10% to immigration rolls this quarter ---
+  const lawyerBoost = state.flags.lawyerImmigrationBoost ? 0.10 : 0;
+
   // --- PERM Processing (probability-based) ---
   if (imm.permStatus === 'pending') {
     const permQuarters = state.turn - imm.permStartTurn;
 
     // First 4 quarters: cannot be approved
     if (permQuarters < 4) {
-      // Rejection check: Q1=20%, Q2=10%, Q3+=2%
+      // Rejection check: Q1=20%, Q2=10%, Q3+=2% (lawyer reduces rejection chance)
       let rejectChance = 0;
       if (permQuarters === 0) rejectChance = 0.20;
       else if (permQuarters === 1) rejectChance = 0.10;
       else rejectChance = 0.02;
+      rejectChance = Math.max(0, rejectChance - lawyerBoost);
 
       if (Math.random() < rejectChance) {
         updates.permStatus = 'none'; // rejected, must refile
@@ -152,7 +156,7 @@ export function processImmigrationQuarter(state: GameState): {
       }
     } else {
       // From Q5 onwards: each quarter +12% approval chance
-      const approvalChance = Math.min(0.95, (permQuarters - 6) * 0.12);
+      const approvalChance = Math.min(0.95, (permQuarters - 6) * 0.12 + lawyerBoost);
       if (Math.random() < approvalChance) {
         updates.permStatus = 'approved';
         mentalDelta += 5;
@@ -184,9 +188,9 @@ export function processImmigrationQuarter(state: GameState): {
   }
 
   if (imm.i140Status === 'pending') {
-    // Premium processing: approve this quarter
+    // Premium processing: approve this quarter (lawyer boost = +10%)
     const result = roll('i140Approval', state);
-    if (result.success) {
+    if (result.success || (lawyerBoost > 0 && Math.random() < lawyerBoost)) {
       updates.i140Status = 'approved';
       updates.priorityDate = imm.permStartTurn; // Priority date = when PERM was filed
       mentalDelta += 10;
