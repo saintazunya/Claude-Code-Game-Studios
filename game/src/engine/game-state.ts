@@ -536,6 +536,29 @@ export function processTurn(
 
   // Grind lock countdown (moved after sickness/burnout can set new locks)
 
+  // Sudden death check: chronic low health + low mental = increasing risk
+  // Track consecutive quarters of dangerously low stats
+  if (s.attributes.health <= 20 && s.attributes.mental <= 20) {
+    s.flags.criticalQuarters = ((s.flags.criticalQuarters as number) || 0) + 1;
+  } else if (s.attributes.health <= 30 || s.attributes.mental <= 15) {
+    // Partial: only one stat critical, slower accumulation
+    s.flags.criticalQuarters = Math.max(0, ((s.flags.criticalQuarters as number) || 0) - 0.5);
+  } else {
+    s.flags.criticalQuarters = Math.max(0, ((s.flags.criticalQuarters as number) || 0) - 1);
+  }
+  const critQ = (s.flags.criticalQuarters as number) || 0;
+  // After 3+ critical quarters, increasing chance of sudden death
+  // 3Q: 2%, 4Q: 5%, 5Q: 10%, 6Q+: 20%
+  if (critQ >= 3 && !s.endingType) {
+    const deathChance = critQ >= 6 ? 0.20 : critQ >= 5 ? 0.10 : critQ >= 4 ? 0.05 : 0.02;
+    if (Math.random() < deathChance) {
+      s.endingType = 'suddenDeath';
+      turnEvents.push({ id: 'sudden_death', choiceId: '' });
+    } else if (critQ >= 2) {
+      turnEvents.push({ id: 'health_warning_critical', choiceId: '' });
+    }
+  }
+
   // Career tenure
   if (s.career.employed === 'employed') s.career.tenure++;
 

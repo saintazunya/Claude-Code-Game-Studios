@@ -33,6 +33,8 @@
         return { icon: '🏠', title: '落叶归根', sub: '选择回国', gradient: 'from-gray-400 to-gray-500', won: false };
       case 'bankrupt':
         return { icon: '💸', title: '破产', sub: '钱花光了...', gradient: 'from-red-400 to-red-600', won: false };
+      case 'suddenDeath':
+        return { icon: '💀', title: '过劳猝死', sub: '身体和精神长期透支，倒在了异国他乡...', gradient: 'from-gray-600 to-black', won: false };
       default:
         return { icon: '🎮', title: '游戏结束', sub: '', gradient: 'from-gray-400 to-gray-500', won: false };
     }
