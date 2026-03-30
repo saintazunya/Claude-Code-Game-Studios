@@ -44,12 +44,7 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
     precondition: (s) => s.career.employed === 'employed' && !s.career.onPip,
     exclusive: ['travel'],
   },
-  entrepreneurship: {
-    id: 'entrepreneurship', nameZh: '创业调研', apCost: 4, phase: 'career',
-    effects: { skills: 3 }, description: 'Research startup opportunities',
-    tipsZh: '✅ 技能+3，推进创业准备 | ⚠️ 需要净资产>$50K | ⚠️ 高风险高回报路线',
-    precondition: (s) => s.attributes.netWorth > 50000,
-  },
+  // entrepreneurship removed — not yet designed
   normalJobSearch: {
     id: 'normalJobSearch', nameZh: '找工作', apCost: 3, phase: 'career',
     effects: { mental: -3 }, description: 'Normal job search',
@@ -78,11 +73,7 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
     tipsZh: '✅ 学术+10，大幅推进NIW/EB1A | ⚠️ 占4AP，代价很高 | ⚠️ RS职业自带论文产出，不需要这个',
     precondition: (s) => s.career.path !== 'rs',
   },
-  consultLawyer: {
-    id: 'consultLawyer', nameZh: '咨询移民律师', apCost: 2, phase: 'career',
-    effects: {}, description: 'Get expert immigration advice ($500)',
-    tipsZh: '✅ 了解当前最优移民路径 | ⚠️ 花费$500 | 💡 对复杂身份情况有帮助',
-  },
+  // consultLawyer removed — not yet designed
 
   // Health & wellness
   rest: {

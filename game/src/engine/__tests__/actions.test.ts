@@ -69,17 +69,7 @@ describe('Action Point System', () => {
       expect(ids).not.toContain('prepJobChange');
     });
 
-    it('entrepreneurship requires net worth > 50K', () => {
-      const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
-      state.phase = 'career';
-      state.attributes.netWorth = 30000;
-      let available = getAvailableActions(state);
-      expect(available.map(a => a.id)).not.toContain('entrepreneurship');
-
-      state.attributes.netWorth = 60000;
-      available = getAvailableActions(state);
-      expect(available.map(a => a.id)).toContain('entrepreneurship');
-    });
+    // entrepreneurship removed — not yet designed
   });
 
   describe('canSelectAction', () => {
