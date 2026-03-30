@@ -180,6 +180,10 @@ export function processTurn(
   // 1. Advance turn
   s.turn++;
 
+  // Consume one-turn flags from previous turn
+  if (s.flags.showProbabilities) s.flags.showProbabilities = false;
+  if (s.flags.lawyerImmigrationBoost) s.flags.lawyerImmigrationBoost = false;
+
   // 2. Economic cycle transition
   s.economicPhaseQuarters++;
   const transition = checkPhaseTransition(s.economicPhase, s.economicPhaseQuarters);
@@ -650,10 +654,7 @@ export function processTurn(
     if (immResult.gameOver) {
       s.endingType = 'deported';
     }
-    // Consume lawyer boost after immigration processing (one-time use)
-    s.flags.lawyerImmigrationBoost = false;
-    // Consume probability reveal after one turn
-    s.flags.showProbabilities = false;
+    // Lawyer boost and probability reveal persist until next turn start (for UI display)
   }
   s.flags.justLaidOff = false;
 
