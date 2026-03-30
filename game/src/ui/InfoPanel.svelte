@@ -155,6 +155,46 @@
       </div>
     </div>
 
+    <!-- Lawyer Probability Reveal (only shown when showProbabilities flag is active) -->
+    {#if gs.flags.showProbabilities}
+      <div class="bg-[#1a2234] rounded-xl p-4 border border-purple-800/50 mb-3">
+        <h2 class="text-[10px] text-purple-400 font-semibold mb-2 tracking-wider">⚖️ 律师分析（本季度概率）</h2>
+        <div class="grid grid-cols-2 gap-y-2 text-xs">
+          {#if gs.phase === 'career' && gs.career.employed === 'employed'}
+            <span class="text-gray-400">升职概率(Q4)</span><span class="text-purple-300 text-right">{promotionChance}%</span>
+            <span class="text-gray-400">裁员风险</span><span class="text-purple-300 text-right">{layoffChance}%</span>
+          {/if}
+          {#if ['opt', 'optStem', 'cptDay1'].includes(gs.immigration.visaType) && !gs.immigration.hasGreenCard}
+            <span class="text-gray-400">H1B中签率</span><span class="text-purple-300 text-right">{Math.round(preview(gs.hasUsMasters ? 'h1bLotteryMasters' : 'h1bLottery', gs) * 100)}%</span>
+          {/if}
+          {#if gs.immigration.permStatus === 'pending'}
+            {@const permQ = gs.turn - gs.immigration.permStartTurn}
+            <span class="text-gray-400">PERM通过率</span><span class="text-purple-300 text-right">{permQ < 4 ? '0% (等待期)' : `${Math.min(95, Math.round(Math.max(0, (permQ - 6) * 12 + 10)))}%`}</span>
+          {/if}
+          {#if gs.immigration.i140Status === 'pending'}
+            <span class="text-gray-400">I-140通过率</span><span class="text-purple-300 text-right">{Math.round(preview('i140Approval', gs) * 100)}%</span>
+          {/if}
+          <span class="text-gray-400">生病风险</span><span class="text-purple-300 text-right">{sicknessChance}%</span>
+          <span class="text-gray-400">Burnout风险</span><span class="text-purple-300 text-right">{burnoutChance}%</span>
+          {#if gs.career.employed === 'unemployed'}
+            <span class="text-gray-400">找到工作概率</span><span class="text-purple-300 text-right">{Math.round(preview('jobOffer', gs) * 100)}%</span>
+          {/if}
+          <span class="text-purple-500 text-[9px] col-span-2 mt-1">⚡ 移民审批+10%加成已激活（本季度有效）</span>
+        </div>
+      </div>
+    {/if}
+
+    <!-- Lawyer Consultation Status -->
+    {#if gs.flags.lawyerConsulted}
+      <div class="bg-[#1a2234] rounded-xl p-4 border border-[#2a3050] mb-3">
+        <h2 class="text-[10px] text-gray-500 font-semibold mb-2 tracking-wider">律师咨询</h2>
+        <div class="grid grid-cols-2 gap-y-2 text-xs">
+          <span class="text-gray-400">状态</span><span class="text-green-400 text-right">已咨询 ✅</span>
+          <span class="text-gray-400">解锁</span><span class="text-purple-400 text-right">NIW/EB1A · Day1-CPT · 发论文</span>
+        </div>
+      </div>
+    {/if}
+
     <!-- Permanent Modifiers -->
     <div class="bg-[#1a2234] rounded-xl p-4 border border-[#2a3050] mb-3">
       <h2 class="text-[10px] text-gray-500 font-semibold mb-2 tracking-wider">永久修正</h2>

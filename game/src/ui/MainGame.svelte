@@ -65,7 +65,8 @@
       searchFullTimeJob: '💼', normalJobSearch: '🔍', workNone: '🏖️', workSlack: '🫠', workHard: '💪', workSuperHard: '🏋️', studySlack: '☕', studyNormal: '📚', studyHard: '📖',  upskill: '📖', prepJobChange: '🔍',
       hospital: '🏥', internWork: '💪',
       entrepreneurship: '🚀', prepH1b: '📋', researchNiw: '📝',
-      publishPaper: '📄', consultLawyer: '⚖️', rest: '😴', travel: '✈️',
+      publishPaper: '📄', consultLawyer: '⚖️', day1Cpt: '🏫', invest: '📈',
+      rest: '😴', travel: '✈️',
       exercise: '🏃', therapist: '🧠', studyGpa: '📚', searchIntern: '🔎',
       thesisResearch: '🔬', taRaWork: '👨‍🏫', networking: '🤝',
       sideProject: '💻', urgentJobSearch: '🆘',
@@ -74,9 +75,9 @@
   }
 
   function modeLabel(m: string) {
-    if (m === 'grind') return { text: '🔥 卷王模式', color: 'text-red-400', desc: '健康⬇ 精神-8' };
-    if (m === 'coast') return { text: '🛋️ 躺平模式', color: 'text-green-400', desc: '精神+3' };
-    return { text: '💼 正常模式', color: 'text-blue-400', desc: '精神-2' };
+    if (m === 'grind') return { text: '🔥 卷王模式', color: 'text-red-400', desc: '健康⬇ 精神-5' };
+    if (m === 'coast') return { text: '🛋️ 躺平模式', color: 'text-green-400', desc: '精神+5' };
+    return { text: '💼 正常模式', color: 'text-blue-400', desc: '精神-1' };
   }
 
   const modeInfo = $derived(modeLabel(mode));
@@ -309,6 +310,17 @@
   {#if gs.grindLockQuarters > 0}
     <div class="mx-4 mb-2 p-2 rounded-xl bg-amber-950/30 border border-amber-900/40 text-xs">
       <span class="text-amber-400">🔒 卷王模式锁定 {gs.grindLockQuarters}季度（AP上限{totalAp}）</span>
+    </div>
+  {/if}
+  {#if gs.flags.showProbabilities}
+    <div class="mx-4 mb-2 p-2.5 rounded-xl bg-purple-950/30 border border-purple-800/40 text-xs">
+      <span class="text-purple-400 font-bold">⚖️ 律师加成生效中</span>
+      <span class="text-purple-400/70"> — 移民审批+10% · 打开📊查看详细概率</span>
+    </div>
+  {/if}
+  {#if gs.phase === 'career' && !gs.flags.lawyerConsulted && !gs.immigration.hasGreenCard}
+    <div class="mx-4 mb-2 p-2 rounded-xl bg-[#1a2234] border border-[#2a3050] text-xs">
+      <span class="text-gray-500">💡 提示：咨询移民律师可解锁隐藏选项（NIW/CPT/发论文）</span>
     </div>
   {/if}
 

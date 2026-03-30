@@ -65,10 +65,8 @@ function validateAvailableActions(state: GameState): ActionIssue[] {
     issues.push({ turn: state.turn, age: ti.age, phase: state.phase, issue: `prepH1b available but visa is ${state.immigration.visaType}, not OPT` });
   }
 
-  // prepJobChange should NOT be available during PIP
-  if (state.career.onPip && availableIds.includes('prepJobChange')) {
-    issues.push({ turn: state.turn, age: ti.age, phase: state.phase, issue: 'Job change prep available during PIP' });
-  }
+  // prepJobChange IS now allowed during PIP (real-world: #1 advice when PIPed is start interviewing)
+  // No check needed — this is intentional behavior.
 
   // urgentJobSearch: available when unemployed OR in last academic quarter without return offer
   if (availableIds.includes('urgentJobSearch')) {

@@ -47,6 +47,8 @@
     sickness_hospitalized: { icon: '🚑', text: '紧急住院', color: 'text-red-400', detail: '身体彻底崩溃！下季度完全无法行动，医疗费$15K-30K。卷王锁定4季度。' },
     burnout: { icon: '💀', text: 'Burnout — 精神崩溃', color: 'text-red-400', detail: '精神状态跌破底线，被迫休息。下季度最多4个行动点。' },
     rfe_resolved: { icon: '📋', text: 'RFE补件完成', color: 'text-amber-400' },
+    lawyer_consulted: { icon: '⚖️', text: '律师咨询完成', color: 'text-purple-400', detail: '解锁了新选项：Day1-CPT、NIW/EB1A、发论文。本季度移民审批+10%。' },
+    cpt_enrolled: { icon: '🏫', text: '报名Day1-CPT学校', color: 'text-purple-400', detail: '转为CPT身份，可以合法工作+继续抽H1B。每季度学费$3K。' },
     i485_rfe: { icon: '📋', text: 'I-485被要求补件(RFE)', color: 'text-amber-400', detail: '需要额外材料，处理时间延长。' },
     visa_expired_deported: { icon: '✈️', text: '签证过期，被遣返', color: 'text-red-400' },
     // Random events from event pool
