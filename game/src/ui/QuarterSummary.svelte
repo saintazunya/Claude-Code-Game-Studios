@@ -53,6 +53,8 @@
     layoff_survived: { icon: '😮‍💨', text: '裁员没裁到你！', color: 'text-green-400', detail: '虚惊一场，你的岗位保住了。精神+3。' },
     market_crash: { icon: '📉', text: '股市暴跌', color: 'text-red-400', detail: '市场突然暴跌，投资组合缩水。' },
     pip_warning: { icon: '⚠️', text: '收到PIP警告', color: 'text-red-400', detail: '被放入绩效改进计划，2个季度内需要证明自己。' },
+    found_job_while_unemployed: { icon: '🎉', text: '找到新工作了！', color: 'text-green-400', detail: '结束失业状态，重新入职。' },
+    job_search_failed: { icon: '😔', text: '没找到工作', color: 'text-amber-400', detail: '继续努力，下季度再试。' },
     job_offer_received: { icon: '🎉', text: '收到Offer！', color: 'text-green-400', detail: '面试通过，新公司发了offer。' },
     job_offer_rejected: { icon: '😔', text: '面试没通过', color: 'text-amber-400', detail: '这次没拿到offer，下次再试。' },
     recruiter_call: { icon: '📞', text: '猎头来电', color: 'text-blue-400', detail: '有人看上了你的简历，想挖你跳槽。' },

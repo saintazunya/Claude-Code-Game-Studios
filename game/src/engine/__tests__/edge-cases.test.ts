@@ -230,6 +230,30 @@ describe('20 Edge Case Tests', () => {
     expect(maxAp).toBe(10); // no deduction
   });
 
+  // 20a. Unemployed: no attitude AP deducted, no base work AP
+  it('20a. unemployed: full AP available, no attitude/work deduction', () => {
+    const s = makeState();
+    s.career.employed = 'unemployed';
+    const maxAp = getMaxAp(s);
+    expect(maxAp).toBe(10); // no deductions
+    // Attitude cost should be 0 when unemployed — tested via store
+  });
+
+  // 20b. Burnout protection prevents consecutive burnout
+  it('20b. burnout protection: no burnout next quarter after burnout', () => {
+    const s = makeState();
+    s.attributes.mental = 0; // trigger burnout
+    const next = processTurn(s, 'normal', []);
+    expect(next.flags.burnoutActive).toBe(true);
+    expect(next.flags.burnoutProtection).toBe(true);
+
+    // Next quarter: even with low mental, no burnout
+    next.attributes.mental = 5;
+    const next2 = processTurn(next, 'normal', []);
+    expect(next2.flags.burnoutActive).toBe(false);
+    expect(next2.flags.burnoutProtection).toBe(false);
+  });
+
   // 20. Share price never drops to 0
   it('20. share price has floor', () => {
     const s = makeState();

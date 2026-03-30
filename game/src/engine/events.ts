@@ -116,7 +116,7 @@ export const EVENT_POOL: GameEvent[] = [
     id: 'team_reorg', type: 'career', nameZh: '团队重组', phase: 'career',
     descZh: '公司宣布组织架构调整，你的团队被合并了。你将迎来一个新老板。',
     weight: 1.5,
-    precondition: (s) => s.career.employed === 'employed' && s.career.tenure > 4,
+    precondition: (s) => s.career.employed === 'employed' && s.career.tenure > 4 && s.career.company !== null,
     cooldownQuarters: 6, oneTime: false,
     immediateEffects: { mental: -5 },
     choices: [
@@ -141,7 +141,7 @@ export const EVENT_POOL: GameEvent[] = [
     id: 'toxic_incident', type: 'career', nameZh: '职场冲突', phase: 'career',
     descZh: '你的老板在会议上当众批评了你的方案，让你非常难堪。',
     weight: 1.2,
-    precondition: (s) => s.career.bossType === 'demanding' || s.career.bossType === 'toxic',
+    precondition: (s) => s.career.employed === 'employed' && (s.career.bossType === 'demanding' || s.career.bossType === 'toxic'),
     cooldownQuarters: 4, oneTime: false,
     immediateEffects: { mental: -10 },
     choices: [
@@ -152,8 +152,8 @@ export const EVENT_POOL: GameEvent[] = [
   },
   // LIFE
   {
-    id: 'holiday_loneliness', type: 'life', nameZh: '节日里的孤独', phase: 'career',
-    descZh: '感恩节和圣诞节，朋友们都回家团聚了，而你一个人对着空荡荡的房间。',
+    id: 'holiday_loneliness', type: 'life', nameZh: '节日里的孤独', phase: 'any',
+    descZh: '节假日，朋友们都回家团聚了，而你一个人对着空荡荡的房间。',
     weight: 1.5,
     precondition: (s) => ((s.turn % 4) + 1) === 4, // Q4 only
     cooldownQuarters: 4, oneTime: false,
@@ -161,7 +161,7 @@ export const EVENT_POOL: GameEvent[] = [
     choices: [
       { id: 'video_call', textKey: '', nameZh: '视频连线家人', descZh: '隔着屏幕，但聊胜于无。', tag: 'stable', effects: { mental: 5 } },
       { id: 'gathering', textKey: '', nameZh: '和移民朋友聚会', descZh: '花$500，一起吃顿火锅。', tag: 'neutral', effects: { mental: 8 } },
-      { id: 'work_through', textKey: '', nameZh: '加班度过', descZh: '绩效+3但精神更差。', tag: 'risky', effects: { performance: 3, mental: -3 } },
+      { id: 'self_improve', textKey: '', nameZh: '学习充电', descZh: '趁假期提升技能。', tag: 'risky', effects: { skills: 3, mental: -3 } },
     ],
   },
   {

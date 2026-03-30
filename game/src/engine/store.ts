@@ -54,6 +54,8 @@ function getAttitudeActionId(level: number, isAcademic: boolean): ActionId {
 
 export const attitudeApCost = derived([attitudeLevel, gameState], ([$att, $gs]) => {
   if (!$gs) return 0;
+  // No attitude cost when unemployed (no work) or student in career phase
+  if ($gs.phase === 'career' && $gs.career.employed !== 'employed') return 0;
   const actionId = getAttitudeActionId($att, $gs.phase === 'academic');
   return ACTIONS[actionId]?.apCost || 0;
 });
@@ -164,15 +166,18 @@ export function endTurn() {
   if (!gs) return;
 
   const actions = [...get(selectedActions)];
-  // Inject attitude action based on toggle
+  // Inject attitude action based on toggle (only when applicable)
   const att = get(attitudeLevel);
   const isAcad = gs.phase === 'academic';
-  const attitudeActions: Record<number, ActionId> = isAcad
-    ? { 0: 'studySlack', 1: 'studyNormal', 2: 'studyHard' }
-    : { 0: 'workNone', 1: 'workSlack', 2: 'workHard', 3: 'workSuperHard' };
-  const attAction = attitudeActions[att];
-  if (attAction && !actions.includes(attAction)) {
-    actions.push(attAction);
+  const hasAttitude = isAcad || gs.career.employed === 'employed';
+  if (hasAttitude) {
+    const attitudeActions: Record<number, ActionId> = isAcad
+      ? { 0: 'studySlack', 1: 'studyNormal', 2: 'studyHard' }
+      : { 0: 'workNone', 1: 'workSlack', 2: 'workHard', 3: 'workSuperHard' };
+    const attAction = attitudeActions[att];
+    if (attAction && !actions.includes(attAction)) {
+      actions.push(attAction);
+    }
   }
 
   const stateBefore = gs;

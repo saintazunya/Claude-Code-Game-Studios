@@ -50,14 +50,19 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
     tipsZh: '✅ 技能+3，推进创业准备 | ⚠️ 需要净资产>$50K | ⚠️ 高风险高回报路线',
     precondition: (s) => s.attributes.netWorth > 50000,
   },
+  normalJobSearch: {
+    id: 'normalJobSearch', nameZh: '找工作', apCost: 3, phase: 'career',
+    effects: { mental: -3 }, description: 'Normal job search',
+    tipsZh: '✅ 基础offer概率 | ⚠️ 精神-3 | 💡 失业时可用，适合AP不够时',
+    precondition: (s) => s.career.employed === 'unemployed',
+    exclusive: ['urgentJobSearch'],
+  },
   urgentJobSearch: {
-    id: 'urgentJobSearch', nameZh: '紧急求职', apCost: 5, phase: 'any',
+    id: 'urgentJobSearch', nameZh: '紧急求职', apCost: 5, phase: 'career',
     effects: { mental: -10 }, description: 'Desperate job search',
-    tipsZh: '✅ +25%拿offer概率（紧急模式）| ⚠️ 精神-10 | 💡 失业或毕业前可用',
-    precondition: (s) => {
-      // Only available when unemployed in career phase
-      return s.phase === 'career' && s.career.employed === 'unemployed';
-    },
+    tipsZh: '✅ +25%拿offer概率（紧急模式）| ⚠️ 精神-10 | 💡 概率更高但AP更贵',
+    precondition: (s) => s.career.employed === 'unemployed',
+    exclusive: ['normalJobSearch'],
   },
 
   // Immigration actions

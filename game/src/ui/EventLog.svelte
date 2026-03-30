@@ -96,6 +96,8 @@
     sickness_hospitalized: { icon: '🚑', text: '住院' },
     burnout: { icon: '💀', text: 'Burnout' },
     priority_date_retrogression: { icon: '😤', text: '排期倒退' },
+    found_job_while_unemployed: { icon: '🎉', text: '重新就业' },
+    job_search_failed: { icon: '😔', text: '求职失败' },
     job_offer_received: { icon: '🎉', text: '收到Offer' },
     job_offer_rejected: { icon: '😔', text: '面试没过' },
     recruiter_call: { icon: '📞', text: '猎头来电' },

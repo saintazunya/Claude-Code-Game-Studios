@@ -310,6 +310,28 @@ export function processTurn(
       if (actionId === 'urgentJobSearch' && s.phase === 'academic') {
         s.flags.urgentJobSearch = true;
       }
+      if ((actionId === 'normalJobSearch' || (actionId === 'urgentJobSearch' && s.phase === 'career')) && s.career.employed === 'unemployed') {
+        // Job search while unemployed
+        const isUrgent = actionId === 'urgentJobSearch';
+        const searchRoll = roll('jobOffer', s);
+        // Urgent gives +25% bonus effectively (already in probability via jobSearchQuarters)
+        const effectiveSuccess = isUrgent ? (searchRoll.success || Math.random() < 0.25) : searchRoll.success;
+        if (effectiveSuccess) {
+          // Found a job!
+          const company = generateCompany(s.career.level);
+          const { salary, rsu } = computeSalary(s.career.level, company, 50);
+          s.career.company = company;
+          s.career.salary = salary;
+          s.career.rsu = rsu;
+          s.career.employed = 'employed';
+          s.career.tenure = 0;
+          s.career.bossType = rollBossType();
+          s.attributes.performance = 50;
+          turnEvents.push({ id: 'found_job_while_unemployed', choiceId: '' });
+        } else {
+          turnEvents.push({ id: 'job_search_failed', choiceId: '' });
+        }
+      }
       if (actionId === 'searchFullTimeJob') {
         s.flags.searchedFullTimeJob = true; // triggers job roll at graduation
       }

@@ -62,7 +62,7 @@
 
   function actionIcon(id: string): string {
     const icons: Record<string, string> = {
-      searchFullTimeJob: '💼', workNone: '🏖️', workSlack: '🫠', workHard: '💪', workSuperHard: '🏋️', studySlack: '☕', studyNormal: '📚', studyHard: '📖',  upskill: '📖', prepJobChange: '🔍',
+      searchFullTimeJob: '💼', normalJobSearch: '🔍', workNone: '🏖️', workSlack: '🫠', workHard: '💪', workSuperHard: '🏋️', studySlack: '☕', studyNormal: '📚', studyHard: '📖',  upskill: '📖', prepJobChange: '🔍',
       hospital: '🏥', internWork: '💪',
       entrepreneurship: '🚀', prepH1b: '📋', researchNiw: '📝',
       publishPaper: '📄', consultLawyer: '⚖️', rest: '😴', travel: '✈️',

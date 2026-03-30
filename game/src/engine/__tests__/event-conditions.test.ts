@@ -64,13 +64,12 @@ describe('Event Preconditions & Guaranteed Triggers', () => {
       }
     });
 
-    it('burnout resets mental and locks grind 1 quarter', () => {
+    it('burnout resets mental and sets protection', () => {
       const s = makeCareerState();
       s.attributes.mental = 0;
       const next = processTurn(s, 'normal', []);
-      // Mental resets to 30 by burnout, then decay reduces it
       expect(next.attributes.mental).toBeGreaterThan(0);
-      expect(next.grindLockQuarters).toBeGreaterThanOrEqual(1);
+      expect(next.flags.burnoutProtection).toBe(true);
     });
 
     it('burnout applies performance -10', () => {
