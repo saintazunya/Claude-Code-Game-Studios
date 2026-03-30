@@ -430,20 +430,27 @@ export function processTurn(
   }
 
   // Burnout: guaranteed at mental 0, probability-based below 30
-  if (s.attributes.mental <= 0) {
+  // Burnout protection: can't burnout two quarters in a row
+  const burnoutProtected = s.flags.burnoutProtection as boolean;
+  if (burnoutProtected) {
+    s.flags.burnoutProtection = false; // consume protection
+    s.flags.burnoutActive = false;
+  } else if (s.attributes.mental <= 0) {
     // Mental hit 0 = automatic burnout
     s.flags.burnoutActive = true;
-    s.attributes.mental = 30;
+    s.attributes.mental = 20; // recover to 20 (not 30 — was too high)
     s.attributes = applyDeltas(s.attributes, { performance: -10 });
     s.grindLockQuarters = Math.max(s.grindLockQuarters, 1);
+    s.flags.burnoutProtection = true; // next quarter immune
     turnEvents.push({ id: 'burnout', choiceId: '' });
   } else if (s.attributes.mental < 30) {
     const burnoutRoll = roll('burnout', s);
     if (burnoutRoll.success) {
       s.flags.burnoutActive = true;
-      s.attributes.mental = 30;
+      s.attributes.mental = 20;
       s.attributes = applyDeltas(s.attributes, { performance: -10 });
       s.grindLockQuarters = Math.max(s.grindLockQuarters, 1);
+      s.flags.burnoutProtection = true; // next quarter immune
       turnEvents.push({ id: 'burnout', choiceId: '' });
     }
   } else {
