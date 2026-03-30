@@ -15,43 +15,43 @@
 
   const characters: Character[] = [
     {
-      id: 'balanced', name: '稳稳', emoji: '🎓', title: '均衡选手',
+      id: 'balanced', name: '小稳', emoji: '🎓', title: '均衡选手',
       desc: '中上985本科，美国Top30硕士。成绩不拔尖但稳扎稳打，什么都会一点。',
       stats: { c: 3, s: 4, g: 3 }, tags: ['推荐新手', '稳健路线'],
       difficulty: '普通', diffColor: 'text-blue-400',
     },
     {
-      id: 'grinder', name: '卷卷', emoji: '🏋️', title: '卷王',
+      id: 'grinder', name: '小娟', emoji: '🏋️', title: '卷王',
       desc: '清华本科MIT硕士，从小卷到大。GPA 4.0，leetcode 2000题。信仰：只要卷不死就往死里卷。',
       stats: { c: 4, s: 5, g: 1 }, tags: ['高绩效', '易burnout'],
       difficulty: '普通', diffColor: 'text-blue-400',
     },
     {
-      id: 'local', name: '湾湾', emoji: '📍', title: '地头蛇',
+      id: 'local', name: '小蛇', emoji: '📍', title: '地头蛇',
       desc: '本科就在湾区读书，实习人脉广，地理优势拉满。学校一般但location is everything。',
       stats: { c: 2, s: 3, g: 5 }, tags: ['实习容易', '找工快'],
       difficulty: '简单', diffColor: 'text-green-400',
     },
     {
-      id: 'ironman', name: '壮壮', emoji: '💪', title: '铁人',
+      id: 'ironman', name: '小龟', emoji: '💪', title: '铁人',
       desc: '体育特长生出身，体质极好。别人burnout他还在跑步。能扛996不生病。',
       stats: { c: 5, s: 2, g: 3 }, tags: ['不易生病', '卷不倒'],
       difficulty: '普通', diffColor: 'text-blue-400',
     },
     {
-      id: 'scholar', name: '文文', emoji: '📚', title: '学术大佬',
+      id: 'scholar', name: '小P', emoji: '📚', title: '学术大佬',
       desc: '顶级名校PhD候选人，论文引用100+。NIW/EB1A是她的绿卡后门。代价：体质差，容易倒。',
       stats: { c: 1, s: 5, g: 4 }, tags: ['NIW路线', '体质弱'],
       difficulty: '普通', diffColor: 'text-blue-400',
     },
     {
-      id: 'gambler', name: '赌赌', emoji: '🎰', title: '赌徒',
+      id: 'gambler', name: '小笃', emoji: '🎰', title: '赌徒',
       desc: '把所有点数押在学校和地理上，体质为零。要么快速上岸，要么速死。不适合心脏不好的人。',
       stats: { c: 0, s: 5, g: 5 }, tags: ['极限操作', '容易猝死'],
       difficulty: '地狱', diffColor: 'text-red-400',
     },
     {
-      id: 'underdog', name: '草根', emoji: '🔥', title: '逆袭者',
+      id: 'underdog', name: '小土', emoji: '🔥', title: '逆袭者',
       desc: '普通二本出身，学校排名0。全靠自己死磕，体质拉满硬扛。从最底层开始证明自己。',
       stats: { c: 5, s: 0, g: 5 }, tags: ['高难度', '找工极难'],
       difficulty: '困难', diffColor: 'text-amber-400',
