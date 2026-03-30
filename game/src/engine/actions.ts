@@ -182,7 +182,8 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
     tipsZh: '✅ 毕业前找全职 | ✅ 概率受实习经历/学校/GPA影响 | ⚠️ 精神-5 | 💡 毕业前最后机会',
     precondition: (s) => {
       const gradTurn = s.academic.isPhd ? 16 : 8;
-      return s.turn === gradTurn - 1;
+      // Available in last 2 quarters before graduation (not just last 1)
+      return s.turn >= gradTurn - 2 && s.turn <= gradTurn - 1;
     },
   },
   thesisResearch: {

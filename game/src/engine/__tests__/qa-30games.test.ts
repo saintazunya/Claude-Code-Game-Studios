@@ -161,14 +161,15 @@ function validateTurn(state: GameState, prevState: GameState, gameNum: number): 
     add('actions', 'searchIntern available during active intern');
   }
 
-  // searchFullTimeJob only in last quarter
+  // searchFullTimeJob available in last 2 quarters before graduation
   if (state.phase === 'academic') {
     const gradTurn = state.academic.isPhd ? 16 : 8;
-    if (state.turn === gradTurn - 1 && !availIds.has('searchFullTimeJob')) {
-      add('actions', 'searchFullTimeJob NOT available in last academic quarter');
+    const inWindow = state.turn >= gradTurn - 2 && state.turn <= gradTurn - 1;
+    if (inWindow && !availIds.has('searchFullTimeJob')) {
+      add('actions', 'searchFullTimeJob NOT available in graduation window');
     }
-    if (state.turn !== gradTurn - 1 && availIds.has('searchFullTimeJob')) {
-      add('actions', 'searchFullTimeJob available outside last quarter');
+    if (!inWindow && availIds.has('searchFullTimeJob')) {
+      add('actions', 'searchFullTimeJob available outside graduation window');
     }
   }
 
