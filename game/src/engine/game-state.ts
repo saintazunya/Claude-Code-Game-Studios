@@ -160,7 +160,7 @@ export function getWorkModeEffects(mode: WorkMode | AcademicStudyMode, state: Ga
     case 'normal':
       return { mental: -1 }; // baseline stress
     case 'grind': case 'intense':
-      return { mental: -5, health: Math.round(-10 * (1 - grindReduction)) }; // burnout risk
+      return { mental: Math.round(-5 * (1 - grindReduction * 0.5)), health: Math.round(-10 * (1 - grindReduction)) }; // CON reduces both
   }
 }
 

@@ -95,12 +95,12 @@ export function computeNaturalDecay(state: GameState): Partial<CoreAttributes> {
     (age > 40 ? -1 : 0) +
     grindHealthPenalty;
 
-  // Mental decay: capped so single-turn total (decay + mode + actions) doesn't spiral
-  // Visa stress reduced: -2 instead of -4 (was causing 40→0 in one turn)
+  // Mental decay: CON reduces grind mental penalty by up to 25%
+  const grindMentalPenalty = grindActive ? Math.round(-4 * (1 - grindReduction * 0.5)) : 0;
   const mentalDecay =
     -3 +
     (visaInsecure ? -2 : 0) +
-    (grindActive ? -4 : 0) +
+    grindMentalPenalty +
     (state.attributes.health < 30 ? -3 : 0);
 
   // Boss effects
