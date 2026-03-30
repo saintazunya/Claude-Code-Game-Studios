@@ -310,6 +310,26 @@ export function processTurn(
       if (actionId === 'urgentJobSearch' && s.phase === 'academic') {
         s.flags.urgentJobSearch = true;
       }
+      if (actionId === 'normalJobSearch' && s.career.employed === 'employed') {
+        // Employed: same as prepJobChange but lower probability (no search bonus)
+        const offerRoll = roll('jobOffer', s);
+        if (offerRoll.success) {
+          const currentTC = s.career.salary + s.career.rsu;
+          const skillsBonus = s.attributes.skills * 0.002;
+          const hopPremium = 0.10 + Math.random() * 0.20 + skillsBonus; // lower than prepJobChange
+          const newTC = Math.round(currentTC * (1 + hopPremium));
+          s.flags.pendingJobOffer = {
+            salary: Math.round(newTC * 0.7),
+            rsu: Math.round(newTC * 0.3),
+            level: s.career.level,
+            premium: Math.round(hopPremium * 100),
+            signingBonus: Math.round(newTC * 0.05),
+          };
+          turnEvents.push({ id: 'job_offer_received', choiceId: '' });
+        } else {
+          turnEvents.push({ id: 'job_offer_rejected', choiceId: '' });
+        }
+      }
       if ((actionId === 'normalJobSearch' || (actionId === 'urgentJobSearch' && s.phase === 'career')) && s.career.employed === 'unemployed') {
         // Job search while unemployed
         const isUrgent = actionId === 'urgentJobSearch';
