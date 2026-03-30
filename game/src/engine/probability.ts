@@ -34,8 +34,8 @@ export interface ProbabilityBreakdown {
 const EVENT_TYPES: Record<string, EventTypeDef> = {
   promotion: { base: 0.15, attrKey: 'performance', attrWeight: 0.004, floor: 0.02, cap: 0.85, usesSchoolMod: true, usesEconCycle: true },
   pip: { base: 0.05, attrKey: 'performance', attrWeight: 0.003, inverseAttr: true, floor: 0.01, cap: 0.60, usesEconCycle: true },
-  h1bLottery: { base: 0.18, floor: 0.13, cap: 0.23 }, // 18% base, ±5% annual variance
-  h1bLotteryMasters: { base: 0.23, floor: 0.18, cap: 0.28 }, // masters gets +5% base
+  h1bLottery: { base: 0.25, floor: 0.20, cap: 0.30 }, // 25% base, ±5% annual variance
+  h1bLotteryMasters: { base: 0.32, floor: 0.27, cap: 0.37 }, // masters gets +7% base
   permApproval: { base: 0.70, floor: 0.30, cap: 0.90, usesEconCycle: true },
   permAudit: { base: 0.10, floor: 0.05, cap: 0.30, usesEconCycle: true },
   i140Approval: { base: 0.85, attrKey: 'performance', attrWeight: 0.001, floor: 0.50, cap: 0.95 },

@@ -372,11 +372,11 @@ export function processTurn(
   // Living costs: always apply
   if (s.phase === 'academic') {
     // Academic: based on geo location. Geo 5 = $3K/month = $9K/quarter, Geo 0 = $1.5K/month = $4.5K/quarter
-    const monthlyRent = 1500 + s.creation.geoLocation * 300; // $1500 (geo 0) to $3000 (geo 5)
+    const monthlyRent = 1000 + s.creation.geoLocation * 250; // $1000 (geo 0) to $2250 (geo 5)
     s.economy.cash -= monthlyRent * 3;
   } else {
-    // Career: $4K/month = $12K/quarter base
-    s.economy.cash -= 12000;
+    // Career: $3K/month = $9K/quarter base (was $12K — too harsh)
+    s.economy.cash -= 9000;
   }
 
   // Salary (career phase only)
@@ -646,7 +646,7 @@ export function processTurn(
   s.timeline.push(record);
 
   // 10. Check game over
-  if (s.economy.cash < -10000 && !s.endingType) {
+  if (s.economy.cash < -20000 && !s.endingType) {
     // Bankruptcy: cash below -$10K
     s.endingType = 'bankrupt';
   }

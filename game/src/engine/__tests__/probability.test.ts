@@ -10,15 +10,15 @@ describe('Probability Engine', () => {
       state.attributes.performance = 100;
       state.attributes.skills = 100;
       const prob = preview('h1bLottery', state);
-      expect(prob).toBeGreaterThanOrEqual(0.13);
-      expect(prob).toBeLessThanOrEqual(0.23);
+      expect(prob).toBeGreaterThanOrEqual(0.20);
+      expect(prob).toBeLessThanOrEqual(0.30);
     });
 
     it('is ~23% for masters (±5% annual variance)', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
       const prob = preview('h1bLotteryMasters', state);
-      expect(prob).toBeGreaterThanOrEqual(0.18);
-      expect(prob).toBeLessThanOrEqual(0.28);
+      expect(prob).toBeGreaterThanOrEqual(0.27);
+      expect(prob).toBeLessThanOrEqual(0.37);
     });
   });
 
@@ -132,8 +132,8 @@ describe('Probability Engine', () => {
       expect(result).toHaveProperty('success');
       expect(result).toHaveProperty('probability');
       expect(result).toHaveProperty('rollValue');
-      expect(result.probability).toBeGreaterThanOrEqual(0.13);
-      expect(result.probability).toBeLessThanOrEqual(0.23);
+      expect(result.probability).toBeGreaterThanOrEqual(0.20);
+      expect(result.probability).toBeLessThanOrEqual(0.30);
       expect(result.rollValue).toBeGreaterThanOrEqual(0);
       expect(result.rollValue).toBeLessThanOrEqual(1);
     });

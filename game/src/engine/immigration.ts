@@ -10,8 +10,8 @@ const PERM_AUDIT_EXTRA_MAX = 6;
 const I140_NORMAL_MIN = 2;
 const I140_NORMAL_MAX = 4;
 const I140_PREMIUM_COST = 2500;
-const I485_PROCESSING_MIN = 4;
-const I485_PROCESSING_MAX = 12;
+const I485_PROCESSING_MIN = 3;
+const I485_PROCESSING_MAX = 8;
 const EB2_WAIT_BASE = 30;
 const EB2_WAIT_VARIANCE = 12;
 
@@ -41,9 +41,17 @@ export function processImmigrationQuarter(state: GameState): {
 
   const quarter = ((state.turn - 1) % 4) + 1;
 
-  // --- Visa countdown ---
+  // --- Visa countdown + warnings ---
   if (!imm.hasGreenCard && !imm.hasComboCard) {
     const remaining = imm.visaExpiryTurn - state.turn;
+    // Warning at 4 quarters and 2 quarters
+    if (remaining === 4) {
+      events.push('visa_expiry_warning_4q');
+      mentalDelta -= 5;
+    } else if (remaining === 2) {
+      events.push('visa_expiry_warning_2q');
+      mentalDelta -= 10;
+    }
     if (remaining <= 0) {
       // Check grace period
       if (imm.graceQuartersRemaining > 0) {
@@ -118,7 +126,7 @@ export function processImmigrationQuarter(state: GameState): {
     const remaining = imm.visaExpiryTurn - state.turn;
     if (remaining <= 1 && remaining > 0) {
       updates.visaType = 'optStem';
-      updates.visaExpiryTurn = imm.visaExpiryTurn + 8; // 24 month extension
+      updates.visaExpiryTurn = imm.visaExpiryTurn + 10; // ~30 month extension (slightly longer than real 24mo to give 3 lottery attempts)
       events.push('opt_stem_activated');
       mentalDelta += 5;
     }
@@ -192,10 +200,10 @@ export function processImmigrationQuarter(state: GameState): {
 
   // --- Priority Date Queue ---
   if (imm.i140Status === 'approved' && imm.priorityDate !== null && imm.i485Status === 'none') {
-    // Advance priority date cursor
-    const baseAdvance = 1.0;
-    const variance = -2 + Math.random() * 5; // -2 to +3
-    const movement = Math.max(-4, Math.min(6, baseAdvance + variance));
+    // Advance priority date cursor — avg ~1.5 quarters advance per quarter
+    const baseAdvance = 1.5;
+    const variance = -1.5 + Math.random() * 4; // -1.5 to +2.5
+    const movement = Math.max(-3, Math.min(6, baseAdvance + variance));
 
     const newCurrent = imm.priorityDateCurrent + movement;
     updates.priorityDateCurrent = newCurrent;
@@ -275,7 +283,9 @@ export function processImmigrationQuarter(state: GameState): {
   }
 
   // --- H1B Renewal (6-year cap without I-140) ---
+  // Skip if green card was just approved this quarter
   if (
+    !updates.hasGreenCard &&
     ['h1b', 'h1bRenewal', 'h1b7thYear'].includes(imm.visaType) &&
     state.career.employed === 'employed' &&
     imm.visaExpiryTurn - state.turn <= 2 &&

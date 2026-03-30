@@ -93,6 +93,8 @@
     h1b_activated: { icon: '🎊', text: 'H-1B正式生效！', color: 'text-purple-400', detail: 'H-1B签证10月1日起生效，有效期3年。注意：H1B总共最多6年，必须在6年内拿到I-140才能续期！' },
     h1b_6year_expired: { icon: '💀', text: 'H-1B 6年到期，无法续签', color: 'text-red-400', detail: '6年H1B用完了但没有I-140批准。无法续签，签证即将到期...' },
     h1b_pending_lost: { icon: '💔', text: 'H-1B抽中但未能激活', color: 'text-red-400', detail: '在H-1B生效前失去了工作，抽中的名额作废了。' },
+    visa_expiry_warning_4q: { icon: '⚠️', text: '签证还剩4个季度！', color: 'text-amber-400', detail: '请尽快确保有下一步身份方案。' },
+    visa_expiry_warning_2q: { icon: '🚨', text: '签证还剩2个季度！', color: 'text-red-400', detail: '紧急！必须立即采取行动否则将被遣返。' },
     grace_period_ticking: { icon: '⏰', text: '宽限期倒计时中', color: 'text-red-400', detail: '必须尽快找到工作或获得新签证状态！' },
   };
 

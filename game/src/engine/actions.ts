@@ -13,7 +13,7 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
   },
   workSlack: {
     id: 'workSlack', nameZh: '摸鱼工作', apCost: 1, phase: 'career',
-    effects: { performance: -3, mental: 2 }, description: 'Slack off at work',
+    effects: { performance: -5, mental: 2 }, description: 'Slack off at work',
     tipsZh: '⚠️ 绩效-3 | ✅ 精神+2 | 💡 摸鱼省精力但绩效下降',
     precondition: (s) => s.career.employed === 'employed',
     exclusive: ['workNone', 'workHard', 'workSuperHard'],
@@ -68,9 +68,9 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
     tipsZh: '✅ 学术+5，推进自主绿卡 | ✅ 不绑雇主，自由度高 | ⚠️ 需要学术影响力>50(NIW)或>75(EB1A)',
   },
   publishPaper: {
-    id: 'publishPaper', nameZh: '发论文（副业）', apCost: 4, phase: 'career',
+    id: 'publishPaper', nameZh: '发论文（副业）', apCost: 3, phase: 'career',
     effects: { academicImpact: 10 }, description: 'Write and publish a paper as side project',
-    tipsZh: '✅ 学术+10，大幅推进NIW/EB1A | ⚠️ 占4AP，代价很高 | ⚠️ RS职业自带论文产出，不需要这个',
+    tipsZh: '✅ 学术+10，大幅推进NIW/EB1A | ⚠️ 占3AP | ⚠️ RS职业自带论文产出，不需要这个',
     precondition: (s) => s.career.path !== 'rs',
   },
   // consultLawyer removed — not yet designed

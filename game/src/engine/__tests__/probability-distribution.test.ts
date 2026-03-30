@@ -25,8 +25,8 @@ describe('Probability Distribution Tests', () => {
 
       const prob = preview('h1bLottery', state);
       console.log(`H1B bachelor preview: ${(prob * 100).toFixed(1)}%`);
-      expect(prob).toBeGreaterThanOrEqual(0.13);
-      expect(prob).toBeLessThanOrEqual(0.23);
+      expect(prob).toBeGreaterThanOrEqual(0.20);
+      expect(prob).toBeLessThanOrEqual(0.30);
 
       // Run distribution test
       const actual = runMany('h1bLottery', () => {
@@ -45,8 +45,8 @@ describe('Probability Distribution Tests', () => {
 
       const prob = preview('h1bLotteryMasters', state);
       console.log(`H1B masters preview: ${(prob * 100).toFixed(1)}%`);
-      expect(prob).toBeGreaterThanOrEqual(0.18);
-      expect(prob).toBeLessThanOrEqual(0.28);
+      expect(prob).toBeGreaterThanOrEqual(0.27);
+      expect(prob).toBeLessThanOrEqual(0.37);
 
       const actual = runMany('h1bLotteryMasters', () => {
         const s = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
