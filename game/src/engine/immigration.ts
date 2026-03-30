@@ -203,15 +203,16 @@ export function processImmigrationQuarter(state: GameState): {
   if (imm.i140Status === 'approved' && imm.priorityDate !== null) {
     const pd = imm.priorityDate;
 
-    // Advance Table B: avg ~1.0/quarter (reaches PD ~14 in ~14Q = 3.5 years)
-    const bVariance = -0.8 + Math.random() * 1.8; // -0.8 to +1.0
-    const bMovement = Math.max(-1.5, Math.min(3, 0.8 + bVariance));
+    // Table B: avg ~1.2/quarter → PD 14 in ~12Q (3 years) → combo card
+    const bVariance = -0.5 + Math.random() * 1.5; // -0.5 to +1.0
+    const bMovement = Math.max(-1, Math.min(3, 1.0 + bVariance));
     const newB = imm.chartBCurrent + bMovement;
     updates.chartBCurrent = newB;
 
-    // Advance Table A: avg ~0.6/quarter (reaches PD ~14 in ~23Q = 5.75 years)
-    const aVariance = -1.0 + Math.random() * 1.5; // -1.0 to +0.5
-    const aMovement = Math.max(-2, Math.min(2.5, 0.4 + aVariance));
+    // Table A: avg ~0.8/quarter → PD 14 in ~18Q (4.5 years) → GC eligible
+    // After Table B reached, Table A still ~6-8Q behind = 1.5-2 year gap
+    const aVariance = -0.8 + Math.random() * 1.5; // -0.8 to +0.7
+    const aMovement = Math.max(-1.5, Math.min(2.5, 0.6 + aVariance));
     const newA = imm.priorityDateCurrent + aMovement;
     updates.priorityDateCurrent = newA;
 
