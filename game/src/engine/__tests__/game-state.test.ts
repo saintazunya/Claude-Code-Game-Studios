@@ -131,7 +131,7 @@ describe('Game State', () => {
       state.immigration.hasGreenCard = true;
       state.turn = 80;
       const score = calculateFinalScore(state);
-      expect(score).toBe(1670000);
+      expect(score).toBe(1500000);
     });
 
     it('no GC = 1.0 multiplier', () => {

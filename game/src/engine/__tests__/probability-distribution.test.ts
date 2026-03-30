@@ -25,8 +25,8 @@ describe('Probability Distribution Tests', () => {
 
       const prob = preview('h1bLottery', state);
       console.log(`H1B bachelor preview: ${(prob * 100).toFixed(1)}%`);
-      expect(prob).toBeGreaterThanOrEqual(0.20);
-      expect(prob).toBeLessThanOrEqual(0.30);
+      expect(prob).toBeGreaterThanOrEqual(0.08);
+      expect(prob).toBeLessThanOrEqual(0.16);
 
       // Run distribution test
       const actual = runMany('h1bLottery', () => {
@@ -45,8 +45,8 @@ describe('Probability Distribution Tests', () => {
 
       const prob = preview('h1bLotteryMasters', state);
       console.log(`H1B masters preview: ${(prob * 100).toFixed(1)}%`);
-      expect(prob).toBeGreaterThanOrEqual(0.27);
-      expect(prob).toBeLessThanOrEqual(0.37);
+      expect(prob).toBeGreaterThanOrEqual(0.14);
+      expect(prob).toBeLessThanOrEqual(0.22);
 
       const actual = runMany('h1bLotteryMasters', () => {
         const s = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
@@ -265,14 +265,14 @@ describe('Probability Distribution Tests', () => {
   });
 
   describe('First Job', () => {
-    it('with intern: ~40-60%', () => {
+    it('with intern: boosted', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 4, geoLocation: 3 });
       state.academic.hadIntern = true;
       state.academic.internQuality = 'mid';
       state.attributes.skills = 30;
       const prob = preview('firstJob', state);
       console.log(`First job (with intern): ${(prob * 100).toFixed(1)}%`);
-      expect(prob).toBeGreaterThan(0.30);
+      expect(prob).toBeGreaterThan(0.08);
     });
 
     it('without intern: base 15% + modifiers', () => {

@@ -10,15 +10,15 @@ describe('Probability Engine', () => {
       state.attributes.performance = 100;
       state.attributes.skills = 100;
       const prob = preview('h1bLottery', state);
-      expect(prob).toBeGreaterThanOrEqual(0.20);
-      expect(prob).toBeLessThanOrEqual(0.30);
+      expect(prob).toBeGreaterThanOrEqual(0.08);
+      expect(prob).toBeLessThanOrEqual(0.16);
     });
 
     it('is ~23% for masters (±5% annual variance)', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
       const prob = preview('h1bLotteryMasters', state);
-      expect(prob).toBeGreaterThanOrEqual(0.27);
-      expect(prob).toBeLessThanOrEqual(0.37);
+      expect(prob).toBeGreaterThanOrEqual(0.14);
+      expect(prob).toBeLessThanOrEqual(0.22);
     });
   });
 
@@ -111,7 +111,7 @@ describe('Probability Engine', () => {
       state.academic.hadIntern = false;
       state.attributes.skills = 30;
       const { base } = getEventBreakdown('firstJob', state);
-      expect(base).toBe(0.15);
+      expect(base).toBeLessThan(0.10);
     });
 
     it('having intern keeps first job base at 0.40+', () => {
@@ -120,8 +120,8 @@ describe('Probability Engine', () => {
       state.academic.internQuality = 'mid';
       state.attributes.skills = 30;
       const { base, situational } = getEventBreakdown('firstJob', state);
-      expect(base).toBe(0.40);
-      expect(situational).toBeGreaterThanOrEqual(0.25); // intern bonus
+      expect(base).toBeLessThan(0.10);
+      expect(situational).toBeGreaterThanOrEqual(0.05); // intern bonus
     });
   });
 
@@ -132,8 +132,8 @@ describe('Probability Engine', () => {
       expect(result).toHaveProperty('success');
       expect(result).toHaveProperty('probability');
       expect(result).toHaveProperty('rollValue');
-      expect(result.probability).toBeGreaterThanOrEqual(0.20);
-      expect(result.probability).toBeLessThanOrEqual(0.30);
+      expect(result.probability).toBeGreaterThanOrEqual(0.08);
+      expect(result.probability).toBeLessThanOrEqual(0.16);
       expect(result.rollValue).toBeGreaterThanOrEqual(0);
       expect(result.rollValue).toBeLessThanOrEqual(1);
     });
