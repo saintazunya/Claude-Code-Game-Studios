@@ -249,13 +249,15 @@ const AGENTS: AgentProfile[] = [
   // ── Agent 2: 卷王 (Grinder) ──
   {
     name: '小李 (卷王 Grinder)',
-    background: '清华→MIT, 拼命卷绩效冲L5/L6, 愿意牺牲健康',
-    personality: 'Aggressive, work-obsessed, pushes limits. Will grind until burnout.',
-    build: { constitution: 5, schoolRanking: 5, geoLocation: 0 },
+    background: '清华→MIT, 拼命卷绩效冲L5/L6, 愿意牺牲健康但懂得节奏',
+    personality: 'Aggressive but strategic. Conserves energy in school, grinds hard at work. Knows when to back off.',
+    build: { constitution: 4, schoolRanking: 5, geoLocation: 1 },
     attitudeLevel: (s) => {
+      // Smart grinder: don't burn out in school, save energy for career
+      if (s.phase === 'academic') return 2; // studyHard, not insane
       if (s.flags.burnoutActive || s.attributes.health < 20) return 0;
-      if (s.attributes.mental < 15) return 1;
-      return 3; // always super hard
+      if (s.attributes.mental < 20) return 1; // back off before burnout
+      return 3; // super hard at work
     },
     strategy: (s) => {
       const p: ActionId[] = [];
@@ -263,17 +265,21 @@ const AGENTS: AgentProfile[] = [
         if (!s.academic.hadIntern && s.turn >= 2) p.push('searchIntern');
         if (s.flags.internActiveThisQuarter) p.push('internWork');
         p.push('sideProject', 'studyGpa', 'networking');
+        // Rest if mental getting low in school
+        if (s.attributes.mental < 40) p.push('exercise');
         const gradTurn = s.academic.isPhd ? 16 : 8;
         if (s.turn === gradTurn - 1) p.push('searchFullTimeJob');
       } else {
-        if (s.attributes.health < 25) p.push('hospital');
+        if (s.attributes.health < 30) p.push('hospital');
+        if (s.attributes.mental < 25) p.push('therapist', 'exercise');
         if (s.career.employed === 'unemployed') p.push('urgentJobSearch');
         p.push('upskill');
-        // Job hop aggressively for higher TC
-        if (s.career.tenure >= 6 && s.attributes.skills > 100) p.push('prepJobChange');
+        // Only job hop AFTER I-140 approved (protect GC progress)
+        if (s.immigration.i140Status === 'approved' && s.career.tenure >= 6) p.push('prepJobChange');
       }
-      const attLvl = s.flags.burnoutActive || s.attributes.health < 20 ? 0 :
-        s.attributes.mental < 15 ? 1 : 3;
+      const attLvl = s.phase === 'academic' ? 2 :
+        s.flags.burnoutActive || s.attributes.health < 20 ? 0 :
+        s.attributes.mental < 20 ? 1 : 3;
       return selectActions(s, p, attLvl);
     },
   },
