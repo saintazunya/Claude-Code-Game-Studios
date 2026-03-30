@@ -199,10 +199,12 @@ export function processImmigrationQuarter(state: GameState): {
 
   // --- Priority Date Queue ---
   if (imm.i140Status === 'approved' && imm.priorityDate !== null && imm.i485Status === 'none') {
-    // Advance priority date cursor — avg ~1.5 quarters advance per quarter
-    const baseAdvance = 0.5;
-    const variance = -1.5 + Math.random() * 4; // -1.5 to +2.5
-    const movement = Math.max(-3, Math.min(6, baseAdvance + variance));
+    // Advance priority date cursor — avg ~0.7 quarters advance per quarter
+    // Target: ~5 years (20 quarters) for a priority date filed ~14 turns in
+    // 14 / 20 = 0.7 per quarter average
+    const baseAdvance = 0.3;
+    const variance = -1.0 + Math.random() * 2.0; // -1.0 to +1.0
+    const movement = Math.max(-2, Math.min(3, baseAdvance + variance));
 
     const newCurrent = imm.priorityDateCurrent + movement;
     updates.priorityDateCurrent = newCurrent;
