@@ -103,7 +103,7 @@ const BASE_EVENTS: GameEvent[] = [
   {
     id: 'priority_date_jump', type: 'immigration', nameZh: '排期大幅前进', phase: 'career',
     descZh: '签证公告牌显示你的类别排期突然大幅前进了6个月！',
-    weight: 0.6,
+    weight: 0.3, // reduced — was triggering too often
     precondition: (s) => s.immigration.i140Status === 'approved' && s.immigration.i485Status === 'none',
     cooldownQuarters: 8, oneTime: false,
     immediateEffects: { mental: 10 },
