@@ -34,8 +34,8 @@ export interface ProbabilityBreakdown {
 const EVENT_TYPES: Record<string, EventTypeDef> = {
   promotion: { base: 0.15, attrKey: 'performance', attrWeight: 0.004, floor: 0.02, cap: 0.85, usesSchoolMod: true, usesEconCycle: true },
   pip: { base: 0.05, attrKey: 'performance', attrWeight: 0.003, inverseAttr: true, floor: 0.01, cap: 0.60, usesEconCycle: true },
-  h1bLottery: { base: 0.25, floor: 0.20, cap: 0.30 }, // 25% base, ±5% annual variance
-  h1bLotteryMasters: { base: 0.32, floor: 0.27, cap: 0.37 }, // masters gets +7% base
+  h1bLottery: { base: 0.12, floor: 0.08, cap: 0.16 }, // 25% base, ±5% annual variance
+  h1bLotteryMasters: { base: 0.18, floor: 0.14, cap: 0.22 }, // masters gets +7% base
   permApproval: { base: 0.70, floor: 0.30, cap: 0.90, usesEconCycle: true },
   permAudit: { base: 0.10, floor: 0.05, cap: 0.30, usesEconCycle: true },
   i140Approval: { base: 0.85, attrKey: 'performance', attrWeight: 0.001, floor: 0.50, cap: 0.95 },
@@ -43,8 +43,8 @@ const EVENT_TYPES: Record<string, EventTypeDef> = {
   eb1aApproval: { base: 0.05, attrKey: 'academicImpact', attrWeight: 0.009, floor: 0.01, cap: 0.75 },
   sickness: { base: 0, floor: 0, cap: 0.80 }, // custom formula
   burnout: { base: 0, floor: 0, cap: 0.30 }, // custom formula
-  internSearch: { base: 0.15, attrKey: 'skills', attrWeight: 0.0015, floor: 0.05, cap: 0.90, usesSchoolMod: true, usesEconCycle: true },
-  firstJob: { base: 0.40, attrKey: 'skills', attrWeight: 0.003, floor: 0.05, cap: 0.90, usesSchoolMod: true, usesEconCycle: true },
+  internSearch: { base: 0.06, attrKey: 'skills', attrWeight: 0.0015, floor: 0.05, cap: 0.90, usesSchoolMod: true, usesEconCycle: true },
+  firstJob: { base: 0.05, attrKey: 'skills', attrWeight: 0.001, floor: 0.02, cap: 0.30, usesSchoolMod: true, usesEconCycle: true },
   jobOffer: { base: 0.20, attrKey: 'skills', attrWeight: 0.003, floor: 0.03, cap: 0.85, usesSchoolMod: true, usesEconCycle: true },
   layoff: { base: 0.05, attrKey: 'performance', attrWeight: 0.002, inverseAttr: true, floor: 0.01, cap: 0.40, usesEconCycle: true },
   i485Noid: { base: 0, floor: 0, cap: 0.80 }, // custom formula
@@ -78,7 +78,7 @@ const ECON_MODIFIERS: Record<string, Record<EconomicPhase, number>> = {
   permApproval: { boom: 0.05, normal: 0, recession: -0.20, recovery: -0.05 },
   permAudit: { boom: -0.03, normal: 0, recession: 0.15, recovery: 0.05 },
   internSearch: { boom: 0.10, normal: 0, recession: -0.10, recovery: 0.05 },
-  firstJob: { boom: 0.10, normal: 0, recession: -0.15, recovery: 0.05 },
+  firstJob: { boom: 0.15, normal: 0, recession: -0.20, recovery: 0.08 },
 };
 
 export function getEventBreakdown(
@@ -176,11 +176,10 @@ export function getEventBreakdown(
   }
   if (eventType === 'firstJob') {
     if (state.academic.hadIntern) {
-      situational += 0.25;
-      if (state.academic.internQuality === 'top') situational += 0.15;
-    } else {
-      base = 0.15; // No intern penalty
+      situational += 0.10; // intern helps but not game-changing
+      if (state.academic.internQuality === 'top') situational += 0.05;
     }
+    // No intern = base stays at 8% (very hard)
   }
   if (eventType === 'internSearch') {
     situational += state.geoBonus;

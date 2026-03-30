@@ -194,10 +194,10 @@ export function processTurn(
     s.attributes = applyDeltas(s.attributes, { skills: 5 });
     s.flags.internActiveThisQuarter = false; // intern ends after 1 quarter
 
-    // Return offer probability: base 40%, +30% if worked hard (internWork action selected)
+    // Return offer probability: base 15%, +15% if worked hard
     const workedHard = selectedActions.includes('internWork');
-    const returnOfferProb = workedHard ? 0.70 : 0.40;
-    const topCompanyBonus = s.academic.internQuality === 'top' ? 0.10 : 0;
+    const returnOfferProb = workedHard ? 0.30 : 0.15;
+    const topCompanyBonus = s.academic.internQuality === 'top' ? 0.05 : 0;
     if (Math.random() < returnOfferProb + topCompanyBonus) {
       s.academic.hasReturnOffer = true;
       turnEvents.push({ id: 'return_offer_received', choiceId: '' });
@@ -650,8 +650,8 @@ export function processTurn(
     // Bankruptcy: cash below -$10K
     s.endingType = 'bankrupt';
   }
-  if (s.turn >= 148 && !s.endingType) {
-    s.endingType = s.immigration.hasGreenCard ? 'age59WithGc' : 'age59WithoutGc';
+  if (s.turn >= 72 && !s.endingType) {
+    s.endingType = s.immigration.hasGreenCard ? 'gcBeforeDeadline' : 'age59WithoutGc';
   }
 
   return s;
@@ -732,6 +732,6 @@ export function calculateFinalScore(state: GameState): number {
   const nw = Math.max(0, state.attributes.netWorth);
   const gcMult = state.immigration.hasGreenCard ? 1.5 : (state.endingType === 'deported' || state.endingType === 'bankrupt') ? 0.8 : 1.0;
   const age = getTurnInfo(state.turn).age;
-  const earlyBonus = state.immigration.hasGreenCard ? Math.max(0, (59 - age) * 10000) : 0;
+  const earlyBonus = state.immigration.hasGreenCard ? Math.max(0, (40 - age) * 10000) : 0;
   return Math.round(nw * gcMult + earlyBonus);
 }

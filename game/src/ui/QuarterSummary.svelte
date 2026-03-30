@@ -141,7 +141,7 @@
     <div class="flex justify-between items-start mb-4">
       <div>
         <h1 class="text-lg font-bold text-white">{ti.year}年 Q{ti.quarter}</h1>
-        <p class="text-xs text-gray-500">{ti.age}岁 · 回合 {gs.turn}/148</p>
+        <p class="text-xs text-gray-500">{ti.age}岁 · 回合 {gs.turn}/72</p>
       </div>
       <div class="text-right">
         <div class="text-lg font-black text-emerald-400">{formatMoney(gs.attributes.netWorth)}</div>

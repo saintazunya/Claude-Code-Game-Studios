@@ -131,7 +131,7 @@
       </div>
     </div>
     <div class="flex items-center gap-2 text-[10px]">
-      <span class="text-gray-500">回合 {gs.turn}/148</span>
+      <span class="text-gray-500">回合 {gs.turn}/72</span>
       <span class="text-gray-700">|</span>
       <span class="text-gray-500">
         {gs.economicPhase === 'recession' ? '📉 衰退' : gs.economicPhase === 'boom' ? '📈 繁荣' : gs.economicPhase === 'recovery' ? '📊 复苏' : '📊 平稳'}

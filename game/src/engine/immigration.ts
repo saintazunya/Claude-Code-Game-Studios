@@ -10,8 +10,8 @@ const PERM_AUDIT_EXTRA_MAX = 6;
 const I140_NORMAL_MIN = 2;
 const I140_NORMAL_MAX = 4;
 const I140_PREMIUM_COST = 2500;
-const I485_PROCESSING_MIN = 3;
-const I485_PROCESSING_MAX = 8;
+const I485_PROCESSING_MIN = 4;
+const I485_PROCESSING_MAX = 12;
 const EB2_WAIT_BASE = 30;
 const EB2_WAIT_VARIANCE = 12;
 
@@ -152,7 +152,7 @@ export function processImmigrationQuarter(state: GameState): {
       }
     } else {
       // From Q5 onwards: each quarter +20% approval chance
-      const approvalChance = Math.min(0.95, (permQuarters - 3) * 0.20);
+      const approvalChance = Math.min(0.95, (permQuarters - 6) * 0.12);
       if (Math.random() < approvalChance) {
         updates.permStatus = 'approved';
         mentalDelta += 5;
@@ -201,7 +201,7 @@ export function processImmigrationQuarter(state: GameState): {
   // --- Priority Date Queue ---
   if (imm.i140Status === 'approved' && imm.priorityDate !== null && imm.i485Status === 'none') {
     // Advance priority date cursor — avg ~1.5 quarters advance per quarter
-    const baseAdvance = 1.5;
+    const baseAdvance = 0.5;
     const variance = -1.5 + Math.random() * 4; // -1.5 to +2.5
     const movement = Math.max(-3, Math.min(6, baseAdvance + variance));
 
