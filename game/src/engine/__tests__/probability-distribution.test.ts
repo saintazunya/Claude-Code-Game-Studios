@@ -141,12 +141,12 @@ describe('Probability Distribution Tests', () => {
   });
 
   describe('Promotion', () => {
-    it('L3 with high performance: ~50-70%', () => {
+    it('L3 with skills=80 (above threshold 60): good chance', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 4, geoLocation: 3 });
       state.career.level = 3;
       state.career.tenure = 8;
-      state.attributes.performance = 80;
-      state.attributes.skills = 50;
+      state.attributes.performance = 70;
+      state.attributes.skills = 80; // above threshold 60
       state.career.bossType = 'neutral';
       state.career.company = {
         id: 't', name: 'T', tier: 'bigTech', city: 'tier1',
@@ -154,27 +154,44 @@ describe('Probability Distribution Tests', () => {
         salaryModifier: 1, pipRateModifier: 0, promotionModifier: 0, layoffModifier: 0,
       };
       const prob = preview('promotion', state);
-      console.log(`Promotion L3 (perf=80): ${(prob * 100).toFixed(1)}%`);
-      expect(prob).toBeGreaterThan(0.4);
-      expect(prob).toBeLessThan(0.85);
+      console.log(`Promotion L3 (skills=80, thresh=60): ${(prob * 100).toFixed(1)}%`);
+      expect(prob).toBeGreaterThan(0.3);
+      expect(prob).toBeLessThanOrEqual(0.80);
     });
 
-    it('L5→L6 capped at 55%', () => {
+    it('L5→L6 with skills=200 (below threshold 280): low chance', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 5, geoLocation: 3 });
       state.career.level = 5;
       state.career.tenure = 20;
-      state.attributes.performance = 100;
-      state.attributes.skills = 100;
-      state.career.bossType = 'supportive';
-      state.economicPhase = 'boom';
+      state.attributes.performance = 80;
+      state.attributes.skills = 200; // below threshold 280
+      state.career.bossType = 'neutral';
       state.career.company = {
         id: 't', name: 'T', tier: 'faang', city: 'tier1',
         culture: 'balanced', gcWillingness: 'standard',
-        salaryModifier: 1, pipRateModifier: 0, promotionModifier: 0.05, layoffModifier: 0,
+        salaryModifier: 1, pipRateModifier: 0, promotionModifier: 0, layoffModifier: 0,
       };
       const prob = preview('promotion', state);
-      console.log(`Promotion L5→L6 (max stats): ${(prob * 100).toFixed(1)}%`);
-      expect(prob).toBeLessThanOrEqual(0.55);
+      console.log(`Promotion L5→L6 (skills=200, thresh=280): ${(prob * 100).toFixed(1)}%`);
+      expect(prob).toBeLessThan(0.30); // below threshold = hard
+    });
+
+    it('L5→L6 with skills=350 (above threshold 280): decent chance', () => {
+      const state = createGameState({ constitution: 3, schoolRanking: 5, geoLocation: 3 });
+      state.career.level = 5;
+      state.career.tenure = 20;
+      state.attributes.performance = 80;
+      state.attributes.skills = 350; // above threshold 280
+      state.career.bossType = 'neutral';
+      state.career.company = {
+        id: 't', name: 'T', tier: 'faang', city: 'tier1',
+        culture: 'balanced', gcWillingness: 'standard',
+        salaryModifier: 1, pipRateModifier: 0, promotionModifier: 0, layoffModifier: 0,
+      };
+      const prob = preview('promotion', state);
+      console.log(`Promotion L5→L6 (skills=350, thresh=280): ${(prob * 100).toFixed(1)}%`);
+      expect(prob).toBeGreaterThan(0.25);
+      expect(prob).toBeLessThanOrEqual(0.50);
     });
   });
 

@@ -31,6 +31,7 @@ export function createStartingAttributes(creation: CreationAttributes): {
 
 export function clampAttribute(key: CoreAttributeKey, value: number): number {
   if (key === 'netWorth') return Math.max(0, value);
+  if (key === 'skills') return Math.max(0, value); // skills uncapped — grows with career
   return Math.max(ATTR_MIN, Math.min(ATTR_MAX, value));
 }
 

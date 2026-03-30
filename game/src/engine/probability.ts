@@ -50,13 +50,23 @@ const EVENT_TYPES: Record<string, EventTypeDef> = {
   i485Noid: { base: 0, floor: 0, cap: 0.80 }, // custom formula
 };
 
-// Promotion base rates by level
-const PROMOTION_BASE_BY_LEVEL: Record<number, number> = {
-  3: 0.30, 4: 0.22, 5: 0.15, 6: 0.08, 7: 0.03,
+// Promotion: skill-threshold based system
+// Each level requires a skill threshold. Probability scales with how far above threshold.
+// Approximate timelines:
+// L3→L4: grind 1yr, coast 2.5yr (threshold ~60)
+// L4→L5: grind 2.5yr, coast 5yr (threshold ~150)
+// L5→L6: grind 3yr, coast 7yr (threshold ~280)
+// L6→L7: grind only, coast nearly impossible (threshold ~450)
+const PROMOTION_SKILL_THRESHOLD: Record<number, number> = {
+  3: 60,   // L3→L4
+  4: 150,  // L4→L5
+  5: 280,  // L5→L6
+  6: 450,  // L6→L7
+  7: 9999, // L7 can't promote
 };
 
 const PROMOTION_CAP_BY_LEVEL: Record<number, number> = {
-  3: 0.85, 4: 0.75, 5: 0.55, 6: 0.30, 7: 0.0, // L7 can't promote
+  3: 0.80, 4: 0.65, 5: 0.50, 6: 0.30, 7: 0.0,
 };
 
 // Economic cycle modifiers per event type
@@ -108,8 +118,19 @@ export function getEventBreakdown(
   }
 
   if (eventType === 'promotion') {
-    base = PROMOTION_BASE_BY_LEVEL[state.career.level] ?? 0.15;
-    cap = PROMOTION_CAP_BY_LEVEL[state.career.level] ?? 0.85;
+    // Skill-threshold based: probability scales with skills relative to threshold
+    const threshold = PROMOTION_SKILL_THRESHOLD[state.career.level] ?? 9999;
+    const skillsOverThreshold = state.attributes.skills - threshold;
+    // Below threshold: very low base (0-5%), at threshold: ~25%, well above: approaches cap
+    if (skillsOverThreshold < 0) {
+      // Below threshold: low cap, performance/school can't fully compensate
+      base = Math.max(0.02, 0.05 + skillsOverThreshold * 0.0005);
+      cap = Math.min(0.15, PROMOTION_CAP_BY_LEVEL[state.career.level] ?? 0.15); // hard cap at 15% when below threshold
+    } else {
+      // Above threshold: 0.25 + diminishing returns toward level cap
+      base = 0.25 + skillsOverThreshold * 0.003;
+      cap = PROMOTION_CAP_BY_LEVEL[state.career.level] ?? 0.65;
+    }
   }
 
   // Attribute contribution
@@ -121,9 +142,9 @@ export function getEventBreakdown(
       : attrVal * def.attrWeight;
   }
 
-  // Skills secondary contribution for promotion
+  // Promotion: performance still contributes (high performer = better review)
   if (eventType === 'promotion') {
-    attrContrib += (state.attributes.skills) * 0.001;
+    attrContrib += state.attributes.performance * 0.002; // perf 80 = +16%
   }
 
   // School modifier

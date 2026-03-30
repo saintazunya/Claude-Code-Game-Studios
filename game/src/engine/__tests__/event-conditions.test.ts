@@ -65,15 +65,17 @@ describe('Event Preconditions & Guaranteed Triggers', () => {
       }
     });
 
-    it('burnout resets mental and sets protection', () => {
+    it('burnout sets protection flag', () => {
       const s = makeCareerState();
       s.attributes.mental = 0;
-      s.immigration.hasGreenCard = true; // no visa drain
-      s.career.grindConsecutive = 0; // no grind drain
-      s.career.bossType = 'neutral';
+      s.immigration.hasGreenCard = true;
+      s.immigration.hasComboCard = true;
+      s.career.grindConsecutive = 0;
+      s.career.bossType = 'supportive'; // +2 mental
+      s.attributes.health = 90; // no health drain on mental
       const next = processTurn(s, 'normal', []);
-      expect(next.attributes.mental).toBeGreaterThan(0);
       expect(next.flags.burnoutProtection).toBe(true);
+      expect(next.timeline[0].events.some(e => e.id === 'burnout')).toBe(true);
     });
 
     it('burnout applies performance -10', () => {

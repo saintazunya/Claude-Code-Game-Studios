@@ -187,7 +187,8 @@ const runs: RunConfig[] = [
     validate: (s) => {
       const errs: string[] = [];
       for (const key of ['performance', 'skills', 'academicImpact', 'health', 'mental'] as const) {
-        if (s.attributes[key] < 0 || s.attributes[key] > 100) errs.push(`${key} OOB: ${s.attributes[key]}`);
+        if (s.attributes[key] < 0) errs.push(`${key} < 0: ${s.attributes[key]}`);
+        if (key !== 'skills' && s.attributes[key] > 100) errs.push(`${key} > 100: ${s.attributes[key]}`);
         if (isNaN(s.attributes[key])) errs.push(`${key} NaN`);
       }
       return errs;
@@ -352,7 +353,7 @@ const runs: RunConfig[] = [
       const errs: string[] = [];
       for (const key of ['performance', 'skills', 'academicImpact', 'health', 'mental'] as const) {
         if (s.attributes[key] < 0) errs.push(`${key} < 0: ${s.attributes[key]}`);
-        if (s.attributes[key] > 100) errs.push(`${key} > 100: ${s.attributes[key]}`);
+        if (key !== 'skills' && s.attributes[key] > 100) errs.push(`${key} > 100: ${s.attributes[key]}`);
         if (isNaN(s.attributes[key])) errs.push(`${key} NaN`);
       }
       if (isNaN(s.economy.cash)) errs.push('cash NaN');

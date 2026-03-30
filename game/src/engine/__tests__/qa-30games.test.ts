@@ -45,7 +45,7 @@ function validateTurn(state: GameState, prevState: GameState, gameNum: number): 
   // === ATTRIBUTE BOUNDS ===
   for (const key of ['performance', 'skills', 'academicImpact', 'health', 'mental'] as const) {
     if (state.attributes[key] < 0) add('bounds', `${key} < 0: ${state.attributes[key]}`);
-    if (state.attributes[key] > 100) add('bounds', `${key} > 100: ${state.attributes[key]}`);
+    if (key !== 'skills' && state.attributes[key] > 100) add('bounds', `${key} > 100: ${state.attributes[key]}`);
     if (isNaN(state.attributes[key])) add('bounds', `${key} is NaN`);
   }
   if (state.attributes.netWorth < 0) add('bounds', `netWorth < 0: ${state.attributes.netWorth}`);

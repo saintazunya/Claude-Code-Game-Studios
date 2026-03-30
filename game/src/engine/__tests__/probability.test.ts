@@ -23,34 +23,38 @@ describe('Probability Engine', () => {
   });
 
   describe('promotion probability', () => {
-    it('uses level-specific base rates', () => {
+    it('uses skill-threshold system: L3 easier than L6', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
-      state.career.level = 3;
       state.attributes.performance = 50;
+      state.attributes.skills = 100;
+      state.career.level = 3; // threshold 60, skills 100 = above
       const l3 = preview('promotion', state);
 
-      state.career.level = 6;
+      state.career.level = 6; // threshold 450, skills 100 = way below
       const l6 = preview('promotion', state);
 
-      expect(l3).toBeGreaterThan(l6); // L3 promotes easier than L6
+      expect(l3).toBeGreaterThan(l6);
     });
 
-    it('school modifier affects promotion', () => {
-      const state0 = createGameState({ constitution: 3, schoolRanking: 0, geoLocation: 7 });
-      const state5 = createGameState({ constitution: 3, schoolRanking: 5, geoLocation: 2 });
-      state0.career.level = 5;
-      state5.career.level = 5;
-      state0.attributes.performance = 60;
-      state5.attributes.performance = 60;
+    it('skills above threshold gives higher promotion chance', () => {
+      const low = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
+      low.career.level = 4; // threshold 150
+      low.attributes.skills = 100; // below threshold
+      low.attributes.performance = 60;
 
-      expect(preview('promotion', state5)).toBeGreaterThan(preview('promotion', state0));
+      const high = createGameState({ constitution: 3, schoolRanking: 3, geoLocation: 4 });
+      high.career.level = 4;
+      high.attributes.skills = 200; // above threshold
+      high.attributes.performance = 60;
+
+      expect(preview('promotion', high)).toBeGreaterThan(preview('promotion', low));
     });
 
     it('is capped per level', () => {
       const state = createGameState({ constitution: 3, schoolRanking: 5, geoLocation: 2 });
       state.career.level = 5;
       state.attributes.performance = 100;
-      state.attributes.skills = 100;
+      state.attributes.skills = 500; // way above threshold
       state.economicPhase = 'boom';
       state.career.bossType = 'supportive';
       state.career.company = {
@@ -60,7 +64,7 @@ describe('Probability Engine', () => {
       };
 
       const prob = preview('promotion', state);
-      expect(prob).toBeLessThanOrEqual(0.55); // L5→L6 cap
+      expect(prob).toBeLessThanOrEqual(0.50); // L5→L6 cap
     });
   });
 

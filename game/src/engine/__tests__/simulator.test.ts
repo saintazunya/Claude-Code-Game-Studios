@@ -38,7 +38,7 @@ function validateState(state: GameState, prevState: GameState | null): TurnValid
   for (const key of ['performance', 'skills', 'academicImpact', 'health', 'mental'] as const) {
     const val = state.attributes[key];
     if (val < 0) errors.push(`${key} < 0: ${val}`);
-    if (val > 100) errors.push(`${key} > 100: ${val}`);
+    if (key !== 'skills' && val > 100) errors.push(`${key} > 100: ${val}`);
     if (isNaN(val)) errors.push(`${key} is NaN`);
     if (!isFinite(val)) errors.push(`${key} is Infinite`);
   }
