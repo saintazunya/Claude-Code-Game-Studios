@@ -42,7 +42,7 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
     effects: { mental: -3 }, description: 'Interview for new jobs this quarter',
     tipsZh: '✅ 本季度判定是否拿到offer | ✅ 技能越高offer越大 | ⚠️ 没有I-140跳槽会重置绿卡进度！ | ⚠️ 精神-3',
     precondition: (s) => s.career.employed === 'employed' && !s.career.onPip,
-    exclusive: ['travel', 'normalJobSearch'],
+    exclusive: ['travel'],
   },
   entrepreneurship: {
     id: 'entrepreneurship', nameZh: '创业调研', apCost: 4, phase: 'career',
@@ -53,9 +53,9 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
   normalJobSearch: {
     id: 'normalJobSearch', nameZh: '找工作', apCost: 3, phase: 'career',
     effects: { mental: -3 }, description: 'Normal job search',
-    tipsZh: '✅ 基础offer概率 | ⚠️ 精神-3 | 💡 在职跳槽或失业找工作都可用',
-    precondition: (s) => s.career.employed === 'employed' || s.career.employed === 'unemployed',
-    exclusive: ['urgentJobSearch', 'prepJobChange'],
+    tipsZh: '✅ 基础offer概率 | ⚠️ 精神-3 | 💡 失业时找工作',
+    precondition: (s) => s.career.employed === 'unemployed',
+    exclusive: ['urgentJobSearch'],
   },
   urgentJobSearch: {
     id: 'urgentJobSearch', nameZh: '紧急求职', apCost: 5, phase: 'career',
