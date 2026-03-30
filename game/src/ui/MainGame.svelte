@@ -5,6 +5,8 @@
 
   let showInfo = $state(false);
   let showEventLog = $state(false);
+  let showStockPopup = $state<'buy' | 'sell' | null>(null);
+  let stockAmount = $state(0);
   import { canSelectAction, ACTIONS } from '../engine/actions';
   import { computeSicknessChance } from '../engine/attributes';
   import type { ActionId } from '../engine/types';
@@ -363,7 +365,17 @@
         <button
           class="w-full flex items-center gap-3 p-3 rounded-xl border transition-all duration-150 text-left {isSelected ? 'border-blue-500 bg-[#1a2a4a] shadow-md shadow-blue-500/5' : 'border-[#2a3050] bg-[#1a2234]'} {disabled ? 'opacity-30' : 'active:scale-[0.98]'}"
           {disabled}
-          onclick={() => toggleAction(action.id)}
+          onclick={() => {
+            if (action.id === 'invest' && !actions.includes('invest')) {
+              stockAmount = Math.round(gs.economy.cash * 0.5);
+              showStockPopup = 'buy';
+            } else if (action.id === 'sellStock' && !actions.includes('sellStock')) {
+              stockAmount = Math.round(gs.economy.portfolioShares * gs.economy.sharePrice);
+              showStockPopup = 'sell';
+            } else {
+              toggleAction(action.id);
+            }
+          }}
         >
           <div class="text-lg w-8 text-center flex-shrink-0">{actionIcon(action.id)}</div>
           <div class="flex-1 min-w-0">
@@ -416,6 +428,79 @@
 {/if}
 {#if showEventLog}
   <EventLog onclose={() => showEventLog = false} />
+{/if}
+{#if showStockPopup && gs}
+  <div class="fixed inset-0 bg-black/70 z-50 flex items-center justify-center" role="dialog">
+    <div class="bg-[#111827] w-[90%] max-w-[380px] rounded-2xl p-5 border border-[#2a3050]" onclick={(e) => e.stopPropagation()}>
+      <h2 class="text-lg font-bold text-white mb-1">
+        {showStockPopup === 'buy' ? '📈 买入股票' : '📉 卖出股票'}
+      </h2>
+      <p class="text-xs text-gray-500 mb-3">
+        当前股价: ${gs.economy.sharePrice.toFixed(2)} /股
+        {showStockPopup === 'buy'
+          ? ` | 可用现金: ${formatMoney(gs.economy.cash)}`
+          : ` | 持有: ${gs.economy.portfolioShares.toFixed(1)}股 (${formatMoney(gs.economy.portfolioShares * gs.economy.sharePrice)})`}
+      </p>
+
+      <div class="mb-3">
+        <label class="text-xs text-gray-400 mb-1 block">
+          {showStockPopup === 'buy' ? '买入金额 ($)' : '卖出金额 ($)'}
+        </label>
+        <input
+          type="range"
+          min="0"
+          max={showStockPopup === 'buy' ? Math.floor(gs.economy.cash) : Math.floor(gs.economy.portfolioShares * gs.economy.sharePrice)}
+          step={showStockPopup === 'buy' ? 1000 : 500}
+          bind:value={stockAmount}
+          class="w-full h-2 bg-[#1a2234] rounded-full appearance-none cursor-pointer accent-blue-500"
+        />
+        <div class="flex justify-between mt-1">
+          <span class="text-emerald-400 text-lg font-bold">${stockAmount.toLocaleString()}</span>
+          <span class="text-xs text-gray-500">≈ {(stockAmount / gs.economy.sharePrice).toFixed(1)}股</span>
+        </div>
+      </div>
+
+      <!-- Quick buttons -->
+      <div class="flex gap-2 mb-4">
+        {#each [25, 50, 75, 100] as pct}
+          <button
+            class="flex-1 py-1.5 rounded-lg bg-[#1a2234] text-xs text-gray-400 border border-[#2a3050] active:scale-95"
+            onclick={() => {
+              const max = showStockPopup === 'buy' ? gs.economy.cash : gs.economy.portfolioShares * gs.economy.sharePrice;
+              stockAmount = Math.round(max * pct / 100);
+            }}
+          >
+            {pct}%
+          </button>
+        {/each}
+      </div>
+
+      <div class="flex gap-2">
+        <button
+          class="flex-1 py-3 rounded-xl bg-[#1a2234] text-gray-400 text-sm border border-[#2a3050] active:scale-95"
+          onclick={() => showStockPopup = null}
+        >
+          取消
+        </button>
+        <button
+          class="flex-1 py-3 rounded-xl text-white text-sm font-bold active:scale-95 {showStockPopup === 'buy' ? 'bg-emerald-600' : 'bg-red-600'}"
+          disabled={stockAmount <= 0}
+          onclick={() => {
+            if (showStockPopup === 'buy') {
+              gs.flags.pendingInvestAmount = stockAmount;
+              toggleAction('invest');
+            } else {
+              gs.flags.pendingSellShares = stockAmount / gs.economy.sharePrice;
+              toggleAction('sellStock');
+            }
+            showStockPopup = null;
+          }}
+        >
+          {showStockPopup === 'buy' ? `买入 $${stockAmount.toLocaleString()}` : `卖出 $${stockAmount.toLocaleString()}`}
+        </button>
+      </div>
+    </div>
+  </div>
 {/if}
 {/if}
 

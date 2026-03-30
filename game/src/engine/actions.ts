@@ -101,14 +101,16 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
   invest: {
     id: 'invest', nameZh: '买入股票', apCost: 0, phase: 'any',
     effects: {}, description: 'Buy S&P500 index fund (0 AP, use cash)',
-    tipsZh: '✅ 0AP免费操作 | ✅ 用现金买入S&P500 | ✅ 长期年化~8% | ⚠️ 衰退期可能亏 | 💡 买入金额在弹窗中设置',
+    tipsZh: '✅ 0AP免费操作 | ✅ 用现金买入S&P500 | ✅ 长期年化~8% | ⚠️ 衰退期可能亏 | 💡 点击后选择金额',
     precondition: (s) => s.economy.cash > 1000,
+    exclusive: ['sellStock'],
   },
   sellStock: {
     id: 'sellStock', nameZh: '卖出股票', apCost: 0, phase: 'any',
     effects: {}, description: 'Sell S&P500 shares for cash (0 AP)',
-    tipsZh: '✅ 0AP免费操作 | ✅ 卖出股票换现金 | 💡 急需用钱或高位套利时卖',
+    tipsZh: '✅ 0AP免费操作 | ✅ 卖出股票换现金 | 💡 点击后选择数量',
     precondition: (s) => s.economy.portfolioShares > 0,
+    exclusive: ['invest'],
   },
 
   // Health & wellness
