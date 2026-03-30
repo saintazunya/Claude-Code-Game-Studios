@@ -73,12 +73,11 @@ export const EVENT_POOL: GameEvent[] = [
   {
     id: 'recruiter_call', type: 'opportunity', nameZh: '猎头来电', phase: 'career',
     descZh: '一个猎头联系你，问你有没有兴趣看看新机会。这是市场对你能力的认可。',
-    weight: 1.5,
+    weight: 0.5,
     weightModifiers: [
-      { condition: (s) => s.economicPhase === 'boom', multiplier: 2.0 },
-      { condition: (s) => s.attributes.skills > 50, multiplier: 1.5 },
+      { condition: (s) => s.economicPhase === 'boom', multiplier: 1.5 },
     ],
-    cooldownQuarters: 4, oneTime: false,
+    cooldownQuarters: 8, oneTime: false,
     precondition: (s) => s.career.employed === 'employed' && !s.career.onPip,
     immediateEffects: { mental: 3 },
     choices: [

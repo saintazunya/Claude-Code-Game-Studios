@@ -659,7 +659,13 @@ export function resolveEvent(state: GameState, event: import('./types').GameEven
     Object.assign(s.flags, result.flags);
   }
 
-  // Handle job offer acceptance
+  // Handle job offer: always clear the pending offer after resolution
+  if (event.id === 'job_offer_received') {
+    // Clear regardless of accept or decline
+    if (!result.flags?.acceptJobOffer) {
+      s.flags.pendingJobOffer = null; // declined
+    }
+  }
   if (result.flags?.acceptJobOffer && s.flags.pendingJobOffer) {
     const offer = s.flags.pendingJobOffer as { salary: number; rsu: number; level: number; signingBonus: number };
     // Apply job change
