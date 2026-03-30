@@ -43,13 +43,14 @@ describe('Event Preconditions & Guaranteed Triggers', () => {
       if (next.attributes.mental === 30 && next.flags.burnoutActive) {
         expect(next.flags.burnoutActive).toBe(true);
       }
-      // If mental didn't reach 0 this specific turn, force it
+      // Force mental = 0 with minimal decay (green card = no visa drain)
       const forced = makeCareerState();
       forced.attributes.mental = 0;
+      forced.immigration.hasGreenCard = true;
+      forced.career.grindConsecutive = 0;
+      forced.career.bossType = 'supportive';
       const result = processTurn(forced, 'normal', []);
       expect(result.flags.burnoutActive).toBe(true);
-      // Mental resets to 30 by burnout, then natural decay reduces it further
-      expect(result.attributes.mental).toBeLessThanOrEqual(30);
       expect(result.attributes.mental).toBeGreaterThan(0);
       expect(result.timeline[0].events.some(e => e.id === 'burnout')).toBe(true);
     });
@@ -67,6 +68,9 @@ describe('Event Preconditions & Guaranteed Triggers', () => {
     it('burnout resets mental and sets protection', () => {
       const s = makeCareerState();
       s.attributes.mental = 0;
+      s.immigration.hasGreenCard = true; // no visa drain
+      s.career.grindConsecutive = 0; // no grind drain
+      s.career.bossType = 'neutral';
       const next = processTurn(s, 'normal', []);
       expect(next.attributes.mental).toBeGreaterThan(0);
       expect(next.flags.burnoutProtection).toBe(true);

@@ -72,7 +72,7 @@ export const EVENT_POOL: GameEvent[] = [
   // OPPORTUNITY
   {
     id: 'recruiter_call', type: 'opportunity', nameZh: '猎头来电', phase: 'career',
-    descZh: '一个猎头联系你，说有一个大厂的机会，薪资比你现在高30%以上。',
+    descZh: '一个猎头联系你，问你有没有兴趣看看新机会。这是市场对你能力的认可。',
     weight: 1.5,
     weightModifiers: [
       { condition: (s) => s.economicPhase === 'boom', multiplier: 2.0 },
@@ -80,11 +80,11 @@ export const EVENT_POOL: GameEvent[] = [
     ],
     cooldownQuarters: 4, oneTime: false,
     precondition: (s) => s.career.employed === 'employed' && !s.career.onPip,
-    immediateEffects: {},
+    immediateEffects: { mental: 3 },
     choices: [
-      { id: 'explore', textKey: '', nameZh: '了解一下', descZh: '开始面试流程，不占用行动点。', tag: 'neutral', effects: {}, flags: { recruiterOffer: true } },
-      { id: 'negotiate', textKey: '', nameZh: '用来谈加薪', descZh: '50%概率现雇主加薪10-15%。', tag: 'risky', effects: {}, probabilityRoll: 'jobOffer' },
-      { id: 'decline', textKey: '', nameZh: '婉拒', descZh: '现在不是跳槽的好时机。', tag: 'stable', effects: {} },
+      { id: 'noted', textKey: '', nameZh: '记下了，下季度考虑跳槽', descZh: '市场上有机会，可以下季度选"跳槽面试"行动。', tag: 'stable', effects: { mental: 2 } },
+      { id: 'negotiate', textKey: '', nameZh: '用来和老板谈加薪', descZh: '告诉老板有人挖你，争取涨薪。50%概率成功。', tag: 'risky', effects: { performance: 2 } },
+      { id: 'decline', textKey: '', nameZh: '不感兴趣', descZh: '现在不是看机会的时候。', tag: 'neutral', effects: {} },
     ],
   },
   {
