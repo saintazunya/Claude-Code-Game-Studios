@@ -154,38 +154,16 @@ export function processImmigrationQuarter(state: GameState): {
     }
   }
 
-  // --- Employer initiating PERM ---
+  // --- Auto-start PERM: company files as soon as you have H1B ---
   if (
     imm.permStatus === 'none' &&
     state.career.employed === 'employed' &&
-    state.career.company &&
-    (imm.visaType === 'h1b' || imm.visaType === 'h1bRenewal' || imm.visaType === 'h1b7thYear')
+    ['h1b', 'h1bRenewal', 'h1b7thYear'].includes(imm.visaType)
   ) {
-    const willingness = state.career.company.gcWillingness;
-    const [delayMin, delayMax] = GC_WILLINGNESS_DELAY[willingness];
-    const delay = randomInt(delayMin, delayMax);
-
-    if (state.career.tenure >= delay) {
-      // Recession may freeze GC initiation
-      if (state.economicPhase === 'recession' && willingness === 'reluctant') {
-        if (Math.random() < 0.15) {
-          events.push('gc_frozen_by_employer');
-          // Don't start PERM
-        } else {
-          updates.permStatus = 'filing';
-        }
-      } else {
-        updates.permStatus = 'filing';
-      }
-    }
-  }
-
-  // PERM filing -> pending
-  if (imm.permStatus === 'filing') {
     updates.permStatus = 'pending';
     updates.permStartTurn = state.turn;
     updates.gcTrack = 'perm';
-    economyCost += 3000; // Legal fees
+    economyCost += 3000;
     events.push('perm_filed');
   }
 
