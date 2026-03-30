@@ -55,7 +55,7 @@ const PHASE_CONFIG: Record<EconomicPhase, PhaseConfig> = {
   },
 };
 
-const INITIAL_SHARE_PRICE = 100;
+const INITIAL_SHARE_PRICE = 10;
 const SHARE_PRICE_FLOOR_PCT = 0.30;
 
 function randomUniform(min: number, max: number): number {

@@ -60,7 +60,7 @@ export function createGameState(creation: CreationAttributes): GameState {
       portfolioShares: 0,
       portfolioCostBasis: 0,
       sharePrice: INITIAL_SHARE_PRICE,
-      autoInvestAmount: 0,
+      sharePriceHistory: [INITIAL_SHARE_PRICE],
       ownsHome: false,
       homePurchasePrice: 0,
       homeMortgageRemaining: 0,
@@ -367,7 +367,7 @@ export function processTurn(
         }
       }
       if (actionId === 'invest') {
-        // Lump sum: invest 20% of available cash (or use pending invest amount from UI)
+        // Buy stock: use pending amount from UI, or default 20% of cash
         const investAmount = (s.flags.pendingInvestAmount as number) || Math.round(s.economy.cash * 0.20);
         if (investAmount > 0 && s.economy.cash >= investAmount) {
           const shares = investAmount / s.economy.sharePrice;
@@ -375,12 +375,21 @@ export function processTurn(
           s.economy.portfolioCostBasis += investAmount;
           s.economy.cash -= investAmount;
         }
-        // Apply auto-invest setting change if pending
-        if (s.flags.pendingAutoInvestAmount !== undefined) {
-          s.economy.autoInvestAmount = s.flags.pendingAutoInvestAmount as number;
-          s.flags.pendingAutoInvestAmount = undefined;
-        }
         s.flags.pendingInvestAmount = undefined;
+      }
+      if (actionId === 'sellStock') {
+        // Sell stock: use pending amount from UI, or default sell all
+        const sellShares = (s.flags.pendingSellShares as number) || s.economy.portfolioShares;
+        const actual = Math.min(sellShares, s.economy.portfolioShares);
+        if (actual > 0) {
+          const proceeds = actual * s.economy.sharePrice;
+          const avgCost = s.economy.portfolioShares > 0
+            ? s.economy.portfolioCostBasis / s.economy.portfolioShares : 0;
+          s.economy.cash += proceeds;
+          s.economy.portfolioCostBasis -= avgCost * actual;
+          s.economy.portfolioShares -= actual;
+        }
+        s.flags.pendingSellShares = undefined;
       }
       if (actionId === 'travel') {
         s.economy.cash -= 2000 + Math.random() * 3000;
@@ -448,18 +457,10 @@ export function processTurn(
     s.economy.homeMortgageRemaining -= mortgageQuarterly * 0.3; // ~30% goes to principal
   }
 
-  // Auto-invest S&P
-  if (s.economy.autoInvestAmount > 0 && s.economy.cash > s.economy.autoInvestAmount) {
-    const amount = s.economy.autoInvestAmount;
-    const shares = amount / s.economy.sharePrice;
-    s.economy.portfolioShares += shares;
-    s.economy.portfolioCostBasis += amount;
-    s.economy.cash -= amount;
-  }
-
   // Market returns
   const marketReturn = rollMarketReturn(s.economicPhase);
   s.economy.sharePrice = updateSharePrice(s.economy.sharePrice, marketReturn);
+  s.economy.sharePriceHistory.push(Math.round(s.economy.sharePrice * 100) / 100);
 
   // Housing value update
   if (s.economy.ownsHome) {

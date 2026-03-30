@@ -20,6 +20,10 @@
   const promotionChance = $derived(gs && gs.career.employed === 'employed' ? Math.round(preview('promotion', gs) * 100) : 0);
   const layoffChance = $derived(gs && gs.career.employed === 'employed' ? Math.round(preview('layoff', gs) * 100) : 0);
   const visaRemaining = $derived(gs ? gs.immigration.visaExpiryTurn - gs.turn : 999);
+  const stockPrices = $derived(gs ? gs.economy.sharePriceHistory : [10]);
+  const stockMax = $derived(Math.max(...stockPrices));
+  const stockMin = $derived(Math.min(...stockPrices));
+  const stockRange = $derived(stockMax - stockMin || 1);
 </script>
 
 {#if gs}
@@ -128,15 +132,46 @@
     <div class="bg-[#1a2234] rounded-xl p-4 border border-[#2a3050] mb-3">
       <h2 class="text-[10px] text-gray-500 font-semibold mb-2 tracking-wider">财务</h2>
       <div class="grid grid-cols-2 gap-y-2 text-xs">
-        <span class="text-gray-400">净资产</span><span class="text-emerald-400 text-right font-bold">{formatMoney(gs.attributes.netWorth)}</span>
-        <span class="text-gray-400">现金</span><span class="text-white text-right">{formatMoney(gs.economy.cash)}</span>
-        <span class="text-gray-400">S&P 500</span><span class="text-right {pf.unrealizedPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}">{formatMoney(pf.currentValue)} ({pf.unrealizedPnlPercent >= 0 ? '+' : ''}{pf.unrealizedPnlPercent.toFixed(1)}%)</span>
+        <span class="text-gray-400">💰 现金</span><span class="text-right font-bold {gs.economy.cash >= 0 ? 'text-emerald-400' : 'text-red-400'}">{formatMoney(gs.economy.cash)}</span>
+        <span class="text-gray-400">📈 股票市值</span><span class="text-right {pf.unrealizedPnl >= 0 ? 'text-emerald-400' : 'text-red-400'}">{formatMoney(pf.currentValue)} ({pf.unrealizedPnlPercent >= 0 ? '+' : ''}{pf.unrealizedPnlPercent.toFixed(1)}%)</span>
+        <span class="text-gray-400">持股数量</span><span class="text-white text-right">{gs.economy.portfolioShares.toFixed(1)}股</span>
+        <span class="text-gray-400">当前股价</span><span class="text-white text-right">${gs.economy.sharePrice.toFixed(2)}</span>
         {#if gs.economy.ownsHome}
           <span class="text-gray-400">房产价值</span><span class="text-white text-right">{formatMoney(gs.economy.homeValue)}</span>
           <span class="text-gray-400">房贷剩余</span><span class="text-red-400 text-right">{formatMoney(gs.economy.homeMortgageRemaining)}</span>
         {/if}
-        <span class="text-gray-400">定投</span><span class="text-white text-right">{gs.economy.autoInvestAmount > 0 ? `${formatMoney(gs.economy.autoInvestAmount)}/季度` : '未设置'}</span>
       </div>
+
+      <!-- Stock Price Chart -->
+      {#if gs.economy.sharePriceHistory.length > 1}
+        <div class="mt-3">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-[10px] text-gray-500">S&P 500 走势</span>
+            <span class="text-[10px] {gs.economy.sharePrice >= gs.economy.sharePriceHistory[0] ? 'text-emerald-400' : 'text-red-400'}">
+              ${gs.economy.sharePrice.toFixed(2)} ({gs.economy.sharePrice >= gs.economy.sharePriceHistory[0] ? '+' : ''}{((gs.economy.sharePrice / gs.economy.sharePriceHistory[0] - 1) * 100).toFixed(1)}%)
+            </span>
+          </div>
+          <svg viewBox="0 0 {stockPrices.length - 1} 40" class="w-full h-16 overflow-visible" preserveAspectRatio="none">
+            <line x1="0" y1="0" x2="{stockPrices.length - 1}" y2="0" stroke="#2a3050" stroke-width="0.3" />
+            <line x1="0" y1="20" x2="{stockPrices.length - 1}" y2="20" stroke="#2a3050" stroke-width="0.3" />
+            <line x1="0" y1="40" x2="{stockPrices.length - 1}" y2="40" stroke="#2a3050" stroke-width="0.3" />
+            <polyline
+              points={stockPrices.map((p, i) => `${i},${40 - ((p - stockMin) / stockRange) * 38}`).join(' ')}
+              fill="none"
+              stroke={stockPrices[stockPrices.length - 1] >= stockPrices[0] ? '#34d399' : '#f87171'}
+              stroke-width="0.8"
+            />
+            <polygon
+              points={`0,40 ${stockPrices.map((p, i) => `${i},${40 - ((p - stockMin) / stockRange) * 38}`).join(' ')} ${stockPrices.length - 1},40`}
+              fill={stockPrices[stockPrices.length - 1] >= stockPrices[0] ? '#34d39910' : '#f8717110'}
+            />
+          </svg>
+          <div class="flex justify-between text-[8px] text-gray-600 mt-0.5">
+            <span>${stockMin.toFixed(1)}</span>
+            <span>${stockMax.toFixed(1)}</span>
+          </div>
+        </div>
+      {/if}
     </div>
 
     <!-- Risk -->

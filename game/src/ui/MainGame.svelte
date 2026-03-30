@@ -65,7 +65,7 @@
       searchFullTimeJob: '💼', normalJobSearch: '🔍', workNone: '🏖️', workSlack: '🫠', workHard: '💪', workSuperHard: '🏋️', studySlack: '☕', studyNormal: '📚', studyHard: '📖',  upskill: '📖', prepJobChange: '🔍',
       hospital: '🏥', internWork: '💪',
       entrepreneurship: '🚀', prepH1b: '📋', researchNiw: '📝',
-      publishPaper: '📄', consultLawyer: '⚖️', day1Cpt: '🏫', invest: '📈',
+      publishPaper: '📄', consultLawyer: '⚖️', day1Cpt: '🏫', invest: '📈', sellStock: '📉',
       rest: '😴', travel: '✈️',
       exercise: '🏃', therapist: '🧠', studyGpa: '📚', searchIntern: '🔎',
       thesisResearch: '🔬', taRaWork: '👨‍🏫', networking: '🤝',
@@ -146,9 +146,11 @@
   <!-- Stats Grid -->
   <div class="grid grid-cols-2 gap-2 p-3">
     <div class="bg-[#1a2234] rounded-xl p-3 border border-[#2a3050]">
-      <div class="text-[10px] text-gray-500 mb-0.5">净资产</div>
-      <div class="text-xl font-black text-emerald-400">{formatMoney(gs.attributes.netWorth)}</div>
-      <div class="text-[10px] text-gray-600">现金 {formatMoney(gs.economy.cash)}</div>
+      <div class="text-[10px] text-gray-500 mb-0.5">💰 现金</div>
+      <div class="text-xl font-black {gs.economy.cash >= 0 ? 'text-emerald-400' : 'text-red-400'}">{formatMoney(gs.economy.cash)}</div>
+      {#if gs.economy.portfolioShares > 0}
+        <div class="text-[10px] text-gray-500 mt-0.5">📈 股票 {formatMoney(gs.economy.portfolioShares * gs.economy.sharePrice)}</div>
+      {/if}
     </div>
     <div class="bg-[#1a2234] rounded-xl p-3 border border-[#2a3050]">
       <div class="text-[10px] text-gray-500 mb-0.5">职业</div>

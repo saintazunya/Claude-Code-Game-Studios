@@ -128,7 +128,7 @@ export interface EconomyState {
   portfolioShares: number;
   portfolioCostBasis: number;
   sharePrice: number;
-  autoInvestAmount: number; // per quarter, 0 = off
+  sharePriceHistory: number[]; // historical prices for chart
   ownsHome: boolean;
   homePurchasePrice: number;
   homeMortgageRemaining: number;
@@ -164,6 +164,7 @@ export type ActionId =
   | 'consultLawyer'
   | 'day1Cpt'
   | 'invest'
+  | 'sellStock'
   | 'rest'
   | 'hospital'
   | 'travel'

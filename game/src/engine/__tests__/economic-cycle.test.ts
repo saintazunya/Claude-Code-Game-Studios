@@ -63,7 +63,7 @@ describe('Economic Cycle System', () => {
     });
 
     it('has floor at 30% of initial', () => {
-      const newPrice = updateSharePrice(35, -0.50);
+      const newPrice = updateSharePrice(3.5, -0.50);
       expect(newPrice).toBe(INITIAL_SHARE_PRICE * 0.30);
     });
   });
