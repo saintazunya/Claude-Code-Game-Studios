@@ -1,160 +1,142 @@
 <script lang="ts">
   import { startNewGame } from '../engine/store';
 
-  let constitution = $state(3);
-  let schoolRanking = $state(4);
-  let geoLocation = $state(3);
+  interface Character {
+    id: string;
+    name: string;
+    emoji: string;
+    title: string;
+    desc: string;
+    stats: { c: number; s: number; g: number };
+    tags: string[];
+    difficulty: '简单' | '普通' | '困难' | '地狱';
+    diffColor: string;
+  }
 
-  const total = $derived(constitution + schoolRanking + geoLocation);
-  const isValid = $derived(total === 10);
-  const remaining = $derived(10 - total);
-
-  // Derived preview values
-  const grindReduction = $derived(constitution * 10); // 0-50% reduction
-  const schoolMod = $derived((-5 + schoolRanking * 4).toFixed(0));
-  const internBonus = $derived((-10 + geoLocation * 6).toFixed(0));
-
-  const archetypes = [
-    { name: '学霸', desc: '名校光环，永久加成', c: 2, s: 5, g: 3 },
-    { name: '铁人', desc: '体质过人，能卷不倒', c: 5, s: 2, g: 3 },
-    { name: '地头蛇', desc: '地利优势，实习无忧', c: 2, s: 3, g: 5 },
-    { name: '赌徒', desc: '极限操作，高风险开局', c: 0, s: 5, g: 5 },
-    { name: '均衡', desc: '推荐新手，稳健起步', c: 3, s: 4, g: 3 },
+  const characters: Character[] = [
+    {
+      id: 'balanced', name: '李明远', emoji: '🎓', title: '均衡选手',
+      desc: '中上985本科，美国Top30硕士。成绩不拔尖但稳扎稳打，什么都会一点。',
+      stats: { c: 3, s: 4, g: 3 }, tags: ['推荐新手', '稳健路线'],
+      difficulty: '普通', diffColor: 'text-blue-400',
+    },
+    {
+      id: 'grinder', name: '张志远', emoji: '🏋️', title: '卷王',
+      desc: '清华本科MIT硕士，从小卷到大。GPA 4.0，leetcode 2000题。信仰：只要卷不死就往死里卷。',
+      stats: { c: 4, s: 5, g: 1 }, tags: ['高绩效', '易burnout'],
+      difficulty: '普通', diffColor: 'text-blue-400',
+    },
+    {
+      id: 'local', name: '王思涵', emoji: '📍', title: '地头蛇',
+      desc: '本科就在湾区读书，实习人脉广，地理优势拉满。学校一般但location is everything。',
+      stats: { c: 2, s: 3, g: 5 }, tags: ['实习容易', '找工快'],
+      difficulty: '简单', diffColor: 'text-green-400',
+    },
+    {
+      id: 'ironman', name: '陈大壮', emoji: '💪', title: '铁人',
+      desc: '体育特长生出身，体质极好。别人burnout他还在跑步。能扛996不生病。',
+      stats: { c: 5, s: 2, g: 3 }, tags: ['不易生病', '卷不倒'],
+      difficulty: '普通', diffColor: 'text-blue-400',
+    },
+    {
+      id: 'scholar', name: '刘雪琪', emoji: '📚', title: '学术大佬',
+      desc: '顶级名校PhD候选人，论文引用100+。NIW/EB1A是她的绿卡后门。代价：体质差，容易倒。',
+      stats: { c: 1, s: 5, g: 4 }, tags: ['NIW路线', '体质弱'],
+      difficulty: '普通', diffColor: 'text-blue-400',
+    },
+    {
+      id: 'gambler', name: '赵天赐', emoji: '🎰', title: '赌徒',
+      desc: '把所有点数押在学校和地理上，体质为零。要么快速上岸，要么速死。不适合心脏不好的人。',
+      stats: { c: 0, s: 5, g: 5 }, tags: ['极限操作', '容易猝死'],
+      difficulty: '地狱', diffColor: 'text-red-400',
+    },
+    {
+      id: 'underdog', name: '马小龙', emoji: '🔥', title: '逆袭者',
+      desc: '普通二本出身，学校排名0。全靠自己死磕，体质拉满硬扛。从最底层开始证明自己。',
+      stats: { c: 5, s: 0, g: 5 }, tags: ['高难度', '找工极难'],
+      difficulty: '困难', diffColor: 'text-amber-400',
+    },
   ];
 
-  function applyArchetype(a: typeof archetypes[0]) {
-    constitution = a.c;
-    schoolRanking = a.s;
-    geoLocation = a.g;
-  }
+  let selected = $state<Character | null>(null);
 
-  function adjustAttr(attr: 'c' | 's' | 'g', delta: number) {
-    if (attr === 'c') {
-      const next = Math.max(0, Math.min(5, constitution + delta));
-      if (next !== constitution && (total + (next - constitution)) <= 10) constitution = next;
-    } else if (attr === 's') {
-      const next = Math.max(0, Math.min(5, schoolRanking + delta));
-      if (next !== schoolRanking && (total + (next - schoolRanking)) <= 10) schoolRanking = next;
-    } else {
-      const next = Math.max(0, Math.min(5, geoLocation + delta));
-      if (next !== geoLocation && (total + (next - geoLocation)) <= 10) geoLocation = next;
-    }
-  }
+  const grindReduction = $derived(selected ? selected.stats.c * 10 : 0);
+  const schoolMod = $derived(selected ? (-5 + selected.stats.s * 4) : 0);
+  const internBonus = $derived(selected ? (-10 + selected.stats.g * 6) : 0);
 
   function confirm() {
-    if (!isValid) return;
-    startNewGame({ constitution, schoolRanking, geoLocation });
+    if (!selected) return;
+    startNewGame({ constitution: selected.stats.c, schoolRanking: selected.stats.s, geoLocation: selected.stats.g });
   }
 </script>
 
 <div class="flex flex-col min-h-dvh bg-[#0a0e17] text-gray-200">
-  <!-- Header -->
-  <div class="px-5 pt-12 pb-4">
-    <h1 class="text-xl font-bold text-white">创建你的角色</h1>
-    <p class="text-xs text-gray-500 mt-1">分配10个属性点，定义你的起点</p>
+  <div class="px-5 pt-10 pb-3">
+    <h1 class="text-xl font-bold text-white">选择你的角色</h1>
+    <p class="text-xs text-gray-500 mt-1">每个人都有不同的起点，选择你的故事</p>
   </div>
 
-  <!-- Archetypes -->
-  <div class="px-5 mb-4">
-    <p class="text-xs text-gray-500 mb-2">快速选择</p>
-    <div class="flex gap-2 overflow-x-auto pb-1">
-      {#each archetypes as a}
+  <!-- Character Cards -->
+  <div class="flex-1 px-4 overflow-y-auto pb-4">
+    <div class="space-y-2.5">
+      {#each characters as char}
         <button
-          class="flex-shrink-0 px-3 py-2 rounded-lg bg-[#1a2234] border border-[#2a3050] text-xs active:bg-[#253050] transition-colors"
-          class:border-blue-500={constitution === a.c && schoolRanking === a.s && geoLocation === a.g}
-          onclick={() => applyArchetype(a)}
+          class="w-full text-left p-4 rounded-xl border-2 transition-all {selected?.id === char.id ? 'border-blue-400 bg-[#1a2a4a] shadow-lg shadow-blue-500/10' : 'border-[#2a3050] bg-[#1a2234]'} active:scale-[0.99]"
+          onclick={() => selected = char}
         >
-          <div class="font-bold text-white">{a.name}</div>
-          <div class="text-gray-500 text-[10px]">{a.desc}</div>
+          <div class="flex items-start gap-3">
+            <div class="text-3xl">{char.emoji}</div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-0.5">
+                <span class="text-base font-bold text-white">{char.name}</span>
+                <span class="text-xs text-gray-400">「{char.title}」</span>
+                <span class="text-[10px] {char.diffColor} ml-auto">{char.difficulty}</span>
+              </div>
+              <p class="text-[11px] text-gray-400 leading-relaxed">{char.desc}</p>
+              <div class="flex gap-1.5 mt-2">
+                {#each char.tags as tag}
+                  <span class="px-1.5 py-0.5 rounded bg-[#0d1117] text-[9px] text-gray-500">{tag}</span>
+                {/each}
+              </div>
+              {#if selected?.id === char.id}
+                <div class="mt-3 grid grid-cols-3 gap-2 text-[10px]">
+                  <div class="bg-[#0d1117] rounded-lg p-2 text-center">
+                    <div class="text-green-400 font-bold text-sm">{char.stats.c}</div>
+                    <div class="text-gray-500">💪 体质</div>
+                    <div class="text-gray-600">减免{char.stats.c * 10}%</div>
+                  </div>
+                  <div class="bg-[#0d1117] rounded-lg p-2 text-center">
+                    <div class="text-blue-400 font-bold text-sm">{char.stats.s}</div>
+                    <div class="text-gray-500">🎓 学校</div>
+                    <div class="text-gray-600">{(-5 + char.stats.s * 4) >= 0 ? '+' : ''}{-5 + char.stats.s * 4}%</div>
+                  </div>
+                  <div class="bg-[#0d1117] rounded-lg p-2 text-center">
+                    <div class="text-purple-400 font-bold text-sm">{char.stats.g}</div>
+                    <div class="text-gray-500">📍 地理</div>
+                    <div class="text-gray-600">{(-10 + char.stats.g * 6) >= 0 ? '+' : ''}{-10 + char.stats.g * 6}%</div>
+                  </div>
+                </div>
+              {/if}
+            </div>
+          </div>
         </button>
       {/each}
     </div>
   </div>
 
-  <!-- Attribute Sliders -->
-  <div class="flex-1 px-5 space-y-5">
-    <!-- Constitution -->
-    <div>
-      <div class="flex justify-between items-center mb-2">
-        <div>
-          <span class="text-sm font-semibold text-white">💪 体质</span>
-          <span class="text-xs text-gray-500 ml-2">卷王惩罚减免 + 抗病能力</span>
-        </div>
-        <span class="text-lg font-bold text-white">{constitution}</span>
-      </div>
-      <div class="flex items-center gap-3">
-        <button class="w-8 h-8 rounded-lg bg-[#1a2234] text-white font-bold active:bg-[#253050]" onclick={() => adjustAttr('c', -1)}>−</button>
-        <div class="flex-1 h-2 bg-[#1a2234] rounded-full overflow-hidden">
-          <div class="h-full bg-green-500 rounded-full transition-all" style="width: {constitution * 20}%"></div>
-        </div>
-        <button class="w-8 h-8 rounded-lg bg-[#1a2234] text-white font-bold active:bg-[#253050]" onclick={() => adjustAttr('c', 1)}>+</button>
-      </div>
-      <p class="text-[10px] text-gray-600 mt-1">卷王健康惩罚减少: {grindReduction}%{constitution >= 4 ? ' 💪' : ''}</p>
-    </div>
-
-    <!-- School Ranking -->
-    <div>
-      <div class="flex justify-between items-center mb-2">
-        <div>
-          <span class="text-sm font-semibold text-white">🎓 学校排名</span>
-          <span class="text-xs text-gray-500 ml-2">永久工作概率加成</span>
-        </div>
-        <span class="text-lg font-bold text-white">{schoolRanking}</span>
-      </div>
-      <div class="flex items-center gap-3">
-        <button class="w-8 h-8 rounded-lg bg-[#1a2234] text-white font-bold active:bg-[#253050]" onclick={() => adjustAttr('s', -1)}>−</button>
-        <div class="flex-1 h-2 bg-[#1a2234] rounded-full overflow-hidden">
-          <div class="h-full bg-blue-500 rounded-full transition-all" style="width: {schoolRanking * 20}%"></div>
-        </div>
-        <button class="w-8 h-8 rounded-lg bg-[#1a2234] text-white font-bold active:bg-[#253050]" onclick={() => adjustAttr('s', 1)}>+</button>
-      </div>
-      <p class="text-[10px] text-gray-600 mt-1">工作概率修正: {Number(schoolMod) >= 0 ? '+' : ''}{schoolMod}%</p>
-    </div>
-
-    <!-- Geo Location -->
-    <div>
-      <div class="flex justify-between items-center mb-2">
-        <div>
-          <span class="text-sm font-semibold text-white">📍 地理位置</span>
-          <span class="text-xs text-gray-500 ml-2">实习搜索加成</span>
-        </div>
-        <span class="text-lg font-bold text-white">{geoLocation}</span>
-      </div>
-      <div class="flex items-center gap-3">
-        <button class="w-8 h-8 rounded-lg bg-[#1a2234] text-white font-bold active:bg-[#253050]" onclick={() => adjustAttr('g', -1)}>−</button>
-        <div class="flex-1 h-2 bg-[#1a2234] rounded-full overflow-hidden">
-          <div class="h-full bg-purple-500 rounded-full transition-all" style="width: {geoLocation * 20}%"></div>
-        </div>
-        <button class="w-8 h-8 rounded-lg bg-[#1a2234] text-white font-bold active:bg-[#253050]" onclick={() => adjustAttr('g', 1)}>+</button>
-      </div>
-      <p class="text-[10px] text-gray-600 mt-1">实习加成: {Number(internBonus) >= 0 ? '+' : ''}{internBonus}%</p>
-    </div>
-
-    <!-- Points remaining -->
-    <div class="text-center py-2">
-      {#if remaining > 0}
-        <span class="text-sm text-amber-400">还剩 {remaining} 个点数未分配</span>
-      {:else if remaining < 0}
-        <span class="text-sm text-red-400">超出 {-remaining} 个点数！</span>
-      {:else}
-        <span class="text-sm text-green-400">✓ 10点已分配完毕</span>
-      {/if}
-    </div>
-  </div>
-
   <!-- Confirm -->
-  <div class="px-5 pb-8 pt-4">
+  <div class="px-5 pb-8 pt-3">
     <button
       class="w-full py-4 rounded-2xl text-white text-lg font-bold transition-all"
-      class:bg-gradient-to-r={isValid}
-      class:from-blue-600={isValid}
-      class:to-blue-700={isValid}
-      class:bg-gray-700={!isValid}
-      class:opacity-50={!isValid}
-      disabled={!isValid}
+      class:bg-gradient-to-r={!!selected}
+      class:from-blue-600={!!selected}
+      class:to-blue-700={!!selected}
+      class:bg-gray-700={!selected}
+      class:opacity-50={!selected}
+      disabled={!selected}
       onclick={confirm}
     >
-      确认出发 ✈️
+      {selected ? `以「${selected.name}」的身份出发 ✈️` : '请选择一个角色'}
     </button>
   </div>
 </div>
