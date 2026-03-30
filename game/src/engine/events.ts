@@ -2,6 +2,7 @@
 
 import type { GameState, GameEvent, CoreAttributes } from './types';
 import { rollEventCount } from './economic-cycle';
+import { IMMIGRATION_EVENTS } from './events-immigration';
 
 function weightedPick<T>(options: { value: T; weight: number }[]): T {
   const total = options.reduce((s, o) => s + o.weight, 0);
@@ -15,7 +16,7 @@ function weightedPick<T>(options: { value: T; weight: number }[]): T {
 }
 
 // MVP Event pool — 15 core events for initial playability
-export const EVENT_POOL: GameEvent[] = [
+const BASE_EVENTS: GameEvent[] = [
   // JOB OFFER (triggered by prepJobChange action, not random)
   {
     id: 'job_offer_received', type: 'opportunity', nameZh: '收到Offer！', phase: 'career',
@@ -226,6 +227,9 @@ export const EVENT_POOL: GameEvent[] = [
     ],
   },
 ];
+
+// Merge base events with immigration-specific events
+export const EVENT_POOL: GameEvent[] = [...BASE_EVENTS, ...IMMIGRATION_EVENTS];
 
 export function selectEvents(state: GameState): GameEvent[] {
   const count = rollEventCount();
