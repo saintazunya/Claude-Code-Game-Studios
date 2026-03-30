@@ -197,52 +197,58 @@ export function processImmigrationQuarter(state: GameState): {
     }
   }
 
-  // --- Priority Date Queue ---
-  if (imm.i140Status === 'approved' && imm.priorityDate !== null && imm.i485Status === 'none') {
-    // Advance priority date cursor — avg ~0.7 quarters advance per quarter
-    // Target: ~5 years (20 quarters) for a priority date filed ~14 turns in
-    // 14 / 20 = 0.7 per quarter average
-    const baseAdvance = 0.3;
-    const variance = -1.0 + Math.random() * 2.0; // -1.0 to +1.0
-    const movement = Math.max(-2, Math.min(3, baseAdvance + variance));
+  // --- Priority Date Queue: Table A + Table B ---
+  // Table B (filing date): advances faster, when current → can file I-485 + get combo card
+  // Table A (final action date): advances slower, when current → I-485 can be approved
+  if (imm.i140Status === 'approved' && imm.priorityDate !== null) {
+    const pd = imm.priorityDate;
 
-    const newCurrent = imm.priorityDateCurrent + movement;
-    updates.priorityDateCurrent = newCurrent;
+    // Advance Table B: avg ~1.0/quarter (reaches PD ~14 in ~14Q = 3.5 years)
+    const bVariance = -0.8 + Math.random() * 1.8; // -0.8 to +1.0
+    const bMovement = Math.max(-1.5, Math.min(3, 0.8 + bVariance));
+    const newB = imm.chartBCurrent + bMovement;
+    updates.chartBCurrent = newB;
 
-    if (variance < -1) {
+    // Advance Table A: avg ~0.6/quarter (reaches PD ~14 in ~23Q = 5.75 years)
+    const aVariance = -1.0 + Math.random() * 1.5; // -1.0 to +0.5
+    const aMovement = Math.max(-2, Math.min(2.5, 0.4 + aVariance));
+    const newA = imm.priorityDateCurrent + aMovement;
+    updates.priorityDateCurrent = newA;
+
+    // Retrogression event (either table moves backwards significantly)
+    if (aVariance < -0.8 || bVariance < -0.6) {
       mentalDelta -= 15;
       events.push('priority_date_retrogression');
     }
 
-    // Check if priority date is current
-    if (newCurrent >= (imm.priorityDate || 0)) {
-      // Can file I-485!
+    // Table B reached: file I-485 + combo card
+    if (imm.i485Status === 'none' && newB >= pd) {
       updates.i485Status = 'pending';
       updates.hasComboCard = true;
-      economyCost += 5000; // I-485 + legal fees
-      mentalDelta += 20; // Combo card!
+      economyCost += 5000;
+      mentalDelta += 20;
       events.push('i485_filed_combo_card');
     }
   }
 
-  // --- I-485 Processing ---
+  // --- I-485 Processing (requires Table A to be current) ---
   if (imm.i485Status === 'pending') {
     // Check for RFE
-    if (Math.random() < 0.05) { // 5% per quarter chance
+    if (Math.random() < 0.05) {
       updates.i485Status = 'rfe';
       mentalDelta -= 15;
       economyCost += 3000;
       events.push('i485_rfe');
     } else {
-      // Processing progress — approve after random 4-12 quarters
+      // Must have been pending 4+ quarters AND Table A must be current
       const processingStart = state.timeline.findIndex(
         (r) => r.events?.some((e) => e.id === 'i485_filed_combo_card')
       );
       const quartersProcessing = processingStart >= 0 ? state.turn - processingStart : 0;
-      const requiredQuarters = randomInt(I485_PROCESSING_MIN, I485_PROCESSING_MAX);
+      const tableACurrent = (updates.priorityDateCurrent ?? imm.priorityDateCurrent) >= (imm.priorityDate || 0);
 
-      if (quartersProcessing >= requiredQuarters) {
-        // GREEN CARD APPROVED!
+      if (quartersProcessing >= 4 && tableACurrent) {
+        // Table A current + 1 year processing = GREEN CARD!
         updates.i485Status = 'approved';
         updates.hasGreenCard = true;
         updates.visaType = 'greenCard';
@@ -254,7 +260,6 @@ export function processImmigrationQuarter(state: GameState): {
   }
 
   if (imm.i485Status === 'rfe') {
-    // RFE response — resolve in 1-2 quarters
     if (Math.random() < 0.5) {
       updates.i485Status = 'pending';
       events.push('rfe_resolved');

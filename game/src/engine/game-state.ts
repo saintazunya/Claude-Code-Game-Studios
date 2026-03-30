@@ -44,6 +44,7 @@ export function createGameState(creation: CreationAttributes): GameState {
       i485Status: 'none',
       priorityDate: null,
       priorityDateCurrent: 0,
+      chartBCurrent: 0,
       gcTrack: 'none',
       hasComboCard: false,
       hasGreenCard: false,

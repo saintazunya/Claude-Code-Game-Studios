@@ -111,7 +111,8 @@ export interface ImmigrationState {
   i140Status: I140Status;
   i485Status: I485Status;
   priorityDate: number | null; // turn number when PERM was filed
-  priorityDateCurrent: number; // visa bulletin cutoff
+  priorityDateCurrent: number; // Table A (final action date) — GC approval
+  chartBCurrent: number; // Table B (filing date) — I-485 filing + combo card
   gcTrack: GcTrack;
   hasComboCard: boolean;
   hasGreenCard: boolean;
