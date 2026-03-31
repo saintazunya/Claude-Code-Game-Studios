@@ -24,9 +24,9 @@
       case 'gcBeforeDeadline':
         return { icon: '🏆', title: '美国梦达成', sub: `${ti.age}岁拿到绿卡`, gradient: 'from-emerald-400 to-blue-400', won: true };
       case 'age59WithGc':
-        return { icon: '✅', title: '安全着陆', sub: '59岁，绿卡在手', gradient: 'from-green-400 to-teal-400', won: true };
+        return { icon: '✅', title: '安全着陆', sub: '绿卡在手', gradient: 'from-green-400 to-teal-400', won: true };
       case 'age59WithoutGc':
-        return { icon: '⏰', title: '时间到', sub: '59岁，仍在等待绿卡...', gradient: 'from-amber-400 to-orange-400', won: false };
+        return { icon: '⏰', title: '时间到', sub: `${ti.age}岁，仍在等待绿卡...漫漫长路`, gradient: 'from-amber-400 to-orange-400', won: false };
       case 'deported':
         return { icon: '✈️', title: '被迫回国', sub: '签证到期，梦断异乡', gradient: 'from-red-400 to-red-600', won: false };
       case 'voluntaryDeparture':

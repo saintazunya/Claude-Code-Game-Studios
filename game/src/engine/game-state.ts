@@ -696,6 +696,10 @@ export function processTurn(
     if (immResult.gameOver) {
       s.endingType = 'deported';
     }
+    // Green card = game won! End immediately.
+    if (s.immigration.hasGreenCard && !s.endingType) {
+      s.endingType = 'gcBeforeDeadline';
+    }
     // Lawyer boost and probability reveal persist until next turn start (for UI display)
     // Clear CPT flag if visa changed away from CPT
     if (s.flags.onCpt && s.immigration.visaType !== 'cptDay1') {
