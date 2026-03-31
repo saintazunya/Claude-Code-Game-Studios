@@ -170,7 +170,7 @@ const ALL_AGENTS = [...VETERANS, ...NEWBIES];
 interface GameResult {
   turns: number; ending: string; hasGC: boolean; h1bWon: boolean;
   permApproved: boolean; i140Approved: boolean; hasCombo: boolean;
-  promotions: number; burnouts: number; level: number; netWorth: number;
+  promotions: number; burnouts: number; layoffs: number; level: number; netWorth: number;
   lawyerUsed: boolean; cptUsed: boolean;
   feedback: string[];
 }
@@ -178,7 +178,7 @@ interface GameResult {
 function playGame(agent: AgentProfile): GameResult {
   let state = createGameState(agent.build);
   let promotions = 0, burnouts = 0;
-  let lawyerUsed = false, cptUsed = false;
+  let lawyerUsed = false, cptUsed = false, layoffs = 0;
   const feedback: string[] = [];
 
   for (let t = 0; t < 72; t++) {
@@ -192,6 +192,7 @@ function playGame(agent: AgentProfile): GameResult {
       if (e.id === 'burnout') burnouts++;
       if (e.id === 'lawyer_consulted') lawyerUsed = true;
       if (e.id === 'cpt_enrolled') cptUsed = true;
+      if (e.id === 'laid_off' || e.id === 'pip_terminated') layoffs++;
     }
 
     // Resolve pending events
@@ -228,7 +229,7 @@ function playGame(agent: AgentProfile): GameResult {
     permApproved: state.immigration.permStatus === 'approved',
     i140Approved: state.immigration.i140Status === 'approved',
     hasCombo: state.immigration.hasComboCard,
-    promotions, burnouts, level: state.career.level,
+    promotions, burnouts, layoffs, level: state.career.level,
     netWorth: Math.round(state.attributes.netWorth),
     lawyerUsed, cptUsed, feedback,
   };
@@ -272,7 +273,9 @@ describe('15-Agent Playtest (10 veteran + 5 new × 10 games × 10 rounds)', () =
       const isNew = agent.name.startsWith('🆕');
       console.log(`\n${isNew ? '🆕' : '  '} ${agent.name} (${agent.background})`);
       console.log(`   GC=${gc}/${n}(${(gc/n*100).toFixed(0)}%) | Deport=${dep} | H1B=${h1b} | PERM=${perm} | I-140=${i140} | Combo=${combo}`);
-      console.log(`   Lawyer=${lawyer} | CPT=${cpt} | Avg L${avgLevel} | NW=$${avgNW.toLocaleString()} | Burnout=${avgBurnout}`);
+      const avgLayoffs = (results.reduce((s, r) => s + r.layoffs, 0) / n).toFixed(1);
+      const layoffPct = results.filter(r => r.layoffs > 0).length;
+      console.log(`   Lawyer=${lawyer} | CPT=${cpt} | Avg L${avgLevel} | NW=$${avgNW.toLocaleString()} | Burnout=${avgBurnout} | Layoff=${layoffPct}/${n}(avg${avgLayoffs})`);
 
       // Collect unique feedback
       const fb = results.flatMap(r => r.feedback);

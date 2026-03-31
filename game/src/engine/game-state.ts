@@ -364,6 +364,7 @@ export function processTurn(
           s.immigration.visaExpiryTurn = s.turn + 8; // 2 years of CPT
           // Can still enter H1B lottery while on CPT
           s.flags.onCpt = true;
+          s.flags.cptStartTurn = s.turn;
           turnEvents.push({ id: 'cpt_enrolled', choiceId: '' });
         }
       }
@@ -433,8 +434,12 @@ export function processTurn(
     const monthlyRent = 1000 + s.creation.geoLocation * 250; // $1000 (geo 0) to $2250 (geo 5)
     s.economy.cash -= monthlyRent * 3;
   } else {
-    // Career: $3K/month = $9K/quarter base (was $12K — too harsh)
+    // Career: $3K/month = $9K/quarter base
     s.economy.cash -= 9000;
+    // CPT tuition: ongoing $3K/quarter while on CPT
+    if (s.flags.onCpt) {
+      s.economy.cash -= 3000;
+    }
   }
 
   // Salary (career phase only)
@@ -689,6 +694,10 @@ export function processTurn(
       s.endingType = 'deported';
     }
     // Lawyer boost and probability reveal persist until next turn start (for UI display)
+    // Clear CPT flag if visa changed away from CPT
+    if (s.flags.onCpt && s.immigration.visaType !== 'cptDay1') {
+      s.flags.onCpt = false;
+    }
   }
   s.flags.justLaidOff = false;
 

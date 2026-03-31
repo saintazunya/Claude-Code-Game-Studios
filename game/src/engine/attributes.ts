@@ -97,10 +97,20 @@ export function computeNaturalDecay(state: GameState): Partial<CoreAttributes> {
 
   // Mental decay: CON reduces grind mental penalty by up to 25%
   const grindMentalPenalty = grindActive ? Math.round(-4 * (1 - grindReduction * 0.5)) : 0;
+
+  // CPT mental pressure: doubles every year on CPT
+  // Year 1: -3, Year 2: -6, Year 3: -12, etc.
+  let cptPenalty = 0;
+  if (state.flags.onCpt && state.flags.cptStartTurn) {
+    const cptYears = Math.floor((state.turn - (state.flags.cptStartTurn as number)) / 4);
+    cptPenalty = -3 * Math.pow(2, cptYears); // -3, -6, -12, -24...
+  }
+
   const mentalDecay =
     -3 +
     (visaInsecure ? -2 : 0) +
     grindMentalPenalty +
+    cptPenalty +
     (state.attributes.health < 30 ? -3 : 0);
 
   // Boss effects
