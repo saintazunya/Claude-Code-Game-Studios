@@ -228,8 +228,76 @@ const BASE_EVENTS: GameEvent[] = [
   },
 ];
 
-// Merge base events with immigration-specific events
-export const EVENT_POOL: GameEvent[] = [...BASE_EVENTS, ...IMMIGRATION_EVENTS];
+// Emotional narrative events — family, life, identity
+const LIFE_EVENTS: GameEvent[] = [
+  {
+    id: 'parents_call', type: 'life', nameZh: '爸妈来电话了', phase: 'any',
+    descZh: '"最近怎么样啊？吃的好不好？工作还顺利吗？" 妈妈的声音在电话那头响起。你张了张嘴，不知道该从何说起。',
+    weight: 1.5,
+    cooldownQuarters: 6, oneTime: false,
+    immediateEffects: {},
+    choices: [
+      { id: 'honest', textKey: '', nameZh: '如实说', descZh: '把最近的压力和困难都说了。妈妈沉默了很久。', tag: 'stable', effects: { mental: 8 } },
+      { id: 'pretend', textKey: '', nameZh: '报喜不报忧', descZh: '"挺好的，别担心。" 挂了电话你叹了口气。', tag: 'neutral', effects: { mental: -2 } },
+      { id: 'avoid', textKey: '', nameZh: '简单聊几句就挂了', descZh: '不想让他们担心，也不想面对自己的情绪。', tag: 'neutral', effects: { mental: -5 } },
+    ],
+  },
+  {
+    id: 'friend_gc', type: 'life', nameZh: '朋友发朋友圈：绿卡到了！', phase: 'career',
+    descZh: '你在朋友圈看到了一张EAD卡的照片，配文"终于自由了！" 评论区一片恭喜。你默默划走了。',
+    weight: 0.8,
+    precondition: (s) => !s.immigration.hasGreenCard && s.turn > 20,
+    cooldownQuarters: 12, oneTime: false,
+    immediateEffects: { mental: -5 },
+    choices: [
+      { id: 'congrats', textKey: '', nameZh: '真心祝福', descZh: '发了个"恭喜！"的评论。你也会有这一天的。', tag: 'stable', effects: { mental: 3 } },
+      { id: 'jealous', textKey: '', nameZh: '酸了', descZh: '为什么是他不是我？你关掉手机躺在床上。', tag: 'neutral', effects: { mental: -8 } },
+      { id: 'motivate', textKey: '', nameZh: '化嫉妒为动力', descZh: '我也一定可以！打开电脑开始研究NIW。', tag: 'risky', effects: { mental: -3, academicImpact: 3 } },
+    ],
+  },
+  {
+    id: 'parents_sick', type: 'crisis', nameZh: '父母生病了', phase: 'career',
+    descZh: '弟弟打来电话："爸住院了，你能回来看看吗？" 你看着日历上标注的签证到期日，陷入了沉默。',
+    weight: 0.5,
+    precondition: (s) => s.turn > 16,
+    cooldownQuarters: 16, oneTime: true,
+    immediateEffects: { mental: -15 },
+    choices: [
+      { id: 'go_back', textKey: '', nameZh: '请假回国探望', descZh: '买了最近的机票飞回去。H1B出入境有风险，但亲情更重要。', tag: 'risky', effects: { mental: 15, health: 5 }, flags: { travelRisk: true } },
+      { id: 'send_money', textKey: '', nameZh: '转钱回去，不回国', descZh: '身份不允许我冒险。给家里转了$10,000，电话里说"等我拿到绿卡就回来看你们。"', tag: 'stable', effects: { mental: -5 } },
+      { id: 'torn', textKey: '', nameZh: '纠结中...', descZh: '你在机票网站和签证页面之间来回切换，一直到凌晨三点。', tag: 'neutral', effects: { mental: -20 } },
+    ],
+  },
+  {
+    id: 'classmate_return', type: 'life', nameZh: '同学回国年薪百万了', phase: 'career',
+    descZh: '大学群里有人发了张字节跳动的offer，base 80万+股票。"还留在美国干嘛？回来不香吗？"',
+    weight: 0.8,
+    precondition: (s) => s.turn > 12 && !s.immigration.hasGreenCard,
+    cooldownQuarters: 10, oneTime: false,
+    immediateEffects: {},
+    choices: [
+      { id: 'stay', textKey: '', nameZh: '我的路我自己走', descZh: '每个人有每个人的选择。你关掉群聊继续刷题。', tag: 'stable', effects: { mental: 3 } },
+      { id: 'doubt', textKey: '', nameZh: '开始怀疑自己', descZh: '我留在这里到底图什么？绿卡？自由？还是沉没成本？', tag: 'neutral', effects: { mental: -10 } },
+      { id: 'plan_b', textKey: '', nameZh: '也投一个国内的试试', descZh: '两手准备总没错。虽然不一定真的回去。', tag: 'neutral', effects: { mental: -3 } },
+    ],
+  },
+  {
+    id: 'loneliness', type: 'life', nameZh: '一个人的感恩节', phase: 'career',
+    descZh: '感恩节放假四天。同事都回家了，公寓楼里安静得只剩下暖气的嗡嗡声。你给自己煮了碗面。',
+    weight: 1.0,
+    precondition: (s) => !s.immigration.hasGreenCard,
+    cooldownQuarters: 8, oneTime: false,
+    immediateEffects: { mental: -3 },
+    choices: [
+      { id: 'friends', textKey: '', nameZh: '约华人朋友聚餐', descZh: '火锅局约起来！虽然都是漂泊的人，但至少今晚不孤单。', tag: 'stable', effects: { mental: 10 } },
+      { id: 'work', textKey: '', nameZh: '趁假期加班', descZh: '反正也没事做。打开电脑继续写代码。', tag: 'neutral', effects: { performance: 3, mental: -5 } },
+      { id: 'travel', textKey: '', nameZh: '一个人去旅行', descZh: '开车去了海边。看着太平洋的方向就是家。', tag: 'neutral', effects: { mental: 5, health: 3 } },
+    ],
+  },
+];
+
+// Merge all events
+export const EVENT_POOL: GameEvent[] = [...BASE_EVENTS, ...IMMIGRATION_EVENTS, ...LIFE_EVENTS];
 
 export function selectEvents(state: GameState): GameEvent[] {
   const count = rollEventCount();

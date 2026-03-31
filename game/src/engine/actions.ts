@@ -21,15 +21,15 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
   workHard: {
     id: 'workHard', nameZh: '努力工作', apCost: 2, phase: 'career',
     effects: { performance: 5, mental: -1 }, description: 'Put in extra effort at work',
-    tipsZh: '✅ 绩效+5 | ⚠️ 精神-1 | 💡 稳步积累绩效',
-    precondition: (s) => s.career.employed === 'employed',
+    tipsZh: '✅ 绩效+5 | ⚠️ 精神-1 | 💡 稳步积累绩效 | ❌ burnout时不可用',
+    precondition: (s) => s.career.employed === 'employed' && !s.flags.burnoutActive,
     exclusive: ['workNone', 'workSlack', 'workSuperHard'],
   },
   workSuperHard: {
     id: 'workSuperHard', nameZh: '超级努力工作', apCost: 3, phase: 'career',
     effects: { performance: 12, mental: -3 }, description: 'Go above and beyond',
-    tipsZh: '✅ 绩效+12 | ⚠️ 精神-3 | 💡 冲绩效升职用',
-    precondition: (s) => s.career.employed === 'employed',
+    tipsZh: '✅ 绩效+12 | ⚠️ 精神-3 | 💡 冲绩效升职用 | ❌ burnout时不可用',
+    precondition: (s) => s.career.employed === 'employed' && !s.flags.burnoutActive,
     exclusive: ['workNone', 'workSlack', 'workHard'],
   },
   upskill: {
@@ -64,9 +64,9 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
   // prepH1b removed — employer auto-files H1B each Q1 when on OPT/STEM
   consultLawyer: {
     id: 'consultLawyer', nameZh: '咨询移民律师', apCost: 1, phase: 'career',
-    effects: { mental: 5 }, description: 'Consult immigration lawyer ($500) — unlocks hidden options',
-    tipsZh: '✅ 精神+5（安心感）| 🔓 解锁Day1-CPT和NIW/EB1A选项 | 📊 显示本季度移民/职业概率 | ✅ 下次移民审批+10% | ⚠️ $500 | 💡 第一次咨询最重要',
-    precondition: (s) => !s.immigration.hasGreenCard, // no point after GC
+    effects: { mental: 5 }, description: 'Consult immigration lawyer ($500)',
+    tipsZh: '✅ 精神+5 | 📊 查看概率 | ⚠️ $500 | 💡 首次咨询解锁NIW/CPT/发论文+移民审批+10%',
+    precondition: (s) => !s.immigration.hasGreenCard,
   },
   day1Cpt: {
     id: 'day1Cpt', nameZh: '报名Day1-CPT学校', apCost: 2, phase: 'career',
@@ -158,7 +158,8 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
   studyHard: {
     id: 'studyHard', nameZh: '努力学习', apCost: 3, phase: 'academic',
     effects: { skills: 5, mental: -2 }, description: 'Intensive study',
-    tipsZh: '✅ GPA+0.30 | ✅ 技能+5 | ⚠️ 精神-2 | 💡 快速刷GPA',
+    tipsZh: '✅ GPA+0.30 | ✅ 技能+5 | ⚠️ 精神-2 | 💡 快速刷GPA | ❌ burnout时不可用',
+    precondition: (s) => !s.flags.burnoutActive,
     exclusive: ['studySlack', 'studyNormal'],
   },
   studyGpa: {

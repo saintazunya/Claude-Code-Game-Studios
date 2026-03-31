@@ -348,13 +348,16 @@ export function processTurn(
       }
       if (actionId === 'consultLawyer') {
         s.economy.cash -= 500;
-        // 1. Unlock hidden actions (day1Cpt, researchNiw, publishPaper)
-        s.flags.lawyerConsulted = true;
-        // 2. Boost next immigration roll by +10%
-        s.flags.lawyerImmigrationBoost = true;
-        // 3. Reveal probabilities (flag for UI to show)
-        s.flags.showProbabilities = true;
-        turnEvents.push({ id: 'lawyer_consulted', choiceId: '' });
+        if (!s.flags.lawyerConsulted) {
+          // First consultation: unlock hidden actions + full boost
+          s.flags.lawyerConsulted = true;
+          s.flags.lawyerImmigrationBoost = true;
+          s.flags.showProbabilities = true;
+          turnEvents.push({ id: 'lawyer_consulted', choiceId: '' });
+        } else {
+          // Repeat consultation: only show probabilities (no immigration boost)
+          s.flags.showProbabilities = true;
+        }
       }
       if (actionId === 'day1Cpt') {
         s.economy.cash -= 3000; // CPT school tuition

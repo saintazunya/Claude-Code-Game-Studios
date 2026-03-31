@@ -11,7 +11,7 @@
     promoted: { icon: '🎉', text: '升职了！', color: 'text-blue-400', detail: '职级提升，薪资增加。新的挑战开始了。' },
     h1b_approved: { icon: '🎊', text: 'H-1B 抽中了！', color: 'text-purple-400', detail: 'H-1B签证获批，有效期3年。可以开始办绿卡了！' },
     h1b_denied: { icon: '😰', text: 'H-1B 没抽中...', color: 'text-red-400', detail: '很遗憾，今年没中签。需要等明年再抽或寻找替代方案。' },
-    green_card_approved: { icon: '🏆', text: '绿卡批准！！！', color: 'text-green-400', detail: '漫长的等待终于结束了！你现在是美国永久居民。' },
+    green_card_approved: { icon: '🏆', text: '🎉🎉🎉 绿卡批准！！！🎉🎉🎉', color: 'text-green-400', detail: '那个平凡的下午，你在邮箱里看到了那封信。手指颤抖着点开——"Welcome to the United States as a Permanent Resident." 你一个人在格子间里坐了很久，眼泪不知不觉就流了下来。从留学到绿卡，这条路你终于走完了。' },
     i485_filed_combo_card: { icon: '🎫', text: 'Combo卡到手！', color: 'text-teal-400', detail: '拿到EAD/AP，不再绑定雇主，可以自由换工作和旅行！' },
     i140_approved: { icon: '📋', text: 'I-140批准！', color: 'text-purple-400', detail: '排期已锁定。即使换工作也保留优先日期。关键里程碑！' },
     perm_rejected: { icon: '❌', text: 'PERM被拒', color: 'text-red-400', detail: 'PERM申请被劳工部拒绝，需要重新提交。' },
