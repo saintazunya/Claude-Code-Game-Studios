@@ -27,6 +27,32 @@
   const turnProgress = $derived(gs ? (gs.turn / 148) * 100 : 0);
   const apUsed = $derived(totalAp - ap);
 
+  // Per-turn narrative flavor text
+  const narrative = $derived(() => {
+    if (!gs) return '';
+    const m = gs.attributes.mental;
+    const h = gs.attributes.health;
+    const t = gs.turn;
+    if (gs.immigration.hasGreenCard) return '绿卡在手，天高任鸟飞。';
+    if (gs.immigration.hasComboCard) return 'Combo卡在手，曙光就在前方。';
+    if (gs.flags.burnoutActive) return '大脑一片空白，什么都不想做。';
+    if (m <= 10) return '精神快要崩溃了…撑住。';
+    if (h <= 20) return '身体在发出警报，不能再这样下去了。';
+    if (gs.career.employed === 'unemployed' && ['h1b', 'h1bRenewal'].includes(gs.immigration.visaType))
+      return '失业了，签证倒计时开始。必须尽快找到工作。';
+    if (gs.career.employed === 'unemployed' && gs.immigration.visaType === 'opt')
+      return 'OPT的时间不等人，每天都在投简历。';
+    if (gs.career.onPip) return 'PIP像一把悬在头顶的剑。';
+    if (isAcademic && t <= 2) return '新学期开始了，一切充满可能。';
+    if (isAcademic && t >= 6) return '毕业临近，找工作的焦虑开始蔓延。';
+    if (gs.immigration.permStatus === 'pending') return 'PERM还在审批…等待是最难的部分。';
+    if (gs.immigration.i140Status === 'approved') return 'I-140批了，排期在慢慢前进。';
+    if (m > 60 && h > 70) return '状态不错，继续保持。';
+    if (t > 40) return '在美国已经快十年了，时间过得真快。';
+    return '';
+  });
+  const narrativeText = $derived(narrative());
+
   function visaColor(type: string) {
     if (type === 'greenCard') return 'bg-green-600';
     if (type === 'comboCard') return 'bg-teal-600';
@@ -148,6 +174,29 @@
       {/if}
     </div>
   </div>
+
+  <!-- Narrative flavor text -->
+  {#if narrativeText}
+    <div class="mx-4 mt-2 mb-1 text-[11px] text-gray-500 italic leading-relaxed">
+      "{narrativeText}"
+    </div>
+  {/if}
+
+  <!-- Visa Countdown (urgent when expiring) -->
+  {#if gs.phase === 'career' && !gs.immigration.hasGreenCard && !gs.immigration.hasComboCard}
+    {@const visaLeft = gs.immigration.visaExpiryTurn - gs.turn}
+    {#if visaLeft <= 8}
+      <div class="mx-4 mt-2 p-2.5 rounded-xl {visaLeft <= 2 ? 'bg-red-950/50 border-red-600/60 animate-pulse' : visaLeft <= 4 ? 'bg-red-950/30 border-red-900/50' : 'bg-amber-950/30 border-amber-900/40'} border text-xs">
+        <span class="{visaLeft <= 2 ? 'text-red-400' : visaLeft <= 4 ? 'text-red-400' : 'text-amber-400'} font-bold">
+          ⏰ {gs.immigration.visaType.toUpperCase()} 签证还剩 {visaLeft} 个季度
+        </span>
+        <span class="text-gray-500"> ({Math.round(visaLeft * 3)}个月)</span>
+        {#if visaLeft <= 2}
+          <span class="text-red-400 font-bold"> — 紧急！考虑Day1-CPT保命</span>
+        {/if}
+      </div>
+    {/if}
+  {/if}
 
   <!-- Stats Grid -->
   <div class="grid grid-cols-2 gap-2 p-3">
