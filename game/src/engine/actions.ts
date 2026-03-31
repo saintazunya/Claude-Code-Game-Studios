@@ -177,8 +177,8 @@ export const ACTIONS: Record<ActionId, ActionDef> = {
     },
   },
   searchFullTimeJob: {
-    id: 'searchFullTimeJob', nameZh: '找全职工作', apCost: 4, phase: 'academic',
-    effects: { mental: -5 }, description: 'Search for full-time job before graduation',
+    id: 'searchFullTimeJob', nameZh: '找全职工作', apCost: 3, phase: 'academic',
+    effects: { mental: -3 }, description: 'Search for full-time job before graduation',
     tipsZh: '✅ 毕业前找全职 | ✅ 概率受实习经历/学校/GPA影响 | ⚠️ 精神-5 | 💡 毕业前最后机会',
     precondition: (s) => {
       const gradTurn = s.academic.isPhd ? 16 : 8;

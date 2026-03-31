@@ -77,7 +77,11 @@
   }
 
   function modeLabel(m: string) {
-    if (m === 'grind') return { text: '🔥 卷王模式', color: 'text-red-400', desc: '健康⬇ 精神-5' };
+    const con = gs?.creation.constitution || 0;
+    const grindRed = con * 0.1;
+    const grindH = Math.round(-10 * (1 - grindRed));
+    const grindM = Math.round(-5 * (1 - grindRed * 0.5));
+    if (m === 'grind') return { text: '🔥 卷王模式', color: 'text-red-400', desc: `健康${grindH} 精神${grindM}` };
     if (m === 'coast') return { text: '🛋️ 躺平模式', color: 'text-green-400', desc: '精神+5' };
     return { text: '💼 正常模式', color: 'text-blue-400', desc: '精神-1' };
   }
@@ -305,7 +309,7 @@
       <span class="text-red-400/70"> — 精神崩溃，本季度最多4AP</span>
     </div>
   {/if}
-  {#if gs.flags.layoffWarningActive}
+  {#if gs.flags.layoffWarningActive && gs.career.employed === 'employed'}
     <div class="mx-4 mb-2 p-2.5 rounded-xl bg-red-950/40 border border-red-900/50 text-xs animate-pulse">
       <span class="text-red-400 font-bold">⚠️ 裁员预警</span>
       <span class="text-red-400/70"> — 下季度揭晓结果。绩效越高被裁概率越低！</span>
